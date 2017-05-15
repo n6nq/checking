@@ -1,0 +1,39 @@
+#!wing
+#!version=6.0
+##################################################################
+# Wing IDE project file                                          #
+##################################################################
+[project attributes]
+debug.named-entry-points = (1,
+                            {'main.py': ({},
+        {'auto-show': False,
+         'launch-id': ('project',
+                       (u'',
+                        '')),
+         'loc': loc('main.py')})})
+proj.file-list = [loc('accounts.py'),
+                  loc('categories.pckl'),
+                  loc('categories.ui'),
+                  loc('categories_auto.py'),
+                  loc('category.py'),
+                  loc('checkfiledialog.py'),
+                  loc('Checking1.csv'),
+                  loc('check_file.py'),
+                  loc('entry.py'),
+                  loc('main.py'),
+                  loc('mainwindow.ui'),
+                  loc('mainwindow_auto.py'),
+                  loc('managecategoriesdialog.py'),
+                  loc('money.py'),
+                  loc('override.py'),
+                  loc('overrides.pckl'),
+                  loc('project_notes.txt'),
+                  loc('QTTest.pro'),
+                  loc('QTTest.pro.user'),
+                  loc('QTtest.wpu.sav'),
+                  loc('readcheckfile.ui'),
+                  loc('readcheckfile_auto.py'),
+                  loc('trigger.py'),
+                  loc('triggers.pckl')]
+proj.file-type = 'shared'
+proj.main-file = 'entry:main.py'

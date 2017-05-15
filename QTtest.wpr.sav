@@ -1,0 +1,27 @@
+#!wing
+#!version=6.0
+##################################################################
+# Wing IDE project file                                          #
+##################################################################
+[project attributes]
+debug.named-entry-points = (1,
+                            {'main': ({},
+                                      {'auto-show': False,
+                                       'launch-id': ('project',
+        (u'',
+         '')),
+                                       'loc': loc('main.py')})})
+proj.directory-list = [{'dirloc': loc('.'),
+                        'excludes': [u'main.cpp',
+                                     u'QTTest.pro.user',
+                                     u'mainwindow.h',
+                                     u'QTTest.pro',
+                                     u'checkfiledialog.py',
+                                     u'mainwindow.cpp'],
+                        'filter': '*',
+                        'include_hidden': False,
+                        'recursive': True,
+                        'watch_for_changes': True}]
+proj.file-list = [loc('checkfiledialog.py')]
+proj.file-type = 'shared'
+proj.main-file = loc('main.py')
