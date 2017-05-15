@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction)
 import PyQt5.QtGui
 from readcheckfile_auto import Ui_ReadCheckFileDialog
-from managecategoriesdialog import ManageCategoriesDialog 
-from trigger import Trigger
-from category import Category
-from override import Override
+from managecategoriesdialog import ManageCategoriesDialog
+import accounts
+import trigger
+import category
+import override
 import check_file
 import entry
 
@@ -13,6 +14,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     def __init__(self):
         super(CheckFileDialog, self).__init__()
         
+        self.acct = accounts.Account('checking')
         self.cf = check_file.CheckFile()
         
         # Set up the user interface from Designer.
@@ -31,11 +33,12 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.buttonBox.rejected.connect(lambda: self.RejectChanges())
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
-        Trigger.load()
-        Category.load()
-        Override.load()
+        self.acct.load()
+        #Trigger.load()
+        #Category.load()
+        #Override.load()
         
-        for catStr in Category.strings:
+        for catStr in self.acct.categories.strings:
             self.listCategories.addItem(catStr)
         # Setup popup menu actions
         self.CreatePopupActions()
@@ -44,8 +47,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.selectedTriggerStr = ''
         self.exec_()
         
-        Trigger.save()
-        Category.save()
+        self.acct.save()
+        #Trigger.save()
+        #Category.save()
         
     #---------- Event handlers ---------------------------
     def ReadFileClickHndlr(self):
@@ -61,7 +65,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.cf.open(fileName[0])
         #iterate check file and load list widgets here
         for check in self.cf.entries:
-            if check.category == Category.no_category():
+            if check.category == self.acct.catories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -99,7 +103,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.cf.entries:
             check.category = Trigger.fromDesc(check.desc)
-            if check.category == Category.no_category():
+            if check.category == self.acct.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -115,7 +119,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         """The Add Cat button was pushed. If a string was entered, make a new
         category and update the category list."""
         catStr = self.edtNewCat.text()
-        Category.addCat(catStr)
+        self.acct.categories.addCat(catStr)
         self.listCategories.addItem(catStr)
 
     def CategorizedPopUpHndlr(self, event, whichList):
@@ -155,7 +159,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.close()
         
     def OpenManageCats(self):
-        mc = ManageCategoriesDialog()
+        mc = ManageCategoriesDialog(self.acct)
         
     #------------ End of Event Handlers ----------------
 
@@ -174,7 +178,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.ResortList()
         
     def NoneCatAction(self):
-        self.selectedEntry.category = Category.no_category()
+        self.selectedEntry.category = self.acct.categories.no_category()
         self.ResortList()
         
     def ResortList(self):    
@@ -183,7 +187,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.cf.entries:
             #check.category = Trigger.fromDesc(check.desc)
-            if check.category == Category.no_category():
+            if check.category == self.acct.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())

@@ -5,44 +5,41 @@ import pickle
 
 class Category(object):
     
-    # the category dictionary
-    strings = set()
+    def __init__(self, acct_str):
     
-    nCats = 0
+        # the category dictionary
+        self.acct_str = acct_str
+        self.strings = set()
+        self.nCats = 0
     
-    # categories pickle file name
-    picklename = 'categories.pckl'
+        # categories pickle file name
+        self.picklename = self.acct_str + '_categories.pckl'
     
-    @classmethod
-    def removeCat(cls, catStr):
+    def removeCat(self, catStr):
         newSet = set()
-        for cat in cls.strings:
+        for cat in self.strings:
             if cat != catStr:
                 newSet.add(cat)
-        cls.strings = newSet
+        self.strings = newSet
 
-    @classmethod
-    def addCat(cls, catStr):
-        cls.strings.add(catStr)
+    def addCat(self, catStr):
+        self.strings.add(catStr)
         
         
-    @classmethod
-    def save(cls):
-        f = open(cls.picklename, 'wb')
-        pickle.dump(cls.strings, f)
+    def save(self):
+        f = open(self.picklename, 'wb')
+        pickle.dump(self.strings, f)
         f.close()
 
-    @classmethod
-    def load(cls):
+    def load(self):
         try:
-            cls.strings = set()
-            f = open(cls.picklename, 'rb')
-            cls.strings = pickle.load(f)
+            self.strings = set()
+            f = open(self.picklename, 'rb')
+            self.strings = pickle.load(f)
             f.close()
-            cls.nCats = len(cls.strings)
+            self.nCats = len(self.strings)
         except FileNotFoundError:
             print('No categories.pckl file.')
     
-    @classmethod
-    def no_category(cls):
+    def no_category(self):
         return 'None'

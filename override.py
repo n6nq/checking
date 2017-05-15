@@ -11,53 +11,49 @@ import pickle
 
 class Override(object):
     
-    # the Override dictionary
-    strings = {}
+    def __init__(self, acct_str):
+        # the Override dictionary
+        self.strings = {}
     
-    # Override pickle file name
-    picklename = 'overrides.pckl'
+        # Override pickle file name
+        self.picklename = acct_str + 'overrides.pckl'
     
-    @classmethod
-    def add_over(cls, over_str, cat):
+    def add_over(self, over_str, cat):
         if over_str == '' or over_str == None:
             return False
-        if over_str in cls.strings:
+        if over_str in self.strings:
             return False
-        cls.strings[over_str] = cat
+        self.strings[over_str] = cat
         
     
-    @classmethod
-    def save(cls):
-        f = open(cls.picklename, 'wb')
-        pickle.dump(cls.strings, f)
+    def save(self):
+        f = open(range.picklename, 'wb')
+        pickle.dump(self.strings, f)
         f.close()
 
-    @classmethod
-    def load(cls):
+    def load(self):
         try:
-            cls.strings = {}
-            f = open(cls.picklename, 'rb')
-            cls.strings = pickle.load(f)
+            self.strings = {}
+            f = open(self.picklename, 'rb')
+            self.strings = pickle.load(f)
             f.close()
         except FileNotFoundError:
             print('No overrides.pckl file.')
     
-    @classmethod
-    def overs_for_cat(cls, lookFor):
+    def overs_for_cat(self, lookFor):
         overs = []
-        for over, cat in cls.strings.items():
+        for over, cat in self.strings.items():
             if cat == lookFor:
                 overs.append(over)
                 
         return overs
     
-    @classmethod
-    def change_overs_for_cat(cls, current_cat, new_cat):
+    def change_overs_for_cat(self, current_cat, new_cat):
         newd = {}
-        for over, cat in cls.strings.items():
+        for over, cat in self.strings.items():
             if cat == current_cat:
                 newd[over] = new_cat
             else:
                 newd[over] = cat
                 
-        cls.strings = newd
+        self.strings = newd
