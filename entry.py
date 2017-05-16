@@ -11,7 +11,8 @@ class EntryList(list):
 
 class Entry(object):
 
-    def __init__(self, date, amount, cleared, checknum, desc):
+    def __init__(self, acct, date, amount, cleared, checknum, desc):
+        self.acct = acct
         dparts = date.split('/')
         self.date = datetime.date(int(dparts[2]), int(dparts[0]), int(dparts[1]))
         self.amount = Money(amount)
@@ -21,7 +22,7 @@ class Entry(object):
         else:
             self.checknum = int(checknum)
         self.desc = desc
-        self.category = Trigger.fromDesc(desc)
+        self.category = self.acct.triggers.fromDesc(desc)
         
     def asNotCatStr(self):
         retstr = self.date.strftime("%m/%d/%y") + ' ' + \

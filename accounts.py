@@ -15,6 +15,11 @@ class Account(object):
         self.categories.load()
         self.triggers.load()
         self.overrides.load()
+
+    def save(self):
+        self.categories.save()
+        self.triggers.save()
+        self.overrides.save()
         
 class AccountList(list):
     def __init__(self):

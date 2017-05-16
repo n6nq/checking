@@ -19,7 +19,7 @@ class Trigger(object):
         self.strings = {}
     
         # triggers pickle file name
-        self.picklename = self.acct_str + 'triggers.pckl'
+        self.picklename = self.acct_str + '_triggers.pckl'
 
     def save(self):
         f = open(self.picklename, 'wb')
@@ -47,13 +47,12 @@ class Trigger(object):
         
         return self.acct.categories.no_category()
     
-    @classmethod
-    def addTrig(cls, trig, cat):
+    def addTrig(self, trig, cat):
         if trig == '' or trig == 'None' or trig == None:
             return False
-        if trig in cls.strings:
+        if trig in self.strings:
             return False
-        cls.strings[trig] = cat
+        self.strings[trig] = cat
         return True
     
     def triggers_for_cat(self, lookFor):
@@ -64,11 +63,11 @@ class Trigger(object):
                 
         return triggers
     
-    def change_trigs_for_cat(cls, current_cat, new_cat):
+    def change_trigs_for_cat(self, current_cat, new_cat):
         newd = {}
-        for trig, cat in cls.strings.items():
+        for trig, cat in self.strings.items():
             if cat == current_cat:
                 newd[trig] = new_cat
             else:
                 newd[trig] = cat
-        cls.strings = newd
+        self.strings = newd

@@ -118,7 +118,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.override_str = self.edtOverride.text()
         cat_list = self.listCategories.selectedItems()
         
-        Override.add_over(self.override_str, cat_list[0].text())
+        self.acct.overrides.add_over(self.override_str, cat_list[0].text())
         i = QListWidgetItem(self.override_str)
         self.listOverrides.addItem(i)
         self.listOverrides.setCurrentItem(i)
@@ -168,9 +168,9 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listCategories.takeItem(row)
         #cat = Category.strings[current_str]
         self.category_str = new_str
-        self.acct.category.strings.add(new_str)
-        Trigger.change_trigs_for_cat(current_str, new_str)
-        Override.change_overs_for_cat(current_str, new_str)
+        self.acct.categories.strings.add(new_str)
+        self.acct.triggers.change_trigs_for_cat(current_str, new_str)
+        self.acct.overrides.change_overs_for_cat(current_str, new_str)
         self.acct.categories.strings.remove(current_str)
         i = QListWidgetItem(new_str)
         self.listCategories.addItem(i)
@@ -185,7 +185,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         trig = self.acct.triggers.strings[current_str]
         del self.acct.triggers.strings[current_str]
         self.trigger_str = newStr
-        Trigger.strings[newStr] = trig
+        self.acct.triggers.strings[newStr] = trig
         i = QListWidgetItem(newStr)
         self.listTriggers.addItem(i)
         self.listTriggers.setCurrentItem(i)
@@ -200,7 +200,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if current > 0:
             current -= 1
         self.listOverrides.setCurrentRow(current)
-        self.edtOverride.clear()
+        self.list_overrides_select_changed(self)
         pass
     
     def delete_category(self):
@@ -214,7 +214,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if current > 0:
             current -= 1
         self.listCategories.setCurrentRow(current)
-        self.edtCategory.clear()
+        self.list_categories_select_changed(self)
         pass
     
     def delete_trigger(self):
@@ -222,10 +222,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.trigger_str == None:
             return False
         current = self.listTriggers.currentRow()
-        self.listTriggers.takeItem(current)
         del self.acct.triggers.strings[self.trigger_str]
+        self.listTriggers.takeItem(current)
         if current > 0:
             current -= 1
         self.listTriggers.setCurrentRow(current)
         self.edtTrigger.clear()
+        self.list_triggers_select_changed()
         pass

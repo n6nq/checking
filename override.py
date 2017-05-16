@@ -16,7 +16,7 @@ class Override(object):
         self.strings = {}
     
         # Override pickle file name
-        self.picklename = acct_str + 'overrides.pckl'
+        self.picklename = acct_str + '_overrides.pckl'
     
     def add_over(self, over_str, cat):
         if over_str == '' or over_str == None:
@@ -27,7 +27,7 @@ class Override(object):
         
     
     def save(self):
-        f = open(range.picklename, 'wb')
+        f = open(self.picklename, 'wb')
         pickle.dump(self.strings, f)
         f.close()
 

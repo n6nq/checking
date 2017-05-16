@@ -95,14 +95,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             raise EOFError
         selectedItems = self.listCategories.selectedItems()
         selectedCatStr = selectedItems[0].text()
-        if Trigger.addTrig(trgStr, selectedCatStr) == False:
+        if self.acct.triggers.addTrig(trgStr, selectedCatStr) == False:
             raise EOFError
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate
         for check in self.cf.entries:
-            check.category = Trigger.fromDesc(check.desc)
+            check.category = self.acct.triggers.fromDesc(check.desc)
             if check.category == self.acct.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
