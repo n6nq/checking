@@ -1,7 +1,7 @@
 """ManageCategoriesDialog provides ui for manipulating overrides, categories
    and trigger strings"""
 
-from PyQt5.QtWidgets import (QDialog)
+from PyQt5.QtWidgets import (QDialog, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
 import PyQt5.QtGui
@@ -129,7 +129,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.category_str = self.edtCategory.text()
         #cat_list = self.listCategories.selectedItems()
     
-        self.acct.categories.ddCat(self.category_str)
+        self.acct.categories.addCat(self.category_str)
         #self.acct.overrides.add_over(self.override_str, cat_list[0].text())
         i = QListWidgetItem(self.category_str)
         self.listCategories.addItem(i)
@@ -156,7 +156,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         over = self.acct.overrides.strings[current_str]
         del self.acct.overrides.strings[current_str]
         self.override_str = newStr
-        self.acct.override.strings[newStr] = over
+        self.acct.overrides.strings[newStr] = over
         i = QListWidgetItem(newStr)
         self.listOverrides.addItem(i)
         self.listOverrides.setCurrentItem(i)        pass
@@ -195,26 +195,34 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.override_str == '' or self.override_str == None:
             return False
         current = self.listOverrides.currentRow()
-        self.listOverrides.takeItem(current)
         del self.acct.overrides.strings[self.override_str]
+        self.listOverrides.takeItem(current)
         if current > 0:
             current -= 1
         self.listOverrides.setCurrentRow(current)
-        self.list_overrides_select_changed(self)
+        self.list_overrides_select_changed()
         pass
     
     def delete_category(self):
         current = self.listCategories.currentRow()
         current_str = self.listCategories.selectedItems()[0].text()
+        msgBox = QMessageBox()
+        reply = msgBox.question(self, 'All entries with this category will become uncategorized!',
+                        'Yes?', QMessageBox.Yes|QMessageBox.No)
+        #msgBox.exec()
+        if reply == QMessageBox.Yes:
+            print('KaBoom')
+        else:
+            print('KaBlam')
         #todo all entries with this category will be changed messageBox
         self.listCategories.takeItem(current)
-        #todo can't delete set member, need to rebuild the set
+        #delete member of set
         self.acct.categories.removeCat(current_str)
         #del Category.strings[self.category_str]
         if current > 0:
             current -= 1
         self.listCategories.setCurrentRow(current)
-        self.list_categories_select_changed(self)
+        self.list_categories_select_changed()
         pass
     
     def delete_trigger(self):
