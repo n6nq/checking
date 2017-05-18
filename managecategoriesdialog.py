@@ -212,8 +212,10 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         #msgBox.exec()
         if reply == QMessageBox.Yes:
             print('KaBoom')
+            self.acct.removeCategory(current_str)
         else:
             print('KaBlam')
+            return
         #todo all entries with this category will be changed messageBox
         self.listCategories.takeItem(current)
         #delete member of set

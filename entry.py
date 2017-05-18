@@ -3,12 +3,30 @@ import datetime
 from money import Money
 from category import Category
 from trigger import Trigger
+import pickle
 
-class EntryList(list):
+class EntryList(object):
     
-    def __init__(self):
+    def __init__(self, acct_str):
         self.n_entries = 0
+        self.entrylist = []
+        self.picklename = acct_str + '_entrylist.pckl'
+        
+    def load(self):
+        try:
+            self.strings = set()
+            f = open(self.picklename, 'rb')
+            self.entrylist = pickle.load(f)
+            f.close()
+            self.n_entries = len(self.entrylist)
+        except FileNotFoundError:
+            print('No acct_categories.pckl file.')
 
+    def save(self):
+        f = open(self.picklename, 'wb')
+        pickle.dump(self.entrylist, f)
+        f.close()
+        
 class Entry(object):
 
     def __init__(self, acct, date, amount, cleared, checknum, desc):

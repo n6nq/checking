@@ -15,7 +15,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         super(CheckFileDialog, self).__init__()
         
         self.acct = accounts.Account('checking')
-        self.cf = check_file.CheckFile()
+        self.acct.load()
+        
+        self.cf = check_file.CheckFile(self.acct)
         
         # Set up the user interface from Designer.
         self.setupUi(self)
@@ -33,11 +35,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.buttonBox.rejected.connect(lambda: self.RejectChanges())
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
-        self.acct.load()
-        #Trigger.load()
-        #Category.load()
-        #Override.load()
-        
+    
         for catStr in self.acct.categories.strings:
             self.listCategories.addItem(catStr)
         # Setup popup menu actions
@@ -65,7 +63,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.cf.open(fileName[0])
         #iterate check file and load list widgets here
         for check in self.cf.entries:
-            if check.category == self.acct.catories.no_category():
+            if check.category == self.acct.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -151,6 +149,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     
     def AcceptChanges(self):
         print('Accepted')
+        self.acct.mergeNewEntries(self.cf.entries)
+        self.acct.save()
         self.close()
         
         
