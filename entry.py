@@ -12,6 +12,13 @@ class EntryList(object):
         self.entrylist = []
         self.picklename = acct_str + '_entrylist.pckl'
         
+
+    def isDupe(self, newEtry):
+        for entry in self.entrylist:
+            if entry.compare(newEtry):
+                return True
+        return False
+        
     def load(self):
         try:
             self.strings = set()
@@ -42,6 +49,13 @@ class Entry(object):
         self.desc = desc
         self.category = self.acct.triggers.fromDesc(desc)
         
+    def compare(self, newEntry):
+        if (self.date - newEntry.date).total_seconds() == 0:
+            if self.amount.value == newEntry.amount.value:
+                if self.desc == newEntry.desc:
+                    return True
+        return False
+            
     def asNotCatStr(self):
         retstr = self.date.strftime("%m/%d/%y") + ' ' + \
             self.amount.asStr() + ' ' + \
