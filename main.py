@@ -31,7 +31,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print ("Pressed Off!")
         for i in range(5):
             self.listUnCategorized.addItem("Numero %d" % i)
-            
+        
         readIt = CheckFileDialog()
         print(readIt.cf)
         
