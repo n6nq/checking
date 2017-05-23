@@ -7,17 +7,18 @@ import entry
 
 class Account(object):
 
-    def __init__(self, acct_str):
+    def __init__(self, acct_str, db):
+        self.db = db
         self.categories = category.Category(acct_str)
         self.triggers = trigger.Trigger(acct_str, self)
         self.overrides = override.Override(acct_str)
         self.entries = entry.EntryList(acct_str)
         
     def load(self):
-        self.categories.load()
-        self.triggers.load()
-        self.overrides.load()
-        self.entries.load()
+        self.categories.load(self.db)
+        self.triggers.load(self.db)
+        self.overrides.load(self.db)
+        self.entries.load(self.db)
         
     def save(self):
         self.categories.save()

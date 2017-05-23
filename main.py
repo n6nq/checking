@@ -1,8 +1,10 @@
 #imports
 import sys
+import os
 # get the Qt files
 import PyQt5
 from PyQt5.QtWidgets import *
+from database import Database
 
 # get the window
 import mainwindow_auto
@@ -31,8 +33,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print ("Pressed Off!")
         for i in range(5):
             self.listUnCategorized.addItem("Numero %d" % i)
-        
-        readIt = CheckFileDialog()
+        cur = os.getcwd()
+        db = Database(cur+'\\checking')
+        readIt = CheckFileDialog(db)
         print(readIt.cf)
         
         

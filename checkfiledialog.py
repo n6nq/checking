@@ -11,10 +11,10 @@ import entry
 
 class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
 
-    def __init__(self):
+    def __init__(self, db):
         super(CheckFileDialog, self).__init__()
         
-        self.acct = accounts.Account('checking')
+        self.acct = accounts.Account('checking', db)
         self.acct.load()
         
         self.cf = check_file.CheckFile(self.acct)
