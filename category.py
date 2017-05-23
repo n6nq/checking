@@ -46,6 +46,7 @@ class Category(object):
                 print('No categories.pckl file.')
         elif storage == account.ACCT_DB:
             try:
-                sql = 'select'
+                sql = 'select '
+                
     def no_category(self):
         return 'None'

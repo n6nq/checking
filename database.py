@@ -10,20 +10,37 @@
 # triggers = id, trigger string, category id
 # overrides = id override string, category id
 
-
 import sqlite3
+import accounts
+import entry
+import category
+import trigger
+import override
 
 class Database(object):
     
-    def __init__(self, name):
-        
+    def __init__(self):
+        self.accts = accounts.Account(acct_str)
+        pass
+    
+    def open(self, name):
         self.dbname = name + '.db'
-        self.conn = sqlite3.connect(name+'.db')
-        self.createTables()
+        conn = sqlite3.connect(name+'.db')
+        self.conn = conn
+        self.accts = accounts.AccountList(conn)
+        self.entries = entry.EntryList(conn)
+        self.categories = category.Category(conn)
+        self.triggers = trigger.Trigger(conn)
+        self.overrides = override.Override(conn)
+        self.createTables(conn)
         
-    def createTables(self):
+    def createTables(self, conn):
         try:
-            conn = self.conn
+            self.accts.createTable()
+            self.entries.createTable()
+            self.categories.createTable()
+            self.triggers.createTable()
+            self.overrides.createTable()
             conn.execute("create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))")
             conn.execute("create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))")
             conn.execute("create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))")

@@ -4,7 +4,7 @@ import os
 # get the Qt files
 import PyQt5
 from PyQt5.QtWidgets import *
-from database import Database
+import database
 
 # get the window
 import mainwindow_auto
@@ -24,6 +24,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnOn.clicked.connect(lambda: self.pressedOnButton())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         
+        self.db = database.Database()
+        
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):
@@ -33,9 +35,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print ("Pressed Off!")
         for i in range(5):
             self.listUnCategorized.addItem("Numero %d" % i)
-        cur = os.getcwd()
-        db = Database(cur+'\\checking')
-        readIt = CheckFileDialog(db)
+
+        curr = os.getcwd()
+        self.db.open(curr+'\\checking')
+        
+        readIt = CheckFileDialog(self.db)
         print(readIt.cf)
         
         

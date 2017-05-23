@@ -11,13 +11,9 @@ ACCT_PCKL = 2
 
 class Account(object):
 
-    def __init__(self, acct_str, db):
-        self.db = db
-        self.categories = category.Category(acct_str, db)
-        self.triggers = trigger.Trigger(acct_str, self, db)
-        self.overrides = override.Override(acct_str, db)
-        self.entries = entry.EntryList(acct_str, db)
-        
+    def __init__(self):
+        pass
+    
     def convertPickleToDB(self):
         self.categories.load(ACCT_PCKL)
         self.categories.save(ACCT_DB)
