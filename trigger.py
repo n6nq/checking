@@ -11,13 +11,15 @@ import pickle
 
 class Trigger(object):
     
-    def __init__(self, acct_str, acct):
+    def __init__(self, acct_str, acct, db):
         
         self.acct = acct
         self.acct_str = acct_str
         # the category dictionary
         self.strings = {}
-    
+        self.db = db
+        
+        #todo: decide about pickle files
         # triggers pickle file name
         self.picklename = self.acct_str + '_triggers.pckl'
 

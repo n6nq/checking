@@ -11,10 +11,12 @@ import pickle
 
 class Override(object):
     
-    def __init__(self, acct_str):
+    def __init__(self, acct_str, db):
         # the Override dictionary
         self.strings = {}
+        self.db = db
     
+        #todo: decide about pickle files
         # Override pickle file name
         self.picklename = acct_str + '_overrides.pckl'
     

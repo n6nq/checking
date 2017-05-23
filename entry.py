@@ -7,9 +7,11 @@ import pickle
 
 class EntryList(object):
     
-    def __init__(self, acct_str):
+    def __init__(self, acct_str, db):
         self.n_entries = 0
         self.entrylist = []
+        self.db = db
+        #todo: decide about pickle files
         self.picklename = acct_str + '_entrylist.pckl'
         
 
