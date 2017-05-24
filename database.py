@@ -27,22 +27,22 @@ class Database(object):
         self.dbname = name + '.db'
         conn = sqlite3.connect(name+'.db')
         self.conn = conn
-        self.accts = accounts.AccountList(conn)
-        self.entries = entry.EntryList(conn)
-        self.categories = category.Category(conn)
-        self.triggers = trigger.Trigger(conn)
-        self.overrides = override.Override(conn)
-        self.createTables(conn)
+        self.accts = accounts.AccountList(self)
+        self.entries = entry.EntryList(self)
+        self.categories = category.Category(self)
+        self.triggers = trigger.Trigger(self)
+        self.overrides = override.Override(self)
+        self.createTables()
         
-    def createTables(self, conn):
+    def createTables(self):
         try:
             self.accts.createTable()
             self.entries.createTable()
             self.categories.createTable()
             self.triggers.createTable()
             self.overrides.createTable()
-            conn.execute("create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))")
-            conn.execute("create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))")
+            #conn.execute("create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))")
+            #conn.execute("create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))")
             conn.execute("create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))")
             conn.execute("create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))")
             conn.execute("create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))")

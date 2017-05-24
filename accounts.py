@@ -44,7 +44,18 @@ class Account(object):
     def removeCategory(catStr):
         pass
         
-class AccountList(list):
-    def __init__(self):
+class AccountList(object):
+    
+    def __init__(self, db):
         self.acct_list = []
+        self.db = db
+        self.createSQL = 'create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))'
+     
+    def createTable(self, db):
+        try:
+            self.conn.execute(self.createSQL)
+            return True
+        except sqlite3.Error as e:
+            db.error("An error occurred when creating the AccountList table:\n", e.args[0])
+            return False            
         

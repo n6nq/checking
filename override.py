@@ -15,6 +15,7 @@ class Override(object):
         # the Override dictionary
         self.strings = {}
         self.db = db
+        self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))'
     
         #todo: decide about pickle files
         # Override pickle file name

@@ -7,12 +7,21 @@ import pickle
 
 class EntryList(object):
     
-    def __init__(self, acct_str, db):
-        self.n_entries = 0
+    def __init__(self, db):
+        #self.n_entries = 0
         self.entrylist = []
         self.db = db
+        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))'
         #todo: decide about pickle files
-        self.picklename = acct_str + '_entrylist.pckl'
+        #self.picklename = acct_str + '_entrylist.pckl'
+
+    def createTable(self):
+        try:
+            self.db.conn.execute(self.createSQL)
+            return True
+        except sqlite3.Error as e:
+            self.db.error("An error occurred when creating the EntryList table:\n", e.args[0])
+            return False            
         
 
     def isDupe(self, newEtry):
