@@ -1,30 +1,32 @@
 """ Category class """
 
-import account
+import accounts
+import database
 import pickle
+import sqlite3
 
 
 class Category(object):
     
-    def __init__(self, acct_str, db):
+    def __init__(self, db):
     
         # the category dictionary
-        self.acct_str = acct_str
+        #self.acct_str = acct_str
         self.strings = set()
        # self.nCats = 0
         self.db = db
         self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))'
-        
+        self.selectAllSQL = 'select oid, name, super from Categories'
         #todo: decide whether pickle will exist after db conversion done
         # categories pickle file name
-        self.picklename = self.acct_str + '_categories.pckl'
+        #self.picklename = self.acct_str + '_categories.pckl'
     
-    def createTable(self, db):
+    def createTable(self):
         try:
-            self.conn.execute(self.createSQL)
+            self.db.conn.execute(self.createSQL)
             return True
         except sqlite3.Error as e:
-            db.error("An error occurred when creating the Catgory table:\n", e.args[0])
+            self.db.error("An error occurred when creating the Catgory table:\n", e.args[0])
             return False            
 
     def removeCat(self, catStr):
@@ -55,7 +57,13 @@ class Category(object):
                 print('No categories.pckl file.')
         elif storage == account.ACCT_DB:
             try:
-                sql = 'select '
+                self.strings = set()
+                for row in self.db.conn.execute(self.selectAllSQL):
+                    self.strings.add(row[1])
+            except sqlite3.Error as e:
+                self.db.error('Error loading memory from the Category table:\n', e.args[0])
+            
+
                 
     def no_category(self):
         return 'None'

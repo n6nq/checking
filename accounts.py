@@ -51,11 +51,11 @@ class AccountList(object):
         self.db = db
         self.createSQL = 'create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))'
      
-    def createTable(self, db):
+    def createTable(self):
         try:
-            self.conn.execute(self.createSQL)
+            self.db.conn.execute(self.createSQL)
             return True
         except sqlite3.Error as e:
-            db.error("An error occurred when creating the AccountList table:\n", e.args[0])
+            self.db.error("An error occurred when creating the AccountList table:\n", e.args[0])
             return False            
         

@@ -20,7 +20,7 @@ import override
 class Database(object):
     
     def __init__(self):
-        self.accts = accounts.Account(acct_str)
+        self.accts = accounts.Account()
         pass
     
     def open(self, name):
@@ -43,9 +43,9 @@ class Database(object):
             self.overrides.createTable()
             #conn.execute("create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))")
             #conn.execute("create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))")
-            conn.execute("create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))")
-            conn.execute("create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))")
-            conn.execute("create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))")
+            #conn.execute("create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))")
+            #conn.execute("create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))")
+            #conn.execute("create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))")
             return True
         except sqlite3.Error as e:
             print("An error occurred:", e.args[0])

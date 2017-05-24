@@ -11,9 +11,9 @@ import pickle
 
 class Trigger(object):
     
-    def __init__(self, acct_str, db):
+    def __init__(self, db):
         
-        self.acct_str = acct_str
+        #self.acct_str = acct_str
         # the category dictionary
         self.strings = {}
         self.db = db
@@ -21,7 +21,15 @@ class Trigger(object):
         
         #todo: decide about pickle files
         # triggers pickle file name
-        self.picklename = self.acct_str + '_triggers.pckl'
+        #self.picklename = self.acct_str + '_triggers.pckl'
+
+    def createTable(self):
+        try:
+            self.db.conn.execute(self.createSQL)
+            return True
+        except sqlite3.Error as e:
+            self.db.error("An error occurred when creating the Trigger table:\n", e.args[0])
+            return False            
 
     def save(self):
         f = open(self.picklename, 'wb')
