@@ -38,6 +38,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         curr = os.getcwd()
         self.db.open(curr+'\\checking')
+        self.db.createAccount('checking')
+        
         
         readIt = CheckFileDialog(self.db)
         print(readIt.cf)

@@ -20,7 +20,6 @@ import override
 class Database(object):
     
     def __init__(self):
-        self.accts = accounts.Account()
         pass
     
     def open(self, name):
@@ -50,3 +49,6 @@ class Database(object):
         except sqlite3.Error as e:
             print("An error occurred:", e.args[0])
             return False
+        
+    def createAccount(self, name):
+        self.accts.createAccount(name)

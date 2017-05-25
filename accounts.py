@@ -4,6 +4,8 @@ import category
 import trigger
 import override
 import entry
+from datetime import date
+import sqlite3
 
 # storage defines
 ACCT_DB = 1
@@ -11,7 +13,11 @@ ACCT_PCKL = 2
 
 class Account(object):
 
-    def __init__(self):
+    def __init__(self, name, start, last, url):
+        self.name = name
+        self.start = start
+        self.last = last
+        self.bankurl = url
         pass
     
     def convertPickleToDB(self):
@@ -49,8 +55,9 @@ class AccountList(object):
     def __init__(self, db):
         self.acct_list = []
         self.db = db
-        self.createSQL = 'create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))'
-     
+        self.createSQL = 'create table if not exists Accounts(id integer primary key, name varchar(30), start date, last date, bankurl varchar(255))'
+        self.insertSQL = 'insert into Accounts(name, start, last, bankurl) VALUES (?,?,?,?)'
+        
     def createTable(self):
         try:
             self.db.conn.execute(self.createSQL)
@@ -58,4 +65,14 @@ class AccountList(object):
         except sqlite3.Error as e:
             self.db.error("An error occurred when creating the AccountList table:\n", e.args[0])
             return False            
-        
+    
+    def createAccount(self, name):
+        today = date.today()
+        self.acct_list.append(Account(name, today, today, ''))
+        try:
+            self.db.conn.execute(self.insertSQL, (name, today, today, ''))
+            self.db.commit()
+            return True
+        except sqlite3.Error as e:
+            self.db.error('Could not create new Account record:\n', e.args[0])
+            return False
