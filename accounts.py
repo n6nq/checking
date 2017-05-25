@@ -7,9 +7,6 @@ import entry
 from datetime import date
 import sqlite3
 
-# storage defines
-ACCT_DB = 1
-ACCT_PCKL = 2
 
 class Account(object):
 
@@ -20,16 +17,6 @@ class Account(object):
         self.bankurl = url
         pass
     
-    def convertPickleToDB(self):
-        self.categories.load(ACCT_PCKL)
-        self.categories.save(ACCT_DB)
-        self.triggers.load(ACCT_PCKL)
-        self.triggers.save(ACCT_DB)
-        self.overrides.load(ACCT_PCKL)
-        self.overrides.save(ACCT_DB)
-        self.entries.load(ACCT_PCKL)
-        self.entries.save(ACCT_DB)
-
     def load(self, storage):
         self.categories.load(storage)
         self.triggers.load(storage)

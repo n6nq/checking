@@ -31,12 +31,29 @@ class Trigger(object):
             self.db.error("An error occurred when creating the Trigger table:\n", e.args[0])
             return False            
 
-    def save(self):
+    def save(self, storage):
         f = open(self.picklename, 'wb')
         pickle.dump(self.strings, f)
         f.close()
 
-    def load(self):
+    def load(self, storage):
+        if storage == database.STORE_PCKL:
+            try:
+                self.strings = set()
+                f = open(self.db.dbname+'_triggers.pckl', 'rb')
+                self.strings = pickle.load(f)
+                f.close()
+                self.nCats = len(self.strings)
+            except FileNotFoundError:
+                print('No categories.pckl file.')
+        elif storage == database.STORE_DB:
+            try:
+                self.strings = set()
+                for row in self.db.conn.execute(self.selectAllSQL):
+                    self.strings.add(row[1])
+            except sqlite3.Error as e:
+                self.db.error('Error loading memory from the Category table:\n', e.args[0])
+        #================================
         try:
             self.strings = {}
             f = open(self.picklename, 'rb')

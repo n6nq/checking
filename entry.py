@@ -30,7 +30,7 @@ class EntryList(object):
                 return True
         return False
         
-    def load(self):
+    def load(self, storage):
         try:
             self.strings = set()
             f = open(self.picklename, 'rb')
@@ -40,7 +40,7 @@ class EntryList(object):
         except FileNotFoundError:
             print('No acct_categories.pckl file.')
 
-    def save(self):
+    def save(self, storage):
         f = open(self.picklename, 'wb')
         pickle.dump(self.entrylist, f)
         f.close()

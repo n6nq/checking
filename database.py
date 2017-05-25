@@ -17,13 +17,20 @@ import category
 import trigger
 import override
 
+# storage defines
+STORE_DB = 1
+STORE_PCKL = 2
+
 class Database(object):
-    
+
     def __init__(self):
         pass
     
+    def commit(self):
+        self.conn.commit()
+        
     def open(self, name):
-        self.dbname = name + '.db'
+        self.dbname = name
         conn = sqlite3.connect(name+'.db')
         self.conn = conn
         self.accts = accounts.AccountList(self)
@@ -32,6 +39,7 @@ class Database(object):
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
         self.createTables()
+        self.convertPicklesToDB()
         
     def createTables(self):
         try:
@@ -40,11 +48,6 @@ class Database(object):
             self.categories.createTable()
             self.triggers.createTable()
             self.overrides.createTable()
-            #conn.execute("create table if not exists Accounts(oid INTEGER PRIMARY KEY ASC, name varchar(30), start date, last date, bankurl varchar(255))")
-            #conn.execute("create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))")
-            #conn.execute("create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))")
-            #conn.execute("create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))")
-            #conn.execute("create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))")
             return True
         except sqlite3.Error as e:
             print("An error occurred:", e.args[0])
@@ -52,3 +55,16 @@ class Database(object):
         
     def createAccount(self, name):
         self.accts.createAccount(name)
+        
+    def convertPicklesToDB(self):
+        self.categories.load(STORE_PCKL)
+        self.categories.save(STORE_DB)
+        self.triggers.load(STORE_PCKL)
+        self.triggers.save(STORE_DB)
+        self.overrides.load(STORE_PCKL)
+        self.overrides.save(STORE_DB)
+        self.entries.load(STORE_PCKL)
+        self.entries.save(STORE_DB)
+
+    
+    

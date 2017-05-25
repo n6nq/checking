@@ -37,12 +37,12 @@ class Override(object):
         self.strings[over_str] = cat
         
     
-    def save(self):
+    def save(self, storage):
         f = open(self.picklename, 'wb')
         pickle.dump(self.strings, f)
         f.close()
 
-    def load(self):
+    def load(self, storage):
         try:
             self.strings = {}
             f = open(self.picklename, 'rb')
