@@ -18,7 +18,8 @@ class Trigger(object):
         self.strings = {}
         self.db = db
         self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))'
-        
+        self.selectAllSQL = 'select oid, trigger, category from Triggers'
+        self.insertSQL = 'insert into Triggers{trigger, category} values(?, ?)'
         #todo: decide about pickle files
         # triggers pickle file name
         #self.picklename = self.acct_str + '_triggers.pckl'
@@ -28,40 +29,38 @@ class Trigger(object):
             self.db.conn.execute(self.createSQL)
             return True
         except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the Trigger table:\n", e.args[0])
+            self.db.error("An error occurred when creating the Triggers table:\n", e.args[0])
             return False            
 
     def save(self, storage):
-        f = open(self.picklename, 'wb')
-        pickle.dump(self.strings, f)
-        f.close()
+        if storage == database.STORE_PCKL:
+            f = open(self.db.dbname+'_triggers.pckl', 'wb')
+            pickle.dump(self.strings, f)
+            f.close()
+        elif storage == database.STORE_DB:
+            try:
+                for trig, cat in self.strings.items:
+                    self.db.conn.execute(self.insertSQL, (trig, cat))
+                self.db.commit()
+            except sqlite3.Error as e:
+                self.db.error('Could save triggers in Triggers table:\n', e.args[0])        
 
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
-                self.strings = set()
+                self.strings = {}
                 f = open(self.db.dbname+'_triggers.pckl', 'rb')
                 self.strings = pickle.load(f)
                 f.close()
-                self.nCats = len(self.strings)
             except FileNotFoundError:
-                print('No categories.pckl file.')
+                print('No triggers.pckl file.')
         elif storage == database.STORE_DB:
             try:
-                self.strings = set()
+                self.strings = {}
                 for row in self.db.conn.execute(self.selectAllSQL):
-                    self.strings.add(row[1])
+                    self.strings[row[1]] = row[2]
             except sqlite3.Error as e:
-                self.db.error('Error loading memory from the Category table:\n', e.args[0])
-        #================================
-        try:
-            self.strings = {}
-            f = open(self.picklename, 'rb')
-            self.strings = pickle.load(f)
-            f.close()
-        except FileNotFoundError:
-            print('No acct_categories.pckl file.')
-            
+                self.db.error('Error loading memory from the Triggers table:\n', e.args[0])
         
     def fromDesc(self, desc):
         for over, cat in self.acct.overrides.strings.items():

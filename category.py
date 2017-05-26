@@ -43,7 +43,7 @@ class Category(object):
         
     def save(self, storage):
         if storage == database.STORE_PCKL:
-            f = open(self.picklename, 'wb')
+            f = open(self.db.dbname+'_categeories.pckl', 'wb')
             pickle.dump(self.strings, f)
             f.close()
         elif storage == database.STORE_DB:

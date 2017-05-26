@@ -16,7 +16,7 @@ class Override(object):
         self.strings = {}
         self.db = db
         self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))'
-    
+        self.selectAllSQL = 'select oid, override, category from Overrides'
         #todo: decide about pickle files
         # Override pickle file name
         #self.picklename = acct_str + '_overrides.pckl'
@@ -43,13 +43,21 @@ class Override(object):
         f.close()
 
     def load(self, storage):
-        try:
-            self.strings = {}
-            f = open(self.picklename, 'rb')
-            self.strings = pickle.load(f)
-            f.close()
-        except FileNotFoundError:
-            print('No overrides.pckl file.')
+        if storage == database.STORE_PCKL:
+            try:
+                self.strings = {}
+                f = open(self.db.dbname+'_overrides.pckl', 'rb')
+                self.strings = pickle.load(f)
+                f.close()
+            except FileNotFoundError:
+                print('No overrides.pckl file.')
+        elif storage == database.STORE_DB:
+            try:
+                self.strings = {}
+                for row in self.db.conn.execute(self.selectAllSQL):
+                    self.strings[row[1]] = row[2]
+            except sqlite3.Error as e:
+                self.db.error('Error loading memory from the Overrides table:\n', e.args[0])
     
     def overs_for_cat(self, lookFor):
         overs = []
