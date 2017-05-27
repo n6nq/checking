@@ -14,10 +14,10 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     def __init__(self, db):
         super(CheckFileDialog, self).__init__()
         
-        self.acct = accounts.Account('checking', db)
-        self.acct.load()
-        
-        self.cf = check_file.CheckFile(self.acct)
+        #self.acct = accounts.Account('checking', db)
+        #self.acct.load()
+        self.db = db
+        self.cf = check_file.CheckFile(self.db)
         
         # Set up the user interface from Designer.
         self.setupUi(self)
@@ -36,7 +36,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
     
-        for catStr in self.acct.categories.strings:
+        for catStr in self.db.categories.strings:
             self.listCategories.addItem(catStr)
         # Setup popup menu actions
         self.CreatePopupActions()

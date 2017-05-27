@@ -7,6 +7,8 @@
    a Bank Fee. Overrides are searched for first, before normal Categories, reating
    a one level hierarchy."""
 
+import database
+import sqlite3
 import pickle
 
 class Override(object):
@@ -17,6 +19,8 @@ class Override(object):
         self.db = db
         self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))'
         self.selectAllSQL = 'select oid, override, category from Overrides'
+        self.insertSQL = 'insert into Overrides(override, category) values(?, ?)'
+        
         #todo: decide about pickle files
         # Override pickle file name
         #self.picklename = acct_str + '_overrides.pckl'
@@ -38,9 +42,17 @@ class Override(object):
         
     
     def save(self, storage):
-        f = open(self.picklename, 'wb')
-        pickle.dump(self.strings, f)
-        f.close()
+        if storage == database.STORE_PCKL:
+            f = open(self.db.dbname+'_overrides.pckl', 'wb')
+            pickle.dump(self.strings, f)
+            f.close()
+        elif storage == database.STORE_DB:
+            try:
+                for over, cat in self.strings.items():
+                    self.db.conn.execute(self.insertSQL, (over, cat))
+                self.db.commit()
+            except sqlite3.Error as e:
+                self.db.error('Could save overrides in Overrides table:\n', e.args[0])                
 
     def load(self, storage):
         if storage == database.STORE_PCKL:

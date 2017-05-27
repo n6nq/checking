@@ -7,6 +7,8 @@
 import accounts
 import category
 import override
+import database
+import sqlite3
 import pickle
 
 class Trigger(object):
@@ -19,7 +21,7 @@ class Trigger(object):
         self.db = db
         self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))'
         self.selectAllSQL = 'select oid, trigger, category from Triggers'
-        self.insertSQL = 'insert into Triggers{trigger, category} values(?, ?)'
+        self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         #todo: decide about pickle files
         # triggers pickle file name
         #self.picklename = self.acct_str + '_triggers.pckl'
@@ -39,7 +41,7 @@ class Trigger(object):
             f.close()
         elif storage == database.STORE_DB:
             try:
-                for trig, cat in self.strings.items:
+                for trig, cat in self.strings.items():
                     self.db.conn.execute(self.insertSQL, (trig, cat))
                 self.db.commit()
             except sqlite3.Error as e:

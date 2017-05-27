@@ -26,6 +26,9 @@ class Database(object):
     def __init__(self):
         pass
     
+    def error(self, msg):
+        print (msg)     #TODO make ui for error messages  
+        
     def commit(self):
         self.conn.commit()
         
@@ -40,6 +43,7 @@ class Database(object):
         self.overrides = override.Override(self)
         self.createTables()
         self.convertPicklesToDB()
+        self.conn.commit()
         
     def createTables(self):
         try:
