@@ -70,5 +70,9 @@ class Database(object):
         self.entries.load(STORE_PCKL)
         self.entries.save(STORE_DB)
 
+    def mergeNewEntries(self, newList):
+        for newEntry in newList:
+            if not self.entries.isDupe(newEntry):
+                self.entries.entrylist.append(newEntry)
     
     

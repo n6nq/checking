@@ -14,8 +14,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     def __init__(self, db):
         super(CheckFileDialog, self).__init__()
         
-        #self.acct = accounts.Account('checking', db)
-        #self.acct.load()
+        #self.db = accounts.Account('checking', db)
+        #self.db.load()
         self.db = db
         self.cf = check_file.CheckFile(self.db)
         
@@ -45,7 +45,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.selectedTriggerStr = ''
         self.exec_()
         
-        self.acct.save()
+        self.db.save()
         #Trigger.save()
         #Category.save()
         
@@ -63,7 +63,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.cf.open(fileName[0])
         #iterate check file and load list widgets here
         for check in self.cf.entries:
-            if check.category == self.acct.categories.no_category():
+            if check.category == self.db.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -93,15 +93,15 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             raise EOFError
         selectedItems = self.listCategories.selectedItems()
         selectedCatStr = selectedItems[0].text()
-        if self.acct.triggers.addTrig(trgStr, selectedCatStr) == False:
+        if self.db.triggers.addTrig(trgStr, selectedCatStr) == False:
             raise EOFError
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate
         for check in self.cf.entries:
-            check.category = self.acct.triggers.fromDesc(check.desc)
-            if check.category == self.acct.categories.no_category():
+            check.category = self.db.triggers.fromDesc(check.desc)
+            if check.category == self.db.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -117,7 +117,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         """The Add Cat button was pushed. If a string was entered, make a new
         category and update the category list."""
         catStr = self.edtNewCat.text()
-        self.acct.categories.addCat(catStr)
+        self.db.categories.addCat(catStr)
         self.listCategories.addItem(catStr)
 
     def CategorizedPopUpHndlr(self, event, whichList):
@@ -149,8 +149,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     
     def AcceptChanges(self):
         print('Accepted')
-        self.acct.mergeNewEntries(self.cf.entries)
-        self.acct.save()
+        self.db.mergeNewEntries(self.cf.entries)
+        self.db.save()
         self.close()
         
         
@@ -159,7 +159,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.close()
         
     def OpenManageCats(self):
-        mc = ManageCategoriesDialog(self.acct)
+        mc = ManageCategoriesDialog(self.db)
         
     #------------ End of Event Handlers ----------------
 
@@ -178,7 +178,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.ResortList()
         
     def NoneCatAction(self):
-        self.selectedEntry.category = self.acct.categories.no_category()
+        self.selectedEntry.category = self.db.categories.no_category()
         self.ResortList()
         
     def ResortList(self):    
@@ -187,7 +187,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.cf.entries:
             #check.category = Trigger.fromDesc(check.desc)
-            if check.category == self.acct.categories.no_category():
+            if check.category == self.db.categories.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())

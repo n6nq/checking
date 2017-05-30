@@ -17,7 +17,7 @@ class CheckFile(object):
             line = line.replace('"', '')
             prt = line.split(',')
             
-            self.entries.append(Entry(self.ac, prt[0], prt[1], prt[2], prt[3], prt[4]))
+            self.entries.append(Entry(self.db, prt[0], prt[1], prt[2], prt[3], prt[4]))
             line = f.readline()
         f.close()
         

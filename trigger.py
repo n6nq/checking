@@ -65,7 +65,7 @@ class Trigger(object):
                 self.db.error('Error loading memory from the Triggers table:\n', e.args[0])
         
     def fromDesc(self, desc):
-        for over, cat in self.acct.overrides.strings.items():
+        for over, cat in self.db.overrides.strings.items():
             if over in desc:
                 return cat
             
@@ -73,7 +73,7 @@ class Trigger(object):
             if trig in desc:
                 return cat
         
-        return self.acct.categories.no_category()
+        return self.db.categories.no_category()
     
     def addTrig(self, trig, cat):
         if trig == '' or trig == 'None' or trig == None:

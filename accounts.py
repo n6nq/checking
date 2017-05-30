@@ -17,17 +17,17 @@ class Account(object):
         self.bankurl = url
         pass
     
-    def load(self, storage):
-        self.categories.load(storage)
-        self.triggers.load(storage)
-        self.overrides.load(storage)
-        self.entries.load(storage)
+#    def load(self, storage):
+#        self.categories.load(storage)
+#        self.triggers.load(storage)
+#        self.overrides.load(storage)
+#        self.entries.load(storage)
         
-    def save(self, storage):
-        self.categories.save(storage)
-        self.triggers.save(storage)
-        self.overrides.save(storage)
-        self.entries.save(storage)
+#    def save(self, storage):
+#        self.categories.save(storage)
+#        self.triggers.save(storage)
+#        self.overrides.save(storage)
+#        self.entries.save(storage)
         
     def mergeNewEntries(self, newList):
         for newEntry in newList:
