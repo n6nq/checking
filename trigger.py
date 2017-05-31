@@ -11,7 +11,7 @@ import database
 import sqlite3
 import pickle
 
-class Trigger(object):
+class Trigger(database.DBObj):
     
     def __init__(self, db):
         

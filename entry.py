@@ -64,7 +64,7 @@ class EntryList(object):
             except sqlite3.Error as e:
                 self.db.error('Could not save entries in EntryList table:\n', e.args[0])
         
-class Entry(object):
+class Entry(database.DBObj):
 
     def __init__(self, db, date, amount, cleared, checknum, desc):
         self.db = db

@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction)
 import PyQt5.QtGui
 from readcheckfile_auto import Ui_ReadCheckFileDialog
 from managecategoriesdialog import ManageCategoriesDialog
+import database
 import accounts
 import trigger
 import category
@@ -150,7 +151,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     def AcceptChanges(self):
         print('Accepted')
         self.db.mergeNewEntries(self.cf.entries)
-        self.db.save()
+        self.db.save(database.STORE_DB)
         self.close()
         
         

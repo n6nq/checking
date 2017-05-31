@@ -4,17 +4,19 @@ import category
 import trigger
 import override
 import entry
+import database
 from datetime import date
 import sqlite3
 
 
-class Account(object):
+class Account(database.DBObj):
 
     def __init__(self, name, start, last, url):
         self.name = name
         self.start = start
         self.last = last
         self.bankurl = url
+        self.state = database.DIRTY
         pass
     
 #    def load(self, storage):
@@ -29,10 +31,10 @@ class Account(object):
 #        self.overrides.save(storage)
 #        self.entries.save(storage)
         
-    def mergeNewEntries(self, newList):
-        for newEntry in newList:
-            if not self.entries.isDupe(newEntry):
-                self.entries.entrylist.append(newEntry)
+#    def mergeNewEntries(self, newList):
+#        for newEntry in newList:
+#            if not self.entries.isDupe(newEntry):
+#             self.entries.entrylist.append(newEntry)
         
     def removeCategory(catStr):
         pass

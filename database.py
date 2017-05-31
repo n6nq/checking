@@ -21,6 +21,18 @@ import override
 STORE_DB = 1
 STORE_PCKL = 2
 
+# clean and dirty
+CLEAN = 0
+DIRTY = 1
+
+class DBObj(object):
+    
+    def __init__(self):
+        self.state = DIRTY
+        
+    def isDirty(self):
+        return self.state == DIRTY
+    
 class Database(object):
 
     def __init__(self):
@@ -75,4 +87,8 @@ class Database(object):
             if not self.entries.isDupe(newEntry):
                 self.entries.entrylist.append(newEntry)
     
-    
+    def save(self, storage):
+        self.categories.save(storage)
+        self.triggers.save(storage)
+        self.overrides.save(storage)
+        self.entries.save(storage)

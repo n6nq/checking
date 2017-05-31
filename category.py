@@ -6,7 +6,12 @@ import pickle
 import sqlite3
 
 
-class Category(object):
+class CategoryRow(database.DBObj):
+    
+    def __init__(self):
+        self.state = database.DIRTY
+        
+class CategoryTable(object):
     
     def __init__(self, db):
     

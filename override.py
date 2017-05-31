@@ -11,7 +11,7 @@ import database
 import sqlite3
 import pickle
 
-class Override(object):
+class Override(database.DBObj):
     
     def __init__(self, db):
         # the Override dictionary
