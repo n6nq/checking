@@ -1,9 +1,10 @@
 """Check entry --- one entry for each transaction on the account"""
+import database
+import dbrow
 import datetime
 from money import Money
-from category import Category
+#from category import Category
 from trigger import Trigger
-import database
 import sqlite3
 import pickle
 
@@ -64,7 +65,7 @@ class EntryList(object):
             except sqlite3.Error as e:
                 self.db.error('Could not save entries in EntryList table:\n', e.args[0])
         
-class Entry(database.DBObj):
+class Entry(dbrow.DBRow):
 
     def __init__(self, db, date, amount, cleared, checknum, desc):
         self.db = db

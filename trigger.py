@@ -4,14 +4,15 @@
     with no known trigger strings return the category string 'None'
     a signal to the caller that a new category must be defined."""
 
+import database
+import dbrow
 import accounts
 import category
 import override
-import database
 import sqlite3
 import pickle
 
-class Trigger(database.DBObj):
+class Trigger(dbrow.DBRow):
     
     def __init__(self, db):
         

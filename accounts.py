@@ -1,15 +1,16 @@
 """Accounts class holds all the data for and account, duh"""
 
+import database
+import dbrow
 import category
 import trigger
 import override
 import entry
-import database
 from datetime import date
 import sqlite3
 
 
-class Account(database.DBObj):
+class Account(dbrow.DBRow):
 
     def __init__(self, name, start, last, url):
         self.name = name

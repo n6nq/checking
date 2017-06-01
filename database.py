@@ -21,17 +21,6 @@ import override
 STORE_DB = 1
 STORE_PCKL = 2
 
-# clean and dirty
-CLEAN = 0
-DIRTY = 1
-
-class DBObj(object):
-    
-    def __init__(self):
-        self.state = DIRTY
-        
-    def isDirty(self):
-        return self.state == DIRTY
     
 class Database(object):
 
@@ -50,7 +39,7 @@ class Database(object):
         self.conn = conn
         self.accts = accounts.AccountList(self)
         self.entries = entry.EntryList(self)
-        self.categories = category.Category(self)
+        self.categories = category.CategoryTable(self)
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
         self.createTables()

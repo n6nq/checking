@@ -1,12 +1,12 @@
 """ Category class """
 
-import accounts
 import database
+import accounts
 import pickle
 import sqlite3
 
 
-class CategoryRow(database.DBObj):
+class CategoryRow(object):
     
     def __init__(self):
         self.state = database.DIRTY
