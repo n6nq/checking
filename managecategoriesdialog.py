@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
 import PyQt5.QtGui
 from categories_auto import Ui_ManageCategoriesDialog
+import database
 import accounts
 import category
 import trigger
@@ -60,7 +61,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.exec_()
         
     def accept_changes(self):
-        self.db.save()
+        self.db.save(database.STORE_DB)
         #Trigger.save()
         #Category.save()
         #Override.save()

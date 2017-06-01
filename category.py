@@ -11,7 +11,7 @@ class CategoryRow(object):
     def __init__(self):
         self.state = database.DIRTY
         
-class CategoryTable(object):
+class Category(object):
     
     def __init__(self, db):
     

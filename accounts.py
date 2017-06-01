@@ -17,7 +17,7 @@ class Account(dbrow.DBRow):
         self.start = start
         self.last = last
         self.bankurl = url
-        self.state = database.DIRTY
+        self.state = dbrow.DIRTY
         pass
     
 #    def load(self, storage):
@@ -37,8 +37,8 @@ class Account(dbrow.DBRow):
 #            if not self.entries.isDupe(newEntry):
 #             self.entries.entrylist.append(newEntry)
         
-    def removeCategory(catStr):
-        pass
+#    def removeCategory(catStr):
+#        pass
         
 class AccountList(object):
     

@@ -39,7 +39,7 @@ class Database(object):
         self.conn = conn
         self.accts = accounts.AccountList(self)
         self.entries = entry.EntryList(self)
-        self.categories = category.CategoryTable(self)
+        self.categories = category.Category(self)
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
         self.createTables()
