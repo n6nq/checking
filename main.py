@@ -24,7 +24,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnOn.clicked.connect(lambda: self.pressedOnButton())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         
-        self.db = database.Database()
+        curr = os.getcwd()
+        self.db = database.Database(curr+'\\checking')
+        self.db.open(curr+'\\checking')
+        self.db.createAccount('checking')
         
     def pressedOnButton(self):
         print ("Pressed On!")
@@ -35,11 +38,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print ("Pressed Off!")
         for i in range(5):
             self.listUnCategorized.addItem("Numero %d" % i)
-
-        curr = os.getcwd()
-        self.db.open(curr+'\\checking')
-        self.db.createAccount('checking')
-        
         
         readIt = CheckFileDialog(self.db)
         print(readIt.cf)

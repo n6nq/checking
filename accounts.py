@@ -47,6 +47,8 @@ class AccountList(object):
         self.db = db
         self.createSQL = 'create table if not exists Accounts(id integer primary key, name varchar(30), start date, last date, bankurl varchar(255))'
         self.insertSQL = 'insert into Accounts(name, start, last, bankurl) VALUES (?,?,?,?)'
+        db.createTable(self.createSQL, 'Account')
+        self.load()
         
     def createTable(self):
         try:

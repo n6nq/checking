@@ -24,7 +24,18 @@ STORE_PCKL = 2
     
 class Database(object):
 
-    def __init__(self):
+    def __init__(self, name):
+        self.dbname = name
+        conn = sqlite3.connect(name+'.db')
+        self.conn = conn
+        self.accts = accounts.AccountList(self)
+        self.entries = entry.EntryList(self)
+        self.categories = category.Category(self)
+        self.triggers = trigger.Trigger(self)
+        self.overrides = override.Override(self)
+        self.createTables()
+        self.convertPicklesToDB()
+        self.conn.commit()
         pass
     
     def error(self, msg):
@@ -45,6 +56,15 @@ class Database(object):
         self.createTables()
         self.convertPicklesToDB()
         self.conn.commit()
+        
+    def createTable(self, sql, tableName):
+        try:
+            self.db.conn.execute(sql)
+            return True
+        except sqlite3.Error as e:
+            self.db.error("An error occurred when creating the "+tableName+" table:\n", e.args[0])
+            return False            
+        
         
     def createTables(self):
         try:
