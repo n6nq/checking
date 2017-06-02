@@ -42,22 +42,31 @@ class Account(dbrow.DBRow):
         
 class AccountList(object):
     
-    def __init__(self, db):
+    def __init__(self, db, storage):
         self.acct_list = []
         self.db = db
         self.createSQL = 'create table if not exists Accounts(id integer primary key, name varchar(30), start date, last date, bankurl varchar(255))'
         self.insertSQL = 'insert into Accounts(name, start, last, bankurl) VALUES (?,?,?,?)'
+        self.selectAllSQL = 'select oid, name, start, last, bankurl from Accounts'
         db.createTable(self.createSQL, 'Account')
-        self.load()
-        
-    def createTable(self):
-        try:
-            self.db.conn.execute(self.createSQL)
-            return True
-        except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the AccountList table:\n", e.args[0])
-            return False            
-    
+        self.load(storage)
+           
+    def load(self, storage):
+        self.acct_list = []
+        if storage == database.STORE_PCKL:
+            try:
+                f = open(self.db.dbname+'_accounts.pckl', 'rb')
+                self.acct_list = pickle.load(f)
+                f.close()
+            except FileNotFoundError:
+                print('No accounts.pckl file.')
+        elif storage == database.STORE_DB:
+            try:
+                for row in self.db.conn.execute(self.selectAllSQL):
+                    self.acct_list.append(row)
+            except sqlite3.Error as e:
+                self.db.error('Error loading memory from the Accounts table:\n', e.args[0])
+
     def createAccount(self, name):
         today = date.today()
         self.acct_list.append(Account(name, today, today, ''))

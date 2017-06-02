@@ -10,32 +10,19 @@ import pickle
 
 class EntryList(object):
     
-    def __init__(self, db):
+    def __init__(self, db, storage):
         #self.n_entries = 0
         self.entrylist = []
         self.db = db
         self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))'
         self.selectAllSQL = 'select oid, category, edate, amount, checknum, cleared, desc from Entries'
         self.insertSQL = 'insert into Entries{category, edate, amount, checkum, cleared, desc} values(?, ?, ?, ?, ?, ?)'
+        db.createTable(self.createSQL, 'Entries')
+        self.load(storage)
 
         #todo: decide about pickle files
         #self.picklename = acct_str + '_entrylist.pckl'
 
-    def createTable(self):
-        try:
-            self.db.conn.execute(self.createSQL)
-            return True
-        except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the EntryList table:\n", e.args[0])
-            return False            
-        
-
-    def isDupe(self, newEtry):
-        for entry in self.entrylist:
-            if entry.compare(newEtry):
-                return True
-        return False
-        
     def load(self, storage):
         self.entrylist = []
         if storage == database.STORE_PCKL:
@@ -53,6 +40,21 @@ class EntryList(object):
                 self.db.error('Error loading memory from the EntryList table:\n', e.args[0])
         self.n_entries = len(self.entrylist)
 
+    #def createTable(self):
+    #    try:
+    #        self.db.conn.execute(self.createSQL)
+    #        return True
+    #    except sqlite3.Error as e:
+    #        self.db.error("An error occurred when creating the EntryList table:\n", e.args[0])
+    #        return False            
+        
+
+    def isDupe(self, newEtry):
+        for entry in self.entrylist:
+            if entry.compare(newEtry):
+                return True
+        return False
+        
     def save(self, storage):
         if storage == database.STORE_PCKL:
             f = open(self.db.dbname+'_entrylist.pckl', 'wb')

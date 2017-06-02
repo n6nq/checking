@@ -25,13 +25,13 @@ class Override():
         # Override pickle file name
         #self.picklename = acct_str + '_overrides.pckl'
     
-    def createTable(self):
-        try:
-            self.db.conn.execute(self.createSQL)
-            return True
-        except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the Override table:\n", e.args[0])
-            return False            
+#    def createTable(self):
+#        try:
+#            self.db.conn.execute(self.createSQL)
+#            return True
+#        except sqlite3.Error as e:
+#            self.db.error("An error occurred when creating the Override table:\n", e.args[0])
+#            return False            
 
     def add_over(self, over_str, cat):
         if over_str == '' or over_str == None:

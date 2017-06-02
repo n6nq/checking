@@ -79,6 +79,5 @@ class Category(object):
                 self.db.error('Error loading memory from the Category table:\n', e.args[0])
             
 
-                
     def no_category(self):
         return 'None'

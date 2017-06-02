@@ -28,12 +28,13 @@ class Database(object):
         self.dbname = name
         conn = sqlite3.connect(name+'.db')
         self.conn = conn
-        self.accts = accounts.AccountList(self)
-        self.entries = entry.EntryList(self)
+        self.accts = accounts.AccountList(self, STORE_DB)
+        #todo get rest from pikles and put in db
+        self.entries = entry.EntryList(self, STORE_DB)
         self.categories = category.Category(self)
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
-        self.createTables()
+        #self.createTables()
         self.convertPicklesToDB()
         self.conn.commit()
         pass
@@ -53,30 +54,30 @@ class Database(object):
         self.categories = category.Category(self)
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
-        self.createTables()
+        #self.createTables()
         self.convertPicklesToDB()
         self.conn.commit()
         
     def createTable(self, sql, tableName):
         try:
-            self.db.conn.execute(sql)
+            self.conn.execute(sql)
             return True
         except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the "+tableName+" table:\n", e.args[0])
+            self.error("An error occurred when creating the "+tableName+" table:\n", e.args[0])
             return False            
         
         
-    def createTables(self):
-        try:
-            self.accts.createTable()
-            self.entries.createTable()
-            self.categories.createTable()
-            self.triggers.createTable()
-            self.overrides.createTable()
-            return True
-        except sqlite3.Error as e:
-            print("An error occurred:", e.args[0])
-            return False
+    #def createTables(self):
+    #    try:
+    #        self.accts.createTable()
+    #        self.entries.createTable()
+    #        self.categories.createTable()
+    #        self.triggers.createTable()
+    #        self.overrides.createTable()
+    #        return True
+    #    except sqlite3.Error as e:
+    #        print("An error occurred:", e.args[0])
+    #        return False
         
     def createAccount(self, name):
         self.accts.createAccount(name)

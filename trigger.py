@@ -27,13 +27,13 @@ class Trigger(dbrow.DBRow):
         # triggers pickle file name
         #self.picklename = self.acct_str + '_triggers.pckl'
 
-    def createTable(self):
-        try:
-            self.db.conn.execute(self.createSQL)
-            return True
-        except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the Triggers table:\n", e.args[0])
-            return False            
+#    def createTable(self):
+#        try:
+#            self.db.conn.execute(self.createSQL)
+#            return True
+#        except sqlite3.Error as e:
+#            self.db.error("An error occurred when creating the Triggers table:\n", e.args[0])
+#            return False            
 
     def save(self, storage):
         if storage == database.STORE_PCKL:
