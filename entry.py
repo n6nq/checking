@@ -14,9 +14,9 @@ class EntryList(object):
         #self.n_entries = 0
         self.entrylist = []
         self.db = db
-        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), edate date, amount int, checknum int, cleared boolean, desc varchar(255))'
-        self.selectAllSQL = 'select oid, category, edate, amount, checknum, cleared, desc from Entries'
-        self.insertSQL = 'insert into Entries{category, edate, amount, checkum, cleared, desc} values(?, ?, ?, ?, ?, ?)'
+        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate text, amount int, checknum int, cleared boolean, desc varchar(255))'
+        self.selectAllSQL = 'select oid, category, sdate, amount, checknum, cleared, desc from Entries'
+        self.insertSQL = 'insert into Entries(category, sdate, amount, checknum, cleared, desc) values(?, ?, ?, ?, ?, ?)'
         db.createTable(self.createSQL, 'Entries')
         self.load(storage)
 
@@ -28,14 +28,14 @@ class EntryList(object):
         if storage == database.STORE_PCKL:
             try:
                 f = open(self.db.dbname+'_entrylist.pckl', 'rb')
-                self.strings = pickle.load(f)
+                self.entrylist = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No entrylist.pckl file.')
         elif storage == database.STORE_DB:
             try:
                 for row in self.db.conn.execute(self.selectAllSQL):
-                    self.entrylist.append((row[1], row[2], row[3], row[4], row[5], row[6]))
+                    self.entrylist.append(row)
             except sqlite3.Error as e:
                 self.db.error('Error loading memory from the EntryList table:\n', e.args[0])
         self.n_entries = len(self.entrylist)
@@ -63,7 +63,8 @@ class EntryList(object):
         elif storage == database.STORE_DB:
             try:
                 for entry in self.entrylist:
-                    self.db.conn.execute(self.insertSQL, (entry[1], entry[2], entry[3], entry[4], entry[5], ntry[6]))
+                    cur = self.db.conn.cursor()
+                    cur.execute(self.insertSQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
             except sqlite3.Error as e:
                 self.db.error('Could not save entries in EntryList table:\n', e.args[0])
         

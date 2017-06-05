@@ -29,8 +29,9 @@ class Database(object):
         conn = sqlite3.connect(name+'.db')
         self.conn = conn
         self.accts = accounts.AccountList(self, STORE_DB)
-        #todo get rest from pikles and put in db
-        self.entries = entry.EntryList(self, STORE_DB)
+        #todo get rest from pickles and put in db
+        self.entries = entry.EntryList(self, STORE_PCKL)
+        self.entries.save(STORE_DB)
         self.categories = category.Category(self)
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
