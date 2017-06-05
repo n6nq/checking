@@ -32,11 +32,13 @@ class Database(object):
         #todo get rest from pickles and put in db
         self.entries = entry.EntryList(self, STORE_PCKL)
         self.entries.save(STORE_DB)
-        self.categories = category.Category(self)
-        self.triggers = trigger.Trigger(self)
-        self.overrides = override.Override(self)
+        self.categories = category.Category(self, STORE_PCKL)
+        self.categories.save(STORE_DB)
+        self.triggers = trigger.Trigger(self, STORE_PCKL)
+        self.triggers.save(STORE_DB)
+        self.overrides = override.Override(self, STORE_PCKL)
+        self.overrides.save(STORE_DB)
         #self.createTables()
-        self.convertPicklesToDB()
         self.conn.commit()
         pass
     

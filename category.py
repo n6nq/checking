@@ -13,27 +13,14 @@ class CategoryRow(object):
         
 class Category(object):
     
-    def __init__(self, db):
-    
-        # the category dictionary
-        #self.acct_str = acct_str
+    def __init__(self, db, storage):
         self.strings = set()
-       # self.nCats = 0
         self.db = db
         self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))'
         self.selectAllSQL = 'select oid, name, super from Categories'
         self.insertSQL = 'insert into Categories(name, super) VALUES (?,?)'
-        #todo: decide whether pickle will exist after db conversion done
-        # categories pickle file name
-        #self.picklename = self.acct_str + '_categories.pckl'
-    
-    def createTable(self):
-        try:
-            self.db.conn.execute(self.createSQL)
-            return True
-        except sqlite3.Error as e:
-            self.db.error("An error occurred when creating the Catgory table:\n", e.args[0])
-            return False            
+        db.createTable(self.createSQL, 'Categories')
+        self.load(storage)
 
     def removeCat(self, catStr):
         newSet = set()

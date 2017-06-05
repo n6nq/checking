@@ -13,25 +13,14 @@ import pickle
 
 class Override():
     
-    def __init__(self, db):
-        # the Override dictionary
-        self.strings = {}
+    def __init__(self, db, storage):
+        self.strings = set()
         self.db = db
         self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))'
         self.selectAllSQL = 'select oid, override, category from Overrides'
         self.insertSQL = 'insert into Overrides(override, category) values(?, ?)'
-        
-        #todo: decide about pickle files
-        # Override pickle file name
-        #self.picklename = acct_str + '_overrides.pckl'
-    
-#    def createTable(self):
-#        try:
-#            self.db.conn.execute(self.createSQL)
-#            return True
-#        except sqlite3.Error as e:
-#            self.db.error("An error occurred when creating the Override table:\n", e.args[0])
-#            return False            
+        db.createTable(self.createSQL, 'Overrides')
+        self.load(storage)
 
     def add_over(self, over_str, cat):
         if over_str == '' or over_str == None:

@@ -14,26 +14,14 @@ import pickle
 
 class Trigger(dbrow.DBRow):
     
-    def __init__(self, db):
-        
-        #self.acct_str = acct_str
-        # the category dictionary
-        self.strings = {}
+    def __init__(self, db, storage):
+        self.strings = set()
         self.db = db
         self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))'
         self.selectAllSQL = 'select oid, trigger, category from Triggers'
         self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
-        #todo: decide about pickle files
-        # triggers pickle file name
-        #self.picklename = self.acct_str + '_triggers.pckl'
-
-#    def createTable(self):
-#        try:
-#            self.db.conn.execute(self.createSQL)
-#            return True
-#        except sqlite3.Error as e:
-#            self.db.error("An error occurred when creating the Triggers table:\n", e.args[0])
-#            return False            
+        db.createTable(self.createSQL, 'Triggers')
+        self.load(storage)
 
     def save(self, storage):
         if storage == database.STORE_PCKL:
