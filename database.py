@@ -42,6 +42,24 @@ class Database(object):
         self.conn.commit()
         pass
     
+    def restore(self, name):
+        self.dbname = name
+        #todo: develop strategy for managing backup and restore naming
+        conn = sqlite3.connect(name+'.db')
+        self.conn = conn
+        self.accts = accounts.AccountList(self, STORE_PCKL)
+        self.accts.save(STORE_DB)
+        self.entries = entry.EntryList(self, STORE_PCKL)
+        self.entries.save(STORE_DB)
+        self.categories = category.Category(self, STORE_PCKL)
+        self.categories.save(STORE_DB)
+        self.triggers = trigger.Trigger(self, STORE_PCKL)
+        self.triggers.save(STORE_DB)
+        self.overrides = override.Override(self, STORE_PCKL)
+        self.overrides.save(STORE_DB)
+        self.conn.commit()
+        
+    
     def error(self, msg):
         print (msg)     #TODO make ui for error messages  
         
