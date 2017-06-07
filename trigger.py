@@ -17,7 +17,7 @@ class Trigger(dbrow.DBRow):
     def __init__(self, db, storage):
         self.strings = set()
         self.db = db
-        self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30), category varchar(20))'
+        self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
         self.selectAllSQL = 'select oid, trigger, category from Triggers'
         self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         db.createTable(self.createSQL, 'Triggers')

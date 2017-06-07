@@ -12,7 +12,7 @@ class Category(dbrow.DBRow):
     def __init__(self, db, storage):
         self.strings = set()
         self.db = db
-        self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20), super varchar(20))'
+        self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllSQL = 'select oid, name, super from Categories'
         self.insertSQL = 'insert into Categories(name, super) VALUES (?,?)'
         db.createTable(self.createSQL, 'Categories')
@@ -31,7 +31,7 @@ class Category(dbrow.DBRow):
 
     def addToDB(self, catStr):
         try:
-            self.db.conn.execute(self.insertSQL, (cat, 'none'))
+            self.db.conn.execute(self.insertSQL, (catStr, 'none'))
             self.db.commit()
         except sqlite3.Error as e:
             self.db.error('Could not save category in Category table:\n', e.args[0])

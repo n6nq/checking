@@ -17,7 +17,7 @@ class Override(dbrow.DBRow):
     def __init__(self, db, storage):
         self.strings = set()
         self.db = db
-        self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30), category varchar(20))'
+        self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
         self.selectAllSQL = 'select oid, override, category from Overrides'
         self.insertSQL = 'insert into Overrides(override, category) values(?, ?)'
         db.createTable(self.createSQL, 'Overrides')

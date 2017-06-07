@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction)
+from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction, QListWidgetItem)
 import PyQt5.QtGui
 from readcheckfile_auto import Ui_ReadCheckFileDialog
 from managecategoriesdialog import ManageCategoriesDialog
@@ -119,7 +119,10 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         category and update the category list."""
         catStr = self.edtNewCat.text()
         self.db.categories.addCat(catStr)
-        self.listCategories.addItem(catStr)
+        i = QListWidgetItem(catStr)
+        self.listCategories.addItem(i)
+        self.listCategories.setCurrentItem(i)
+        
 
     def CategorizedPopUpHndlr(self, event, whichList):
         """A right mouse click has happened in one of the Categorized list. If a Category
