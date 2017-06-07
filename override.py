@@ -7,11 +7,12 @@
    a Bank Fee. Overrides are searched for first, before normal Categories, reating
    a one level hierarchy."""
 
+import dbrow
 import database
 import sqlite3
 import pickle
 
-class Override():
+class Override(dbrow.DBRow):
     
     def __init__(self, db, storage):
         self.strings = set()

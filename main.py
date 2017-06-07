@@ -28,7 +28,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.db = database.Database(curr+'\\checking')
 #       self.db.open(curr+'\\checking')
 #        self.db.createAccount('checking')
-        
+        pass
+    
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):

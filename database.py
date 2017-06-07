@@ -29,19 +29,32 @@ class Database(object):
         conn = sqlite3.connect(name+'.db')
         self.conn = conn
         self.accts = accounts.AccountList(self, STORE_DB)
-        #todo get rest from pickles and put in db
-        self.entries = entry.EntryList(self, STORE_PCKL)
-        self.entries.save(STORE_DB)
-        self.categories = category.Category(self, STORE_PCKL)
-        self.categories.save(STORE_DB)
-        self.triggers = trigger.Trigger(self, STORE_PCKL)
-        self.triggers.save(STORE_DB)
-        self.overrides = override.Override(self, STORE_PCKL)
-        self.overrides.save(STORE_DB)
-        #self.createTables()
-        self.conn.commit()
+        self.entries = entry.EntryList(self, STORE_DB)
+        #self.entries.save(STORE_DB)
+        self.categories = category.Category(self, STORE_DB)
+        #self.categories.save(STORE_DB)
+        self.triggers = trigger.Trigger(self, STORE_DB)
+        #self.triggers.save(STORE_DB)
+        self.overrides = override.Override(self, STORE_DB)
+        #self.overrides.save(STORE_DB)
         pass
     
+    def backup(self, name):
+        self.dbname = name
+        #todo: develop strategy for managing backup and restore naming
+        conn = sqlite3.connect(name+'.db')
+        self.conn = conn
+        self.accts = accounts.AccountList(self, STORE_DB)
+        self.accts.save(STORE_PCKL)
+        self.entries = entry.EntryList(self, STORE_DB)
+        self.entries.save(STORE_PCKL)
+        self.categories = category.Category(self, STORE_DB)
+        self.categories.save(STORE_PCKL)
+        self.triggers = trigger.Trigger(self, STORE_DB)
+        self.triggers.save(STORE_PCKL)
+        self.overrides = override.Override(self, STORE_DB)
+        self.overrides.save(STORE_PCKL)
+
     def restore(self, name):
         self.dbname = name
         #todo: develop strategy for managing backup and restore naming

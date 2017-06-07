@@ -1,17 +1,13 @@
 """ Category class """
 
+import dbrow
 import database
 import accounts
 import pickle
 import sqlite3
 
-
-class CategoryRow(object):
-    
-    def __init__(self):
-        self.state = database.DIRTY
-        
-class Category(object):
+       
+class Category(dbrow.DBRow):
     
     def __init__(self, db, storage):
         self.strings = set()
@@ -31,7 +27,15 @@ class Category(object):
 
     def addCat(self, catStr):
         self.strings.add(catStr)
-        
+        self.addToDB(catStr)
+
+    def addToDB(self, catStr):
+        try:
+            self.db.conn.execute(self.insertSQL, (cat, 'none'))
+            self.db.commit()
+        except sqlite3.Error as e:
+            self.db.error('Could not save category in Category table:\n', e.args[0])
+     
         
     def save(self, storage):
         if storage == database.STORE_PCKL:
@@ -39,12 +43,8 @@ class Category(object):
             pickle.dump(self.strings, f)
             f.close()
         elif storage == database.STORE_DB:
-            try:
-                for cat in self.strings:
-                    self.db.conn.execute(self.insertSQL, (cat, 'none'))
-                self.db.commit()
-            except sqlite3.Error as e:
-                self.db.error('Could save category in Category table:\n', e.args[0])
+            for cat in self.strings:
+                self.addToDB(cat)
                     
 
     def load(self, storage):
