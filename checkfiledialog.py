@@ -46,7 +46,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.selectedTriggerStr = ''
         self.exec_()
         
-        self.db.save()
+        #self.db.save()
         #Trigger.save()
         #Category.save()
         

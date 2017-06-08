@@ -5,6 +5,9 @@ class Money(object):
     
     def __init__(self, str):
         self.value = int(float(str) * 100)
+
+    def __init__(self, number):
+        self.value = number
         
     def asStr(self):
         return '{}'.format(float(self.value) / 100)

@@ -35,7 +35,8 @@ class EntryList(object):
         elif storage == database.STORE_DB:
             try:
                 for row in self.db.conn.execute(self.selectAllSQL):
-                    self.entrylist.append(row)
+                    #todo: convert all query results to objects
+                    self.entrylist.append(Entry(self.db, row))
             except sqlite3.Error as e:
                 self.db.error('Error loading memory from the EntryList table:\n', e.args[0])
         self.n_entries = len(self.entrylist)
@@ -69,6 +70,16 @@ class EntryList(object):
                 self.db.error('Could not save entries in EntryList table:\n', e.args[0])
         
 class Entry(dbrow.DBRow):
+    
+    def __init__(self, db, row):
+        self.db = db
+        self.oid = row[0]
+        self.category = row[1]
+        self.date = datetime.datetime.strptime(row[2], '%Y-%m-%d').date()
+        self.amount = Money(row[3])
+        self.checknum = row[4]
+        self.cleared = row[5]
+        self.desc = row[6]
 
     def __init__(self, db, date, amount, cleared, checknum, desc):
         self.db = db
