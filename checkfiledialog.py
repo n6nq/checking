@@ -64,7 +64,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.cf.open(fileName[0])
         #iterate check file and load list widgets here
         for check in self.cf.entries:
-            if check.category == self.db.categories.no_category():
+            if check.category == Category.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -102,7 +102,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.cf.entries:
             check.category = self.db.triggers.fromDesc(check.desc)
-            if check.category == self.db.categories.no_category():
+            if check.category == Category.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -182,7 +182,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.ResortList()
         
     def NoneCatAction(self):
-        self.selectedEntry.category = self.db.categories.no_category()
+        self.selectedEntry.category = Category.no_category()
         self.ResortList()
         
     def ResortList(self):    
@@ -191,7 +191,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.cf.entries:
             #check.category = Trigger.fromDesc(check.desc)
-            if check.category == self.db.categories.no_category():
+            if check.category == Category.no_category():
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())

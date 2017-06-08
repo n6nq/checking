@@ -75,24 +75,28 @@ class Entry(dbrow.DBRow):
         self.db = db
         self.oid = row[0]
         self.category = row[1]
-        self.date = datetime.datetime.strptime(row[2], '%Y-%m-%d').date()
+        if row[2].find('/') > -1:
+            formatstr = '%m/%d/%Y'
+        else:
+            formatstr = '%Y-%m-%d'
+        self.date = datetime.datetime.strptime(row[2], formatstr).date()
         self.amount = Money(row[3])
-        self.checknum = row[4]
-        self.cleared = row[5]
+        self.cleared = (row[4] == '*')
+        self.checknum = row[5]
         self.desc = row[6]
 
-    def __init__(self, db, date, amount, cleared, checknum, desc):
-        self.db = db
-        dparts = date.split('/')
-        self.date = datetime.date(int(dparts[2]), int(dparts[0]), int(dparts[1]))
-        self.amount = Money(amount)
-        self.cleared = (cleared == '*')
-        if len(checknum) == 0:
-            self.checknum = 0
-        else:
-            self.checknum = int(checknum)
-        self.desc = desc
-        self.category = self.db.triggers.fromDesc(desc)
+#    def __init__(self, db, date, amount, cleared, checknum, desc):
+#        self.db = db
+#        dparts = date.split('/')
+#        self.date = datetime.date(int(dparts[2]), int(dparts[0]), int(dparts[1]))
+#        self.amount = Money(amount)
+#        self.cleared = (cleared == '*')
+#        if len(checknum) == 0:
+#            self.checknum = 0
+#        else:
+#            self.checknum = int(checknum)
+#        self.desc = desc
+#        self.category = self.db.triggers.fromDesc(desc)
         
     def compare(self, newEntry):
         if (self.date - newEntry.date).total_seconds() == 0:

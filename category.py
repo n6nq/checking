@@ -65,6 +65,6 @@ class Category(dbrow.DBRow):
             except sqlite3.Error as e:
                 self.db.error('Error loading memory from the Category table:\n', e.args[0])
             
-
+    @classmethod
     def no_category(self):
         return 'None'
