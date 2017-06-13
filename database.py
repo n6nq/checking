@@ -73,8 +73,8 @@ class Database(object):
         self.conn.commit()
         
     
-    def error(self, msg):
-        print (msg)     #TODO make ui for error messages  
+    def error(self, msg, reason):
+        print (msg, reason)     #TODO make ui for error messages  
         
     def commit(self):
         self.conn.commit()

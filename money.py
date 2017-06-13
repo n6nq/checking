@@ -3,12 +3,18 @@ provide provide or consume presentations or strings"""
 
 class Money(object):
     
-    def __init__(self, str):
-        self.value = int(float(str) * 100)
+    @classmethod
+    def from_number(cls, number):
+        obj = cls()
+        obj.value = number
+        return obj
 
-    def __init__(self, number):
-        self.value = number
-        
-    def asStr(self):
+    @classmethod
+    def from_str(cls, amount_str):
+        obj = cls()
+        obj.value = int(float(amount_str) * 100)
+        return obj
+    
+    def as_str(self):
         return '{}'.format(float(self.value) / 100)
-        
+    

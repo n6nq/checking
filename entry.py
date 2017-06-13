@@ -14,9 +14,9 @@ class EntryList(object):
         #self.n_entries = 0
         self.entrylist = []
         self.db = db
-        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate text, amount int, checknum int, cleared boolean, desc varchar(255))'
-        self.selectAllSQL = 'select oid, category, sdate, amount, checknum, cleared, desc from Entries'
-        self.insertSQL = 'insert into Entries(category, sdate, amount, checknum, cleared, desc) values(?, ?, ?, ?, ?, ?)'
+        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate text, amount int, cleared boolean, checknum int, desc varchar(255))'
+        self.selectAllSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
+        self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
         db.createTable(self.createSQL, 'Entries')
         self.load(storage)
 
@@ -36,7 +36,9 @@ class EntryList(object):
             try:
                 for row in self.db.conn.execute(self.selectAllSQL):
                     #todo: convert all query results to objects
-                    self.entrylist.append(Entry(self.db, row))
+                    #oid category date amount cleared checknum desc
+                    #todo: consider re-assessing all 'None' entries
+                    self.entrylist.append(Entry(self.db, row), Entry.NO_CAT)
             except sqlite3.Error as e:
                 self.db.error('Error loading memory from the EntryList table:\n', e.args[0])
         self.n_entries = len(self.entrylist)
@@ -70,21 +72,23 @@ class EntryList(object):
                 self.db.error('Could not save entries in EntryList table:\n', e.args[0])
         
 class Entry(dbrow.DBRow):
+    NO_CAT = 0
+    CATEGORIZE = 1
+    ONLY_NONE = 2
     
-    def __init__(self, db, row):
+    def __init__(self, db, row, how_to_cat):
         self.db = db
         self.oid = row[0]
         self.category = row[1]
-        if row[2].find('/') > -1:
-            formatstr = '%m/%d/%Y'
-        else:
-            formatstr = '%Y-%m-%d'
-        self.date = datetime.datetime.strptime(row[2], formatstr).date()
-        self.amount = Money(row[3])
-        self.cleared = (row[4] == '*')
+        self.date = row[2]
+        self.amount = row[3]
+        self.cleared = row[4]
         self.checknum = row[5]
         self.desc = row[6]
-
+        if how_to_cat == Entry.CATEGORIZE:
+            self.category = self.db.triggers.fromDesc(self.desc)
+            
+#oid  cat  datestr amtstr  clr*    chknum''  desc
 #    def __init__(self, db, date, amount, cleared, checknum, desc):
 #        self.db = db
 #        dparts = date.split('/')
@@ -107,7 +111,7 @@ class Entry(dbrow.DBRow):
             
     def asNotCatStr(self):
         retstr = self.date.strftime("%m/%d/%y") + ' ' + \
-            self.amount.asStr() + ' ' + \
+            self.amount.as_str() + ' ' + \
             '<' + '{}'.format(int(self.checknum)) + '> ' + \
             self.desc
         return retstr

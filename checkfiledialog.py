@@ -5,7 +5,7 @@ from managecategoriesdialog import ManageCategoriesDialog
 import database
 import accounts
 import trigger
-import category
+from category import Category
 import override
 import check_file
 import entry

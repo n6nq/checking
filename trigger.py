@@ -62,7 +62,7 @@ class Trigger(dbrow.DBRow):
             if trig in desc:
                 return cat
         
-        return Category.no_category()
+        return category.Category.no_category()
     
     def addTrig(self, trig, cat):
         if trig == '' or trig == 'None' or trig == None:
@@ -70,6 +70,12 @@ class Trigger(dbrow.DBRow):
         if trig in self.strings:
             return False
         self.strings[trig] = cat
+        try:
+            self.db.conn.execute(self.insertSQL, (trig, cat))
+            self.db.commit()
+        except sqlite3.Error as e:
+            self.db.error('Could not insert trigger in Triggers table:\n', e.args[0])        
+
         return True
     
     def triggers_for_cat(self, lookFor):
