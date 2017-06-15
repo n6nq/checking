@@ -17,11 +17,19 @@ class EntryList(object):
         self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.selectAllSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
         self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
+        self.updateCatSQL = 'update Entries set category = ? where category = ?'
         db.createTable(self.createSQL, 'Entries')
         self.load(storage)
 
         #todo: decide about pickle files
         #self.picklename = acct_str + '_entrylist.pckl'
+
+    def change_cat_of_entries(self, current, new):
+        try:
+            cur = self.db.conn.execute(self.updateCatSQL, (current, new))
+            affected = cur.rowcount
+        except sqlite3.Error as e:
+                self.db.error('Error updating categories in Entries table:\n', e.args[0])
 
     def load(self, storage):
         self.entrylist = []
