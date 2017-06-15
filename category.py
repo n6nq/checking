@@ -31,7 +31,7 @@ class Category(dbrow.DBRow):
 
     def addToDB(self, catStr):
         try:
-            self.db.conn.execute(self.insertSQL, (catStr, 'none'))
+            self.db.conn.execute(self.insertSQL, (catStr, None))
             self.db.commit()
         except sqlite3.Error as e:
             self.db.error('Could not save category in Category table:\n', e.args[0])

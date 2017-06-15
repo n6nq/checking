@@ -62,7 +62,7 @@ class Trigger(dbrow.DBRow):
             if trig in desc:
                 return cat
         
-        return category.Category.no_category()
+        return None
     
     def addTrig(self, trig, cat):
         if trig == '' or trig == 'None' or trig == None:

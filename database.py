@@ -26,7 +26,7 @@ class Database(object):
 
     def __init__(self, name):
         self.dbname = name
-        conn = sqlite3.connect(name+'.db')
+        conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
         self.accts = accounts.AccountList(self, STORE_DB)
         self.entries = entry.EntryList(self, STORE_DB)
@@ -132,7 +132,7 @@ class Database(object):
                 self.entries.entrylist.append(newEntry)
     
     def save(self, storage):
-        self.categories.save(storage)
-        self.triggers.save(storage)
-        self.overrides.save(storage)
+        #self.categories.save(storage)
+        #self.triggers.save(storage)
+        #self.overrides.save(storage)
         self.entries.save(storage)

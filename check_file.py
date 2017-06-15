@@ -21,9 +21,9 @@ class CheckFile(object):
             prt = line.split(',')
             #                                   oid  cat                   datestr amtstr  clr*    chknum''  desc
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
-            row = (0, Category.no_category(), trans_date, Money.from_str(prt[1]),
+            row = (0, None, trans_date, Money.from_str(prt[1]),
                    self.cleared(prt[2]), self.check_num(prt[3]), prt[4])
-            self.entries.append(Entry(self.db, row, Entry.CATEGORIZE))
+            self.entries.append(Entry(self.db, row, Entry.categorize()))
             line = f.readline()
         f.close 
     

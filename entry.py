@@ -14,7 +14,7 @@ class EntryList(object):
         #self.n_entries = 0
         self.entrylist = []
         self.db = db
-        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate text, amount int, cleared boolean, checknum int, desc varchar(255))'
+        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.selectAllSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
         self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
         db.createTable(self.createSQL, 'Entries')
@@ -38,7 +38,7 @@ class EntryList(object):
                     #todo: convert all query results to objects
                     #oid category date amount cleared checknum desc
                     #todo: consider re-assessing all 'None' entries
-                    self.entrylist.append(Entry(self.db, row), Entry.NO_CAT)
+                    self.entrylist.append(Entry(self.db, row, Entry.no_cat()))
             except sqlite3.Error as e:
                 self.db.error('Error loading memory from the EntryList table:\n', e.args[0])
         self.n_entries = len(self.entrylist)
@@ -72,9 +72,18 @@ class EntryList(object):
                 self.db.error('Could not save entries in EntryList table:\n', e.args[0])
         
 class Entry(dbrow.DBRow):
-    NO_CAT = 0
-    CATEGORIZE = 1
-    ONLY_NONE = 2
+    
+    @classmethod
+    def no_cat(cls):
+        return 0
+    
+    @classmethod
+    def categorize(cls):
+        return 1
+    
+    @classmethod
+    def only_none(cls):
+        return 2
     
     def __init__(self, db, row, how_to_cat):
         self.db = db
@@ -85,7 +94,7 @@ class Entry(dbrow.DBRow):
         self.cleared = row[4]
         self.checknum = row[5]
         self.desc = row[6]
-        if how_to_cat == Entry.CATEGORIZE:
+        if how_to_cat == Entry.categorize():
             self.category = self.db.triggers.fromDesc(self.desc)
             
 #oid  cat  datestr amtstr  clr*    chknum''  desc
@@ -117,7 +126,11 @@ class Entry(dbrow.DBRow):
         return retstr
     
     def asCategorizedStr(self):
-        return self.category + ' ' + self.asNotCatStr()
+        if self.category == None:
+            cat_str = 'None'
+        else:
+            cat_str = self.category
+        return cat_str + ' ' + self.asNotCatStr()
     
     def isMatch(self, line):
         thisStr = self.asNotCatStr()
