@@ -27,7 +27,14 @@ class EntryList(object):
     def change_cat_of_entries(self, current, new):
         try:
             cur = self.db.conn.execute(self.updateCatSQL, (current, new))
-            affected = cur.rowcount
+            db_affected = cur.rowcount
+            list_affected = 0
+            for entry in self.entrylist:
+                if entry.category == current:
+                    entry.category = new
+                    list_affected += 1
+            if db_affected != list_affected:
+                self.db.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
         except sqlite3.Error as e:
                 self.db.error('Error updating categories in Entries table:\n', e.args[0])
 
