@@ -2,6 +2,7 @@
 import datetime
 from money import Money
 from entry import Entry
+from entry import EntryList
 from category import Category
 import database
 
@@ -10,7 +11,7 @@ class CheckFile(object):
     def __init__(self, db):
         """Read the check file into memory"""
         self.db = db
-        self.entries = []
+        #self.entries = db.temp_entries
         
     def open(self, filename):
         f = open(filename, 'r')
@@ -23,7 +24,7 @@ class CheckFile(object):
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
             row = (0, None, trans_date, Money.from_str(prt[1]),
                    self.cleared(prt[2]), self.check_num(prt[3]), prt[4])
-            self.entries.append(Entry(self.db, row, Entry.categorize()))
+            self.db.temp_entries.entrylist.append(Entry(self.db, row, Entry.categorize()))
             line = f.readline()
         f.close 
     
@@ -37,7 +38,7 @@ class CheckFile(object):
         return cleared_str == '*'
     
     def find(self, line):
-        for anEntry in self.entries:
+        for anEntry in self.entries.entrylist:
             if anEntry.isMatch(line):
                 return anEntry
             

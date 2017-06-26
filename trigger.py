@@ -23,6 +23,9 @@ class Trigger(dbrow.DBRow):
         db.createTable(self.createSQL, 'Triggers')
         self.load(storage)
 
+    def del_cat(self, cat):
+        pass
+    
     def save(self, storage):
         if storage == database.STORE_PCKL:
             f = open(self.db.dbname+'_triggers.pckl', 'wb')

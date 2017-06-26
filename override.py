@@ -23,6 +23,9 @@ class Override(dbrow.DBRow):
         db.createTable(self.createSQL, 'Overrides')
         self.load(storage)
 
+    def del_cat(self, cat):
+        pass
+    
     def add_over(self, over_str, cat):
         if over_str == '' or over_str == None:
             return False

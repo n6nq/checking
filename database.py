@@ -18,6 +18,7 @@ import trigger
 import override
 
 # storage defines
+EMPTY = 0
 STORE_DB = 1
 STORE_PCKL = 2
 
@@ -30,6 +31,7 @@ class Database(object):
         self.conn = conn
         self.accts = accounts.AccountList(self, STORE_DB)
         self.entries = entry.EntryList(self, STORE_DB)
+        self.temp_entries = entry.EntryList(self, EMPTY)
         #self.entries.save(STORE_DB)
         self.categories = category.Category(self, STORE_DB)
         #self.categories.save(STORE_DB)
@@ -37,6 +39,19 @@ class Database(object):
         #self.triggers.save(STORE_DB)
         self.overrides = override.Override(self, STORE_DB)
         #self.overrides.save(STORE_DB)
+        pass
+    
+    def removeCategory(self, cat):
+        #remove triggers
+        self.triggers.del_cat(cat)
+        #remove overrides
+        self.overrides.del_cat(cat)
+        #remove entries
+        self.entries.del_cat(cat)
+        #remove temp_entries
+        self.temp_entries.del_cat(cat)
+        #remove category
+        self.categories.del_cat(cat)
         pass
     
     def backup(self, name):

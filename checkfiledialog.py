@@ -63,7 +63,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         
         self.cf.open(fileName[0])
         #iterate check file and load list widgets here
-        for check in self.cf.entries:
+        for check in self.db.temp_entries.entrylist:
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
@@ -100,7 +100,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate
-        for check in self.cf.entries:
+        for check in self.cf.entries.entrylist:
             check.category = self.db.triggers.fromDesc(check.desc)
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
@@ -153,7 +153,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     
     def AcceptChanges(self):
         print('Accepted')
-        self.db.mergeNewEntries(self.cf.entries)
+        self.db.mergeNewEntries(self.cf.entries.entrylist)
         self.db.save(database.STORE_DB)
         self.close()
         
@@ -164,6 +164,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         
     def OpenManageCats(self):
         mc = ManageCategoriesDialog(self.db)
+        self.ResortList()
         
     #------------ End of Event Handlers ----------------
 
@@ -189,7 +190,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate
-        for check in self.cf.entries:
+        for check in self.cf.entries.entrylist:
             #check.category = Trigger.fromDesc(check.desc)
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
