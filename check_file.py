@@ -24,6 +24,7 @@ class CheckFile(object):
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
             row = (0, None, trans_date, Money.from_str(prt[1]),
                    self.cleared(prt[2]), self.check_num(prt[3]), prt[4])
+            self.db.add_temp_entry()
             self.db.temp_entries.entrylist.append(Entry(self.db, row, Entry.categorize()))
             line = f.readline()
         f.close 

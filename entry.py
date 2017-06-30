@@ -34,32 +34,22 @@ class EntryList(object):
                 entry.category = new
                 list_affected += 1
         if do_db:
-            try:
-                cur = self.db.conn.execute(self.updateCatSQL, (current, new))
-                db_affected = cur.rowcount
-                if db_affected != list_affected:
-                    self.db.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
-            except sqlite3.Error as e:
-                self.db.error('Error updating categories in Entries table:\n', e.args[0])
+            db_affected = self.db.updateEntriesCats(current, new)
+            if db_affected != list_affected:
+                self.db.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
 
     def load(self, storage):
         self.entrylist = []
         if storage == database.STORE_PCKL:
             try:
-                f = open(self.db.dbname+'_entrylist.pckl', 'rb')
+                f = open(self.db.name()+'_entrylist.pckl', 'rb')
                 self.entrylist = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No entrylist.pckl file.')
         elif storage == database.STORE_DB:
-            try:
-                for row in self.db.conn.execute(self.selectAllSQL):
-                    #todo: convert all query results to objects
-                    #oid category date amount cleared checknum desc
-                    #todo: consider re-assessing all 'None' entries
-                    self.entrylist.append(Entry(self.db, row, Entry.no_cat()))
-            except sqlite3.Error as e:
-                self.db.error('Error loading memory from the EntryList table:\n', e.args[0])
+            for row in self.db.getAllEtries():
+                self.entrylist.append(Entry(self.db, row, Entry.no_cat()))
         self.n_entries = len(self.entrylist)
 
     #def createTable(self):
@@ -79,16 +69,11 @@ class EntryList(object):
         
     def save(self, storage):
         if storage == database.STORE_PCKL:
-            f = open(self.db.dbname+'_entrylist.pckl', 'wb')
+            f = open(self.db.name()+'_entrylist.pckl', 'wb')
             pickle.dump(self.strings, f)
             f.close()
         elif storage == database.STORE_DB:
-            try:
-                for entry in self.entrylist:
-                    cur = self.db.conn.cursor()
-                    cur.execute(self.insertSQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
-            except sqlite3.Error as e:
-                self.db.error('Could not save entries in EntryList table:\n', e.args[0])
+            self.db.addEntryList(self.entrylist)
         
 class Entry(dbrow.DBRow):
     

@@ -163,19 +163,14 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listOverrides.setCurrentItem(i)        pass
     
     def rename_category(self):
-        current_str = self.listCategories.currentItem().text()
-        new_str = self.edtCategory.text()
+        current_cat = self.listCategories.currentItem().text()
+        new_cat = self.edtCategory.text()
         row = self.listCategories.currentRow()
         self.listCategories.takeItem(row)
-        #cat = Category.strings[current_str]
-        self.category_str = new_str
-        self.db.categories.strings.add(new_str)
-        self.db.triggers.change_trigs_for_cat(current_str, new_str)
-        self.db.overrides.change_overs_for_cat(current_str, new_str)
-        self.db.entries.change_cat_of_entries(current_str, new_str, True)
-        self.db.temp_entries.change_cat_of_entries(current_str, new_str, False)
-        self.db.categories.strings.remove(current_str)
-        i = QListWidgetItem(new_str)
+        #cat = Category.strings[current_cat]
+        self.category_str = new_cat
+        self.db.rename_category(current_cat, new_cat)
+        i = QListWidgetItem(new_cat)
         self.listCategories.addItem(i)
         self.listCategories.setCurrentItem(i)
         pass

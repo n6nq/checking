@@ -41,6 +41,102 @@ class Database(object):
         #self.overrides.save(STORE_DB)
         pass
     
+    def getAllAccunts(self):
+        acct_list = []
+        try:
+            for row in self.conn.execute(self.selectAllAccountsSQL):
+                acct_list.append(row)
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Accounts table:\n', e.args[0])
+        return acct_list
+    
+    def addAccount(self, row):
+        try:
+            self.conn.execute(self.insertAccountSQL, (name, today, today, ''))
+            self.commit()
+            return True
+        except sqlite3.Error as e:
+            self.error('Could not create new Account record:\n', e.args[0])
+            return False
+        
+    def addCat(self, catStr):
+        try:
+            self.db.execute(self.insertCatSQL, (catStr, None))
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not save category in Category table:\n', e.args[0])
+            
+    def getAllCats(self):
+        try:
+            theCats = set()
+            for row in self.conn.execute(self.selectAllCatsSQL):
+                theCats.add(row[1])
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Category table:\n', e.args[0])
+        return theCats
+        
+    def updateEntriesCats(self, curCat, newCat):
+        try:
+            cur = self.conn.execute(self.updateCatSQL, (current, new))
+            return cur.rowcount
+        except sqlite3.Error as e:
+            self.error('Error updating categories in Entries table:\n', e.args[0])
+    
+    def rename_category(self, currenr, new):
+        self.categories.strings.add(new_cat)
+        self.triggers.change_trigs_for_cat(current_cat, new_cat)
+        self.overrides.change_overs_for_cat(current_cat, new_cat)
+        self.entries.change_cat_of_entries(current_cat, new_cat, True)
+        self.temp_entries.change_cat_of_entries(current_cat, new_cat, False)
+        self.categories.strings.remove(current_cat)
+        
+    def getAllEntries(self):
+        try:
+            rows = []
+            for row in self.conn.execute(self.selectAllEntriesSQL):
+                rows.append(row)
+                return rows
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the EntryList table:\n', e.args[0])
+
+    def addEntryList(self, entryList):
+        try:
+            for entry in self.entrylist:
+                cur = self.db.conn.cursor()
+                cur.execute(self.insertEntrySQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
+        except sqlite3.Error as e:
+            self.error('Could not save entries in EntryList table:\n', e.args[0])
+    
+    def name(self):
+        return self.dbname
+    
+    def addOverride(self, over, cat):
+        try:
+            self.conn.execute(self.insertOverrideSQL, (over, cat))
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could save overrides in Overrides table:\n', e.args[0])
+            
+            
+    def getAllOverrides(self):
+        try:
+            return self.conn.execute(self.selectAllOverridesSQL):
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Overrides table:\n', e.args[0])
+        
+    def addTrigger(self, trig, cat):
+        try:
+            self.conn.execute(self.insertSQL, (trig, cat))
+        except sqlite3.Error as e:
+            self.error('Could save triggers in Triggers table:\n', e.args[0])
+            
+    def getAllTriggers(self):
+        try:
+            return self.conn.execute(self.selectAllSQL):
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Triggers table:\n', e.args[0])
+        
+        
     def removeCategory(self, cat):
         #remove triggers
         self.triggers.del_cat(cat)
@@ -107,7 +203,7 @@ class Database(object):
         self.convertPicklesToDB()
         self.conn.commit()
         
-    def createTable(self, sql, tableName):
+    def createTable(self, sql, tableName):  #move
         try:
             self.conn.execute(sql)
             return True

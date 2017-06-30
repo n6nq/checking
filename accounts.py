@@ -52,28 +52,18 @@ class AccountList(object):
         self.load(storage)
            
     def load(self, storage):
-        self.acct_list = []
         if storage == database.STORE_PCKL:
             try:
-                f = open(self.db.dbname+'_accounts.pckl', 'rb')
+                f = open(self.db.name()+'_accounts.pckl', 'rb')
                 self.acct_list = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No accounts.pckl file.')
         elif storage == database.STORE_DB:
-            try:
-                for row in self.db.conn.execute(self.selectAllSQL):
-                    self.acct_list.append(row)
-            except sqlite3.Error as e:
-                self.db.error('Error loading memory from the Accounts table:\n', e.args[0])
+            self.acct_list = self.db.getAllAccunts()
 
     def createAccount(self, name):
         today = date.today()
+        newAccount = 
         self.acct_list.append(Account(name, today, today, ''))
-        try:
-            self.db.conn.execute(self.insertSQL, (name, today, today, ''))
-            self.db.commit()
-            return True
-        except sqlite3.Error as e:
-            self.db.error('Could not create new Account record:\n', e.args[0])
-            return False
+        self.db.addAccount((name, today, today, ''))

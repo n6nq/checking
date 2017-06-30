@@ -15,46 +15,48 @@ import pickle
 class Trigger(dbrow.DBRow):
     
     def __init__(self, db, storage):
-        self.strings = set()
+        self.strings = {}
         self.db = db
         self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
         self.selectAllSQL = 'select oid, trigger, category from Triggers'
         self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
+        self.deleteCatSQL = 'delete from Triggers where category = ?'
         db.createTable(self.createSQL, 'Triggers')
         self.load(storage)
 
-    def del_cat(self, cat):
-        pass
+    def del_cat(self, lose_cat):
+        newd = {}
+        for trig, cat in self.strings.items():
+            if cat != lose_cat:
+                newd[trig] = cat
+        self.strings = newd
+        
+        #try:
+        #    cur = self.db.conn.execute(self.deleteCatSQL)
+        #pass
     
     def save(self, storage):
         if storage == database.STORE_PCKL:
-            f = open(self.db.dbname+'_triggers.pckl', 'wb')
+            f = open(self.db.name()+'_triggers.pckl', 'wb')
             pickle.dump(self.strings, f)
             f.close()
         elif storage == database.STORE_DB:
-            try:
-                for trig, cat in self.strings.items():
-                    self.db.conn.execute(self.insertSQL, (trig, cat))
-                self.db.commit()
-            except sqlite3.Error as e:
-                self.db.error('Could save triggers in Triggers table:\n', e.args[0])        
+            for trig, cat in self.strings.items():
+                self.db.addTrigger(trig, cat)
 
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
                 self.strings = {}
-                f = open(self.db.dbname+'_triggers.pckl', 'rb')
+                f = open(self.db.name()+'_triggers.pckl', 'rb')
                 self.strings = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No triggers.pckl file.')
         elif storage == database.STORE_DB:
-            try:
-                self.strings = {}
-                for row in self.db.conn.execute(self.selectAllSQL):
-                    self.strings[row[1]] = row[2]
-            except sqlite3.Error as e:
-                self.db.error('Error loading memory from the Triggers table:\n', e.args[0])
+            self.strings = {}
+            for row in self.db.getAllTriggers():
+                self.strings[row[1]] = row[2]
         
     def fromDesc(self, desc):
         for over, cat in self.db.overrides.strings.items():
@@ -73,12 +75,7 @@ class Trigger(dbrow.DBRow):
         if trig in self.strings:
             return False
         self.strings[trig] = cat
-        try:
-            self.db.conn.execute(self.insertSQL, (trig, cat))
-            self.db.commit()
-        except sqlite3.Error as e:
-            self.db.error('Could not insert trigger in Triggers table:\n', e.args[0])        
-
+        self.db.addTrigger(trig, cat)
         return True
     
     def triggers_for_cat(self, lookFor):

@@ -36,33 +36,26 @@ class Override(dbrow.DBRow):
     
     def save(self, storage):
         if storage == database.STORE_PCKL:
-            f = open(self.db.dbname+'_overrides.pckl', 'wb')
+            f = open(self.db.name()+'_overrides.pckl', 'wb')
             pickle.dump(self.strings, f)
             f.close()
         elif storage == database.STORE_DB:
-            try:
-                for over, cat in self.strings.items():
-                    self.db.conn.execute(self.insertSQL, (over, cat))
-                self.db.commit()
-            except sqlite3.Error as e:
-                self.db.error('Could save overrides in Overrides table:\n', e.args[0])                
+            for over, cat in self.strings.items():
+                self.db.addOverride(over, cat)
 
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
                 self.strings = {}
-                f = open(self.db.dbname+'_overrides.pckl', 'rb')
+                f = open(self.db.name()+'_overrides.pckl', 'rb')
                 self.strings = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No overrides.pckl file.')
         elif storage == database.STORE_DB:
-            try:
-                self.strings = {}
-                for row in self.db.conn.execute(self.selectAllSQL):
-                    self.strings[row[1]] = row[2]
-            except sqlite3.Error as e:
-                self.db.error('Error loading memory from the Overrides table:\n', e.args[0])
+            self.strings = {}
+            for row in self.db.getAllOverrides():
+                self.strings[row[1]] = row[2]
     
     def overs_for_cat(self, lookFor):
         overs = []
