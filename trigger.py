@@ -22,7 +22,7 @@ class Trigger(dbrow.DBRow):
         self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         self.deleteCatSQL = 'delete from Triggers where category = ?'
         db.createTable(self.createSQL, 'Triggers')
-        self.load(storage)
+        #self.load(storage)  load after they are created
 
     def del_cat(self, lose_cat):
         newd = {}

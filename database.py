@@ -29,7 +29,8 @@ class Database(object):
         self.dbname = name
         conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
-        self.accts = accounts.AccountList(self, STORE_DB)
+        #todo create them first, then load them
+        self.accts = accounts.Accounts(self, STORE_DB)
         self.entries = entry.EntryList(self, STORE_DB)
         self.temp_entries = entry.EntryList(self, EMPTY)
         #self.entries.save(STORE_DB)
@@ -44,7 +45,7 @@ class Database(object):
     def getAllAccunts(self):
         acct_list = []
         try:
-            for row in self.conn.execute(self.selectAllAccountsSQL):
+            for row in self.conn.execute(self.accts.selectAllSQL):
                 acct_list.append(row)
         except sqlite3.Error as e:
             self.error('Error loading memory from the Accounts table:\n', e.args[0])
@@ -69,7 +70,7 @@ class Database(object):
     def getAllCats(self):
         try:
             theCats = set()
-            for row in self.conn.execute(self.selectAllCatsSQL):
+            for row in self.conn.execute(self.categories.selectAllSQL):
                 theCats.add(row[1])
         except sqlite3.Error as e:
             self.error('Error loading memory from the Category table:\n', e.args[0])
@@ -93,7 +94,7 @@ class Database(object):
     def getAllEntries(self):
         try:
             rows = []
-            for row in self.conn.execute(self.selectAllEntriesSQL):
+            for row in self.conn.execute(self.entries.selectAllSQL):
                 rows.append(row)
                 return rows
         except sqlite3.Error as e:
@@ -120,7 +121,7 @@ class Database(object):
             
     def getAllOverrides(self):
         try:
-            return self.conn.execute(self.selectAllOverridesSQL):
+            return self.conn.execute(self.overrides.selectAllSQL)
         except sqlite3.Error as e:
             self.error('Error loading memory from the Overrides table:\n', e.args[0])
         
@@ -132,7 +133,7 @@ class Database(object):
             
     def getAllTriggers(self):
         try:
-            return self.conn.execute(self.selectAllSQL):
+            return self.conn.execute(self.selectAllSQL)
         except sqlite3.Error as e:
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         

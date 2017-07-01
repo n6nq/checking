@@ -19,7 +19,7 @@ class EntryList(object):
         self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
         self.updateCatSQL = 'update Entries set category = ? where category = ?'
         db.createTable(self.createSQL, 'Entries')
-        self.load(storage)
+        #self.load(storage)   load after it's created
 
         #todo: decide about pickle files
         #self.picklename = acct_str + '_entrylist.pckl'
@@ -48,7 +48,7 @@ class EntryList(object):
             except FileNotFoundError:
                 print('No entrylist.pckl file.')
         elif storage == database.STORE_DB:
-            for row in self.db.getAllEtries():
+            for row in self.db.getAllEntries():
                 self.entrylist.append(Entry(self.db, row, Entry.no_cat()))
         self.n_entries = len(self.entrylist)
 

@@ -16,7 +16,7 @@ class Category(dbrow.DBRow):
         self.selectAllSQL = 'select oid, name, super from Categories'
         self.insertSQL = 'insert into Categories(name, super) VALUES (?,?)'
         db.createTable(self.createSQL, 'Categories')
-        self.load(storage)
+        #self.load(storage)  load after they are created
 
     def removeCat(self, catStr):
         newSet = set()
