@@ -16,10 +16,34 @@ class Overrides(object):
     
     def __init__(self, db):
         self.cache = set()
+        self.db = db
         self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
         self.selectAllSQL = 'select oid, override, category from Overrides'
         self.insertSQL = 'insert into Overrides(override, category) values(?, ?)'
-        db.createTable(self.createSQL, 'Overrides')
+        db.create_table(self.createSQL, 'Overrides')
+
+    def load(self, storage):
+        if storage == database.STORE_PCKL:
+            try:
+                self.strings = {}
+                f = open(self.db.name()+'_overrides.pckl', 'rb')
+                self.strings = pickle.load(f)
+                f.close()
+            except FileNotFoundError:
+                print('No overrides.pckl file.')
+        elif storage == database.STORE_DB:
+            self.strings = {}
+            for row in self.db.get_all_overrides():
+                self.strings[row[1]] = row[2]
+
+    def save(self, storage):
+        if storage == database.STORE_PCKL:
+            f = open(self.db.name()+'_overrides.pckl', 'wb')
+            pickle.dump(self.strings, f)
+            f.close()
+        elif storage == database.STORE_DB:
+            for over, cat in self.strings.items():
+                self.db.addOverride(over, cat)
         
 class Override(dbrow.DBRow):
     
@@ -40,28 +64,7 @@ class Override(dbrow.DBRow):
         self.strings[over_str] = cat
         
     
-    def save(self, storage):
-        if storage == database.STORE_PCKL:
-            f = open(self.db.name()+'_overrides.pckl', 'wb')
-            pickle.dump(self.strings, f)
-            f.close()
-        elif storage == database.STORE_DB:
-            for over, cat in self.strings.items():
-                self.db.addOverride(over, cat)
 
-    def load(self, storage):
-        if storage == database.STORE_PCKL:
-            try:
-                self.strings = {}
-                f = open(self.db.name()+'_overrides.pckl', 'rb')
-                self.strings = pickle.load(f)
-                f.close()
-            except FileNotFoundError:
-                print('No overrides.pckl file.')
-        elif storage == database.STORE_DB:
-            self.strings = {}
-            for row in self.db.getAllOverrides():
-                self.strings[row[1]] = row[2]
     
     def overs_for_cat(self, lookFor):
         overs = []

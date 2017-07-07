@@ -30,19 +30,24 @@ class Database(object):
         conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
         #todo create them first, then load them
-        self.accts = accounts.Accounts(self, STORE_DB)
-        self.entries = entry.EntryList(self, STORE_DB)
-        self.temp_entries = entry.EntryList(self, EMPTY)
+        self.accts = accounts.Accounts(self)
+        self.accts.load(STORE_DB)
+        self.entries = entry.Entrys(self)
+        self.entries.load(STORE_DB)
+        self.temp_entries = entry.EntryList(self)
         #self.entries.save(STORE_DB)
-        self.categories = category.Category(self, STORE_DB)
+        self.categories = category.Category(self)
+        self.categories.load(STORE_DB)
         #self.categories.save(STORE_DB)
-        self.triggers = trigger.Trigger(self, STORE_DB)
+        self.triggers = trigger.Trigger(self)
+        self.triggers.load(STORE_DB)
         #self.triggers.save(STORE_DB)
-        self.overrides = override.Override(self, STORE_DB)
+        self.overrides = override.Overrides(self)
+        self.overrides.load(STORE_DB)
         #self.overrides.save(STORE_DB)
         pass
     
-    def getAllAccunts(self):
+    def get_all_accounts(self):
         acct_list = []
         try:
             for row in self.conn.execute(self.accts.selectAllSQL):
@@ -51,7 +56,33 @@ class Database(object):
             self.error('Error loading memory from the Accounts table:\n', e.args[0])
         return acct_list
     
-    def addAccount(self, row):
+    def get_all_cats(self):
+        self.categories = set()
+        try:
+            for row in self.conn.execute(self.categories.selectAllSQL):
+                self.categories.add(row[1])
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Category table:\n', e.args[0])
+        return self.categories
+
+    def get_all_entries(self):
+        entries = []
+        try:
+            self.entries = []
+            for row in self.conn.execute(self.entries.selectAllSQL):
+                self.entries.append(row)
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the EntryList table:\n', e.args[0])
+        return self.entries
+
+    def get_all_overrides(self):
+        self.overrides = set()
+        try:
+            return self.conn.execute(self.overrides.selectAllSQL)
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Overrides table:\n', e.args[0])
+    
+    def add_account(self, row):
         try:
             self.conn.execute(self.insertAccountSQL, (name, today, today, ''))
             self.commit()
@@ -60,23 +91,15 @@ class Database(object):
             self.error('Could not create new Account record:\n', e.args[0])
             return False
         
-    def addCat(self, catStr):
+    def add_cat(self, catStr):
         try:
             self.db.execute(self.insertCatSQL, (catStr, None))
             self.commit()
         except sqlite3.Error as e:
             self.error('Could not save category in Category table:\n', e.args[0])
             
-    def getAllCats(self):
-        try:
-            theCats = set()
-            for row in self.conn.execute(self.categories.selectAllSQL):
-                theCats.add(row[1])
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Category table:\n', e.args[0])
-        return theCats
         
-    def updateEntriesCats(self, curCat, newCat):
+    def update_entries_cats(self, curCat, newCat):
         try:
             cur = self.conn.execute(self.updateCatSQL, (current, new))
             return cur.rowcount
@@ -91,27 +114,23 @@ class Database(object):
         self.temp_entries.change_cat_of_entries(current_cat, new_cat, False)
         self.categories.strings.remove(current_cat)
         
-    def getAllEntries(self):
-        try:
-            rows = []
-            for row in self.conn.execute(self.entries.selectAllSQL):
-                rows.append(row)
-                return rows
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the EntryList table:\n', e.args[0])
 
-    def addEntryList(self, entryList):
+    def add_entry_list(self, entryList):
         try:
             for entry in self.entrylist:
                 cur = self.db.conn.cursor()
                 cur.execute(self.insertEntrySQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
         except sqlite3.Error as e:
             self.error('Could not save entries in EntryList table:\n', e.args[0])
+            
+    def add_temp_entry(self, row):
+        self.temp_entries.entrylist.append(row)
+        pass
     
     def name(self):
         return self.dbname
     
-    def addOverride(self, over, cat):
+    def add_override(self, over, cat):
         try:
             self.conn.execute(self.insertOverrideSQL, (over, cat))
             self.commit()
@@ -119,26 +138,21 @@ class Database(object):
             self.error('Could save overrides in Overrides table:\n', e.args[0])
             
             
-    def getAllOverrides(self):
-        try:
-            return self.conn.execute(self.overrides.selectAllSQL)
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Overrides table:\n', e.args[0])
         
-    def addTrigger(self, trig, cat):
+    def add_trigger(self, trig, cat):
         try:
             self.conn.execute(self.insertSQL, (trig, cat))
         except sqlite3.Error as e:
             self.error('Could save triggers in Triggers table:\n', e.args[0])
             
-    def getAllTriggers(self):
+    def get_all_triggers(self):
         try:
-            return self.conn.execute(self.selectAllSQL)
+            return self.conn.execute(self.triggers.selectAllSQL)
         except sqlite3.Error as e:
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         
         
-    def removeCategory(self, cat):
+    def remove_category(self, cat):
         #remove triggers
         self.triggers.del_cat(cat)
         #remove overrides
@@ -204,7 +218,7 @@ class Database(object):
         self.convertPicklesToDB()
         self.conn.commit()
         
-    def createTable(self, sql, tableName):  #move
+    def create_table(self, sql, tableName):  #move
         try:
             self.conn.execute(sql)
             return True
@@ -225,10 +239,10 @@ class Database(object):
     #        print("An error occurred:", e.args[0])
     #        return False
         
-    def createAccount(self, name):
+    def create_account(self, name):
         self.accts.createAccount(name)
         
-    def convertPicklesToDB(self):
+    def convert_pickles_to_DB(self):
         self.categories.load(STORE_PCKL)
         self.categories.save(STORE_DB)
         self.triggers.load(STORE_PCKL)
@@ -238,7 +252,7 @@ class Database(object):
         self.entries.load(STORE_PCKL)
         self.entries.save(STORE_DB)
 
-    def mergeNewEntries(self, newList):
+    def merge_new_entries(self, newList):
         for newEntry in newList:
             if not self.entries.isDupe(newEntry):
                 self.entries.entrylist.append(newEntry)

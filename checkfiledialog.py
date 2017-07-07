@@ -37,7 +37,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
     
-        for catStr in self.db.categories.strings:
+        for catStr in self.db.get_all_cats():
             self.listCategories.addItem(catStr)
         # Setup popup menu actions
         self.CreatePopupActions()

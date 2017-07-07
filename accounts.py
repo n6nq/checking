@@ -42,13 +42,13 @@ class Account(dbrow.DBRow):
         
 class Accounts(object):
     
-    def __init__(self, db, storage):
+    def __init__(self, db):
         self.cache = []
         self.db = db
         self.createSQL = 'create table if not exists Accounts(id integer primary key, name varchar(30) unique, start date, last date, bankurl varchar(255))'
         self.insertSQL = 'insert into Accounts(name, start, last, bankurl) VALUES (?,?,?,?)'
         self.selectAllSQL = 'select oid, name, start, last, bankurl from Accounts'
-        db.createTable(self.createSQL, 'Account')
+        db.create_table(self.createSQL, 'Account')
         #self.load(storage)
            
     def load(self, storage):
@@ -60,7 +60,7 @@ class Accounts(object):
             except FileNotFoundError:
                 print('No accounts.pckl file.')
         elif storage == database.STORE_DB:
-            self.cache = self.db.getAllAccunts()
+            self.cache = self.db.get_all_accounts()
 
     def createAccount(self, name):
         today = date.today()

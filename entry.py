@@ -8,17 +8,17 @@ from trigger import Trigger
 import sqlite3
 import pickle
 
-class EntryList(object):
+class Entrys(object):
     
-    def __init__(self, db, storage):
+    def __init__(self, db):
         #self.n_entries = 0
-        self.entrylist = []
+        self.cache = []
         self.db = db
         self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.selectAllSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
         self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
         self.updateCatSQL = 'update Entries set category = ? where category = ?'
-        db.createTable(self.createSQL, 'Entries')
+        db.create_table(self.createSQL, 'Entries')  #TODO: maybe skip if temp_entries
         #self.load(storage)   load after it's created
 
         #todo: decide about pickle files
@@ -39,19 +39,19 @@ class EntryList(object):
                 self.db.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
 
     def load(self, storage):
-        self.entrylist = []
+        entries = []
         if storage == database.STORE_PCKL:
             try:
                 f = open(self.db.name()+'_entrylist.pckl', 'rb')
-                self.entrylist = pickle.load(f)
+                entries = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No entrylist.pckl file.')
         elif storage == database.STORE_DB:
-            for row in self.db.getAllEntries():
-                self.entrylist.append(Entry(self.db, row, Entry.no_cat()))
-        self.n_entries = len(self.entrylist)
-
+            for row in self.db.get_all_entries():
+                entries.append(Entry(self.db, row, Entry.no_cat()))
+        self.n_entries = len(entries)
+        return entries
     #def createTable(self):
     #    try:
     #        self.db.conn.execute(self.createSQL)

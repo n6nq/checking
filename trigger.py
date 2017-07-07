@@ -14,22 +14,22 @@ import pickle
 
 class Trigger(dbrow.DBRow):
     
-    def __init__(self, db, storage):
-        self.strings = {}
+    def __init__(self, db):
+        self.cache = {}
         self.db = db
         self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
         self.selectAllSQL = 'select oid, trigger, category from Triggers'
         self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         self.deleteCatSQL = 'delete from Triggers where category = ?'
-        db.createTable(self.createSQL, 'Triggers')
+        db.create_table(self.createSQL, 'Triggers')
         #self.load(storage)  load after they are created
 
     def del_cat(self, lose_cat):
         newd = {}
-        for trig, cat in self.strings.items():
+        for trig, cat in self.cache.items():
             if cat != lose_cat:
                 newd[trig] = cat
-        self.strings = newd
+        self.cache = newd
         
         #try:
         #    cur = self.db.conn.execute(self.deleteCatSQL)
@@ -38,32 +38,32 @@ class Trigger(dbrow.DBRow):
     def save(self, storage):
         if storage == database.STORE_PCKL:
             f = open(self.db.name()+'_triggers.pckl', 'wb')
-            pickle.dump(self.strings, f)
+            pickle.dump(self.cache, f)
             f.close()
         elif storage == database.STORE_DB:
-            for trig, cat in self.strings.items():
+            for trig, cat in self.cache.items():
                 self.db.addTrigger(trig, cat)
 
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
-                self.strings = {}
+                self.cache = {}
                 f = open(self.db.name()+'_triggers.pckl', 'rb')
-                self.strings = pickle.load(f)
+                self.cache = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No triggers.pckl file.')
         elif storage == database.STORE_DB:
-            self.strings = {}
-            for row in self.db.getAllTriggers():
-                self.strings[row[1]] = row[2]
+            self.cache = {}
+            for row in self.db.get_all_triggers():
+                self.cache[row[1]] = row[2]
         
     def fromDesc(self, desc):
-        for over, cat in self.db.overrides.strings.items():
+        for over, cat in self.db.get_all_overrides():
             if over in desc:
                 return cat
             
-        for trig, cat in self.strings.items():
+        for trig, cat in self.cache.items():
             if trig in desc:
                 return cat
         
@@ -72,15 +72,15 @@ class Trigger(dbrow.DBRow):
     def addTrig(self, trig, cat):
         if trig == '' or trig == 'None' or trig == None:
             return False
-        if trig in self.strings:
+        if trig in self.cache:
             return False
-        self.strings[trig] = cat
+        self.cache[trig] = cat
         self.db.addTrigger(trig, cat)
         return True
     
     def triggers_for_cat(self, lookFor):
         triggers = []
-        for trig, cat in self.strings.items():
+        for trig, cat in self.cache.items():
             if cat == lookFor:
                 triggers.append(trig)
                 
@@ -88,7 +88,7 @@ class Trigger(dbrow.DBRow):
     
     def change_trigs_for_cat(self, current_cat, new_cat):
         newd = {}
-        for trig, cat in self.strings.items():
+        for trig, cat in self.cache.items():
             if cat == current_cat:
                 newd[trig] = new_cat
             else:
