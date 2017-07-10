@@ -47,16 +47,13 @@ class Trigger(dbrow.DBRow):
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
-                self.cache = {}
                 f = open(self.db.name()+'_triggers.pckl', 'rb')
                 self.cache = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No triggers.pckl file.')
         elif storage == database.STORE_DB:
-            self.cache = {}
-            for row in self.db.get_all_triggers():
-                self.cache[row[1]] = row[2]
+            self.cache = self.db.get_all_triggers()
         
     def fromDesc(self, desc):
         for over, cat in self.db.get_all_overrides():

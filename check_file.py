@@ -2,7 +2,7 @@
 import datetime
 from money import Money
 from entry import Entry
-from entry import Entrys
+from entry import Entries
 from category import Category
 import database
 

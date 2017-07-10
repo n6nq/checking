@@ -15,7 +15,7 @@ import pickle
 class Overrides(object):
     
     def __init__(self, db):
-        self.cache = set()
+        self.cache = {}
         self.db = db
         self.createSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
         self.selectAllSQL = 'select oid, override, category from Overrides'
@@ -25,16 +25,13 @@ class Overrides(object):
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
-                self.strings = {}
                 f = open(self.db.name()+'_overrides.pckl', 'rb')
-                self.strings = pickle.load(f)
+                self.cache = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No overrides.pckl file.')
         elif storage == database.STORE_DB:
-            self.strings = {}
-            for row in self.db.get_all_overrides():
-                self.strings[row[1]] = row[2]
+            self.cache = self.db.get_all_overrides()
 
     def save(self, storage):
         if storage == database.STORE_PCKL:

@@ -8,7 +8,7 @@ from trigger import Trigger
 import sqlite3
 import pickle
 
-class Entrys(object):
+class Entries(object):
     
     def __init__(self, db):
         #self.n_entries = 0
@@ -39,19 +39,16 @@ class Entrys(object):
                 self.db.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
 
     def load(self, storage):
-        entries = []
         if storage == database.STORE_PCKL:
             try:
                 f = open(self.db.name()+'_entrylist.pckl', 'rb')
-                entries = pickle.load(f)
+                self.cache = pickle.load(f)
                 f.close()
             except FileNotFoundError:
                 print('No entrylist.pckl file.')
         elif storage == database.STORE_DB:
-            for row in self.db.get_all_entries():
-                entries.append(Entry(self.db, row, Entry.no_cat()))
-        self.n_entries = len(entries)
-        return entries
+            self.cache = self.db.get_all_entries()
+            
     #def createTable(self):
     #    try:
     #        self.db.conn.execute(self.createSQL)

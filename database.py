@@ -32,9 +32,9 @@ class Database(object):
         #todo create them first, then load them
         self.accts = accounts.Accounts(self)
         self.accts.load(STORE_DB)
-        self.entries = entry.Entrys(self)
+        self.entries = entry.Entries(self)
         self.entries.load(STORE_DB)
-        self.temp_entries = entry.EntryList(self)
+        self.temp_entries = entry.Entries(self)
         #self.entries.save(STORE_DB)
         self.categories = category.Category(self)
         self.categories.load(STORE_DB)
@@ -56,31 +56,41 @@ class Database(object):
             self.error('Error loading memory from the Accounts table:\n', e.args[0])
         return acct_list
     
-    def get_all_cats(self):
-        self.categories = set()
-        try:
-            for row in self.conn.execute(self.categories.selectAllSQL):
-                self.categories.add(row[1])
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Category table:\n', e.args[0])
-        return self.categories
-
     def get_all_entries(self):
-        entries = []
+        entry_list = []
         try:
-            self.entries = []
             for row in self.conn.execute(self.entries.selectAllSQL):
-                self.entries.append(row)
+                entry_list.append(row)
         except sqlite3.Error as e:
             self.error('Error loading memory from the EntryList table:\n', e.args[0])
-        return self.entries
+        return entry_list
 
-    def get_all_overrides(self):
-        self.overrides = set()
+    def get_all_cats(self):
+        cats = set()
         try:
-            return self.conn.execute(self.overrides.selectAllSQL)
+            for row in self.conn.execute(self.categories.selectAllSQL):
+                cats.add(row[1])
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Category table:\n', e.args[0])
+        return cats
+
+    def get_all_triggers(self):
+        trigs = {}
+        try:
+            for row in self.conn.execute(self.triggers.selectAllSQL):
+                trigs[row[1]] = row[2]
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Triggers table:\n', e.args[0])
+        return trigs
+        
+    def get_all_overrides(self):
+        overrides = {}
+        try:
+            for row in self.conn.execute(self.overrides.selectAllSQL):
+                overrides[row[1]] = row[2]
         except sqlite3.Error as e:
             self.error('Error loading memory from the Overrides table:\n', e.args[0])
+        return overrides
     
     def add_account(self, row):
         try:
@@ -145,12 +155,6 @@ class Database(object):
         except sqlite3.Error as e:
             self.error('Could save triggers in Triggers table:\n', e.args[0])
             
-    def get_all_triggers(self):
-        try:
-            return self.conn.execute(self.triggers.selectAllSQL)
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Triggers table:\n', e.args[0])
-        
         
     def remove_category(self, cat):
         #remove triggers
