@@ -96,7 +96,7 @@ class Entry(dbrow.DBRow):
         self.checknum = row[5]
         self.desc = row[6]
         if how_to_cat == Entry.categorize():
-            self.category = self.db.triggers.fromDesc(self.desc)
+            self.category = self.db.cat_from_desc(self.desc)
             
 #oid  cat  datestr amtstr  clr*    chknum''  desc
 #    def __init__(self, db, date, amount, cleared, checknum, desc):

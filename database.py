@@ -29,24 +29,109 @@ class Database(object):
         self.dbname = name
         conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
-        #todo create them first, then load them
-        self.accts = accounts.Accounts(self)
-        self.accts.load(STORE_DB)
-        self.entries = entry.Entries(self)
-        self.entries.load(STORE_DB)
-        self.temp_entries = entry.Entries(self)
-        #self.entries.save(STORE_DB)
-        self.categories = category.Category(self)
-        self.categories.load(STORE_DB)
-        #self.categories.save(STORE_DB)
-        self.triggers = trigger.Trigger(self)
-        self.triggers.load(STORE_DB)
-        #self.triggers.save(STORE_DB)
-        self.overrides = override.Overrides(self)
-        self.overrides.load(STORE_DB)
-        #self.overrides.save(STORE_DB)
-        pass
+        
+        self.createAcctsSQL = 'create table if not exists Accounts(id integer primary key, name varchar(30) unique, start date, last date, bankurl varchar(255))'
+        self.selectAllAcctsSQL = 'select oid, name, start, last, bankurl from Accounts'
+        self.accounts = []
+        self.load_accounts()
+        
+        self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
+        self.selectAllEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
+        self.insertCatSQL = 'insert into Categories(name, super) VALUES (?,?)'
+        self.entries = []
+        self.load_entries()
+        
+        self.temp_entries = []
+        
+        self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
+        self.selectAllCatsSQL = 'select oid, name, super from Categories'
+        self.categories = set()
+        self.load_categories()
+        
+        self.createTrigsSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
+        self.selectAllTrigsSQL = 'select oid, trigger, category from Triggers'
+        self.insertTrigsSQL = 'insert into Triggers(trigger, category) values(?, ?)'
+        self.triggers = {}
+        self.load_triggers()
+        
+        self.createOversSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
+        self.selectAllOversSQL = 'select oid, override, category from Overrides'
+        self.overrides = {}
+        self.load_overrides()
+        
+        #self.accts = accounts.Accounts(self)
+        #self.accts.load(STORE_DB)
+        #self.entries = entry.Entries(self)
+        #self.entries.load(STORE_DB)
+        #self.temp_entries = entry.Entries(self)
+        # #self.entries.save(STORE_DB)
+        #self.categories = category.Category(self)
+        #self.categories.load(STORE_DB)
+        # #self.categories.save(STORE_DB)
+        #self.triggers = trigger.Trigger(self)
+        #self.triggers.load(STORE_DB)
+        # #self.triggers.save(STORE_DB)
+        #self.overrides = override.Overrides(self)
+        #self.overrides.load(STORE_DB)
+        # #self.overrides.save(STORE_DB)
+        #pass
+
+    def cat_from_desc(self, desc):
+        for over, cat in self.overrides.items():
+            if over in desc:
+                return cat
+            
+        for trig, cat in self.triggers.items():
+            if trig in desc:
+                return cat
+        
+        return None
     
+    def load_accounts(self):
+        if len(self.accounts) == 0:
+            try:
+                self.conn.execute(self.createAcctsSQL)
+                for row in self.conn.execute(self.selectAllAcctsSQL):
+                    self.accounts.append(accounts.Account(row))
+            except sqlite3.Error as e:
+                self.error('Error loading memory from the Accounts table:\n', e.args[0])
+
+    def load_entries(self):
+        if len(self.entries) == 0:
+            try:
+                self.conn.execute(self.createEntriesSQL)
+                for row in self.conn.execute(self.selectAllEntriesSQL):
+                    self.entries.append(entry.Entry(row))
+            except sqlite3.Error as e:
+                self.error('Error loading memory from the Entries table:\n', e.args[0])
+                
+    def load_categories(self):
+        if len(self.categories) == 0:
+            try:
+                self.conn.execute(self.createCatsSQL)
+                for row in self.conn.execute(self.selectAllCatsSQL):
+                    self.categories.add(category.Category(row).cat)
+            except sqlite3.Error as e:
+                self.error('Error loading memory from the Categries table:\n', e.args[0])
+                
+    def load_triggers(self):
+        if len(self.triggers) == 0:
+            try:
+                self.conn.execute(self.createTrigsSQL)
+                for row in self.conn.execute(self.selectAllTrigsSQL):
+                    self.triggers[row[1]] = row[2]
+            except sqlite3.Error as e:
+                self.error('Error loading memory from the Triggers table:\n', e.args[0])
+                
+    def load_overrides(self):
+        if len(self.overrides) == 0:
+            try:
+                self.conn.execute(self.createOversSQL)
+                for row in self.conn.execute(self.selectAllOversSQL):
+                    self.overrides[row[1]] = row[2]
+            except sqlite3.Error as e:
+                self.error('Error loading memory from the Overrides table:\n', e.args[0])
+                
     def get_all_accounts(self):
         acct_list = []
         try:
@@ -62,17 +147,21 @@ class Database(object):
             for row in self.conn.execute(self.entries.selectAllSQL):
                 entry_list.append(row)
         except sqlite3.Error as e:
-            self.error('Error loading memory from the EntryList table:\n', e.args[0])
+            self.error('Error loading memory from the Entries table:\n', e.args[0])
         return entry_list
 
     def get_all_cats(self):
-        cats = set()
-        try:
-            for row in self.conn.execute(self.categories.selectAllSQL):
-                cats.add(row[1])
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Category table:\n', e.args[0])
-        return cats
+        if len(self.categories) == 0:
+            self.load_categories()
+        return self.categories
+    
+    #    cats = set()
+    #    try:
+    #        for row in self.conn.execute(self.categories.selectAllSQL):
+    #            cats.add(row[1])
+    #    except sqlite3.Error as e:
+    #        self.error('Error loading memory from the Category table:\n', e.args[0])
+    #    return cats
 
     def get_all_triggers(self):
         trigs = {}
@@ -84,6 +173,8 @@ class Database(object):
         return trigs
         
     def get_all_overrides(self):
+        if self.overrides.cache_loaded():
+            return self.overrides.get_cache()
         overrides = {}
         try:
             for row in self.conn.execute(self.overrides.selectAllSQL):
@@ -103,10 +194,16 @@ class Database(object):
         
     def add_cat(self, catStr):
         try:
-            self.db.execute(self.insertCatSQL, (catStr, None))
-            self.commit()
+            if catStr in self.categories:
+                return False
+            else:
+                self.categories.add(catStr)
+                self.conn.execute(self.insertCatSQL, (catStr, None))
+                self.commit()
+                return True
         except sqlite3.Error as e:
             self.error('Could not save category in Category table:\n', e.args[0])
+            return False
             
         
     def update_entries_cats(self, curCat, newCat):
@@ -134,7 +231,7 @@ class Database(object):
             self.error('Could not save entries in EntryList table:\n', e.args[0])
             
     def add_temp_entry(self, row):
-        self.temp_entries.entrylist.append(row)
+        self.temp_entries.append(row)
         pass
     
     def name(self):
@@ -151,9 +248,14 @@ class Database(object):
         
     def add_trigger(self, trig, cat):
         try:
-            self.conn.execute(self.insertSQL, (trig, cat))
+            if trig in self.triggers:
+                return False
+            self.triggers[trig] = cat
+            self.conn.execute(self.insertTrigsSQL, (trig, cat))
+            return True
         except sqlite3.Error as e:
-            self.error('Could save triggers in Triggers table:\n', e.args[0])
+            self.error('Could not save triggers in Triggers table:\n', e.args[0])
+            return False
             
         
     def remove_category(self, cat):

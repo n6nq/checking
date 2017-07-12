@@ -24,8 +24,8 @@ class CheckFile(object):
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
             row = (0, None, trans_date, Money.from_str(prt[1]),
                    self.cleared(prt[2]), self.check_num(prt[3]), prt[4])
-            self.db.add_temp_entry(row)
-            self.db.temp_entries.entrylist.append(Entry(self.db, row, Entry.categorize()))
+            self.db.add_temp_entry(Entry(self.db, row, Entry.categorize()))
+            #self.db.temp_entries.entrylist.append(Entry(self.db, row, Entry.categorize()))
             line = f.readline()
         f.close 
     
@@ -39,7 +39,7 @@ class CheckFile(object):
         return cleared_str == '*'
     
     def find(self, line):
-        for anEntry in self.entries.entrylist:
+        for anEntry in self.db.temp_entries:
             if anEntry.isMatch(line):
                 return anEntry
             

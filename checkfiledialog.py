@@ -28,6 +28,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listUnCategorized.clicked.connect(lambda: self.UnCategorizedClickHndlr())
         self.edtSelectTrigger.selectionChanged.connect(lambda: self.TriggerSelectedHndlr())
         self.btnSetTrigger.clicked.connect(lambda: self.SetTriggerHndlr())
+        self.btnSetCat.clicked.connect(lambda: self.SetCatHndlr())
         self.edtNewCat.selectionChanged.connect(lambda: self.GetNewCatStrHndlr())
         self.btnAddCat.clicked.connect(lambda: self.AddCategoryHndlr())
         self.listCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listCategorized))
@@ -63,7 +64,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         
         self.cf.open(fileName[0])
         #iterate check file and load list widgets here
-        for check in self.db.temp_entries.entrylist:
+        for check in self.db.temp_entries:
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
@@ -85,6 +86,38 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             self.selectedTriggerStr = trgStr
         print('>'+self.selectedTriggerStr+'<')
         
+    def SetCatHndlr(self):
+        """The Set Cat button has been pushed. Set the Category of the
+        entry that is the current selection in the UnCategorized list.
+        No new trigger will be defined."""
+        #trgStr = self.selectedTriggerStr
+        #if trgStr == '':
+        #    raise EOFError
+        selectedCats = self.listCategories.selectedItems()
+        selectedCatStr = selectedCats[0].text()
+        #if self.db.add_trigger(trgStr, selectedCatStr) == False:
+        #    raise EOFError
+        selectedEntryStr =  self.listUnCategorized.currentItem().text()
+       # selectedEntries = self.listUnCategorized.selectedItems()
+        selectedEntry = self.cf.find(selectedEntryStr)
+        selectedEntry.category = selectedCatStr
+        # clear the list
+        self.listCategorized.clear()
+        self.listUnCategorized.clear()
+        
+        #selectedEntryStr = whichList.currentItem().text()
+        #self.newCatStr = str
+        #self.selectedEntry = self.cf.find(selectedEntryStr)        
+        # repopulate
+        for check in self.db.temp_entries:
+            if check.category == None:
+                check.category = self.db.cat_from_desc(check.desc)
+                self.listUnCategorized.addItem(check.asNotCatStr())
+            else:
+                self.listCategorized.addItem(check.asCategorizedStr())
+        self.listCategorized.repaint()
+        self.listUnCategorized.repaint()
+        
     def SetTriggerHndlr(self):
         """The Set Trigger button has been pushed. If a new trigger string
         has been save in the dialog, then get the selected string and the
@@ -94,14 +127,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             raise EOFError
         selectedItems = self.listCategories.selectedItems()
         selectedCatStr = selectedItems[0].text()
-        if self.db.triggers.addTrig(trgStr, selectedCatStr) == False:
+        if self.db.add_trigger(trgStr, selectedCatStr) == False:
             raise EOFError
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate
-        for check in self.cf.entries.entrylist:
-            check.category = self.db.triggers.fromDesc(check.desc)
+        for check in self.db.temp_entries:
+            check.category = self.db.cat_from_desc(check.desc)
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
@@ -118,11 +151,12 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         """The Add Cat button was pushed. If a string was entered, make a new
         category and update the category list."""
         catStr = self.edtNewCat.text()
-        self.db.categories.addCat(catStr)
-        i = QListWidgetItem(catStr)
-        self.listCategories.addItem(i)
-        self.listCategories.setCurrentItem(i)
-        
+        if self.db.add_cat(catStr):
+            i = QListWidgetItem(catStr)
+            self.listCategories.addItem(i)
+            self.listCategories.setCurrentItem(i)
+        else:
+            self.edtNewCat.setText('')
 
     def CategorizedPopUpHndlr(self, event, whichList):
         """A right mouse click has happened in one of the Categorized list. If a Category

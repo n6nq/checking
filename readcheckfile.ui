@@ -84,7 +84,7 @@
    <property name="geometry">
     <rect>
      <x>860</x>
-     <y>100</y>
+     <y>70</y>
      <width>101</width>
      <height>311</height>
     </rect>
@@ -187,9 +187,9 @@
    <property name="geometry">
     <rect>
      <x>860</x>
-     <y>420</y>
+     <y>390</y>
      <width>101</width>
-     <height>114</height>
+     <height>151</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -201,10 +201,25 @@
        </font>
       </property>
       <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This button the sets the category of the currently selected entry in the Uncategorized list. The category must be selected from Category list above. If a unique string was first selected in the Line Edit, then that unique string is used to match any like entries in the Uncategorized list. They will all have their categories set automatically, same for all future entries.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This button creates a new trigger string. It also searchs the UnCategorized list and sets the Category of any entry that contains the new trigger string. The category must be selected from Category list above. If a unique string was first selected in the Line Edit, then that unique string is used to match any like entries in the Uncategorized list. They will all have their categories set automatically, same for all future entries.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="text">
        <string>Set Trigger</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnSetCat">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This button sets the category of the current selected ntry in the UnCategorized List. No trigger string is defined and only the selected entry is effected. This is inteneded for rare entries. Any future entries, that are similar, will require this same action because no trigger string was defined.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Set Cat</string>
       </property>
      </widget>
     </item>
@@ -258,7 +273,7 @@
      <x>860</x>
      <y>10</y>
      <width>101</width>
-     <height>86</height>
+     <height>61</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -286,18 +301,6 @@
       </property>
       <property name="text">
        <string>UnCat Entry</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="btnDeDupe">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>De Dupe</string>
       </property>
      </widget>
     </item>

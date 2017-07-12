@@ -9,13 +9,17 @@ import sqlite3
        
 class Category(dbrow.DBRow):
     
-    def __init__(self, db):
-        self.cache = set()
-        self.db = db
-        self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
-        self.selectAllSQL = 'select oid, name, super from Categories'
-        self.insertSQL = 'insert into Categories(name, super) VALUES (?,?)'
-        db.create_table(self.createSQL, 'Categories')
+    def __init__(self, row):
+        self.id = row[0]
+        self.cat = row[1]
+        self.super_cat = row[2]
+        
+        #self.cache = set()
+        #self.db = db
+        #self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
+        #self.selectAllSQL = 'select oid, name, super from Categories'
+        #self.insertSQL = 'insert into Categories(name, super) VALUES (?,?)'
+        #db.create_table(self.createSQL, 'Categories')
         #self.load(storage)  load after they are created
 
     def removeCat(self, catStr):

@@ -55,16 +55,16 @@ class Trigger(dbrow.DBRow):
         elif storage == database.STORE_DB:
             self.cache = self.db.get_all_triggers()
         
-    def fromDesc(self, desc):
-        for over, cat in self.db.get_all_overrides():
-            if over in desc:
-                return cat
-            
-        for trig, cat in self.cache.items():
-            if trig in desc:
-                return cat
-        
-        return None
+#    def fromDesc(self, desc):
+#        for over, cat in self.db.get_all_overrides():
+#            if over in desc:
+#                return cat
+#            
+#        for trig, cat in self.cache.items():
+#            if trig in desc:
+#                return cat
+#        
+#        return None
     
     def addTrig(self, trig, cat):
         if trig == '' or trig == 'None' or trig == None:
