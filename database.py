@@ -155,14 +155,6 @@ class Database(object):
             self.load_categories()
         return self.categories
     
-    #    cats = set()
-    #    try:
-    #        for row in self.conn.execute(self.categories.selectAllSQL):
-    #            cats.add(row[1])
-    #    except sqlite3.Error as e:
-    #        self.error('Error loading memory from the Category table:\n', e.args[0])
-    #    return cats
-
     def get_all_triggers(self):
         trigs = {}
         try:
@@ -311,19 +303,6 @@ class Database(object):
     def commit(self):
         self.conn.commit()
         
-    def open(self, name):
-        self.dbname = name
-        conn = sqlite3.connect(name+'.db')
-        self.conn = conn
-        self.accts = accounts.AccountList(self)
-        self.entries = entry.EntryList(self)
-        self.categories = category.Category(self)
-        self.triggers = trigger.Trigger(self)
-        self.overrides = override.Override(self)
-        #self.createTables()
-        self.convertPicklesToDB()
-        self.conn.commit()
-        
     def create_table(self, sql, tableName):  #move
         try:
             self.conn.execute(sql)
@@ -358,11 +337,30 @@ class Database(object):
         self.entries.load(STORE_PCKL)
         self.entries.save(STORE_DB)
 
-    def merge_new_entries(self, newList):
-        for newEntry in newList:
-            if not self.entries.isDupe(newEntry):
-                self.entries.entrylist.append(newEntry)
+    def isDupe(self, newEtry):
+        for entry in self.entrylist:
+            if entry.compare(newEtry):
+                return True
+        return False
     
+    def merge_temp_entries(self):
+        for temp in self.temp_entries:
+            if temp not in self.entries:
+                self.entries.append(temp)
+    
+    def open(self, name):
+        self.dbname = name
+        conn = sqlite3.connect(name+'.db')
+        self.conn = conn
+        self.accts = accounts.AccountList(self)
+        self.entries = entry.EntryList(self)
+        self.categories = category.Category(self)
+        self.triggers = trigger.Trigger(self)
+        self.overrides = override.Override(self)
+        #self.createTables()
+        self.convertPicklesToDB()
+        self.conn.commit()
+        
     def save(self, storage):
         #self.categories.save(storage)
         #self.triggers.save(storage)

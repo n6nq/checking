@@ -30,6 +30,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnSetTrigger.clicked.connect(lambda: self.SetTriggerHndlr())
         self.btnSetCat.clicked.connect(lambda: self.SetCatHndlr())
         self.edtNewCat.selectionChanged.connect(lambda: self.GetNewCatStrHndlr())
+        self.btnUnCat.clicked.connect(lambda: self.UnCatHndlr())
         self.btnAddCat.clicked.connect(lambda: self.AddCategoryHndlr())
         self.listCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listCategorized))
         self.listUnCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listUnCategorized))     #self.connect(self.customContextMenuRequested, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.CategorizedPopUp)
@@ -62,14 +63,32 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.filePathEdit.setText(fileName[0])
         self.show()
         
-        self.cf.open(fileName[0])
+        self.cf.open(fileName[0])	
         #iterate check file and load list widgets here
         for check in self.db.temp_entries:
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
-    
+
+    def UnCatHndlr(self):
+        selection = self.listCategorized.currentItem().text()
+        selectedEntry = self.cf.find(selection)
+        selectedEntry.category = None
+        
+        # clear the list
+        self.listCategorized.clear()
+        self.listUnCategorized.clear()
+        
+        for check in self.db.temp_entries:
+            if check.category == None:
+                check.category = self.db.cat_from_desc(check.desc)
+                self.listUnCategorized.addItem(check.asNotCatStr())
+            else:
+                self.listCategorized.addItem(check.asCategorizedStr())
+        self.listCategorized.repaint()
+        self.listUnCategorized.repaint()
+        
     def UnCategorizedClickHndlr(self):
         """Copy the selected entry from the UnCategorized list to the
            trigger string select edit line."""
@@ -93,8 +112,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #trgStr = self.selectedTriggerStr
         #if trgStr == '':
         #    raise EOFError
-        selectedCats = self.listCategories.selectedItems()
-        selectedCatStr = selectedCats[0].text()
+        selectedCatStr = self.listCategories.currentItem().text()
         #if self.db.add_trigger(trgStr, selectedCatStr) == False:
         #    raise EOFError
         selectedEntryStr =  self.listUnCategorized.currentItem().text()
@@ -134,7 +152,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listUnCategorized.clear()
         # repopulate
         for check in self.db.temp_entries:
-            check.category = self.db.cat_from_desc(check.desc)
+            if check.category == None:
+                check.category = self.db.cat_from_desc(check.desc)
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
             else:
@@ -187,7 +206,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     
     def AcceptChanges(self):
         print('Accepted')
-        self.db.mergeNewEntries(self.cf.entries.entrylist)
+        self.db.merge_temp_entries()
         self.db.save(database.STORE_DB)
         self.close()
         
