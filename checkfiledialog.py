@@ -207,7 +207,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     def AcceptChanges(self):
         print('Accepted')
         self.db.merge_temp_entries()
-        self.db.save(database.STORE_DB)
+        if len(self.db.temp_entries) > 0:
+            return
         self.close()
         
         

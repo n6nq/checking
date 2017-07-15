@@ -26,6 +26,7 @@ STORE_PCKL = 2
 class Database(object):
 
     def __init__(self, name):
+        
         self.dbname = name
         conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
@@ -37,7 +38,7 @@ class Database(object):
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.selectAllEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
-        self.insertCatSQL = 'insert into Categories(name, super) VALUES (?,?)'
+        self.insertEntrySQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
         self.entries = []
         self.load_entries()
         
@@ -45,6 +46,7 @@ class Database(object):
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
+        self.insertCatSQL = 'insert into Categories(name, super) VALUES (?,?)'
         self.categories = set()
         self.load_categories()
         
@@ -58,24 +60,17 @@ class Database(object):
         self.selectAllOversSQL = 'select oid, override, category from Overrides'
         self.overrides = {}
         self.load_overrides()
-        
-        #self.accts = accounts.Accounts(self)
-        #self.accts.load(STORE_DB)
-        #self.entries = entry.Entries(self)
-        #self.entries.load(STORE_DB)
-        #self.temp_entries = entry.Entries(self)
-        # #self.entries.save(STORE_DB)
-        #self.categories = category.Category(self)
-        #self.categories.load(STORE_DB)
-        # #self.categories.save(STORE_DB)
-        #self.triggers = trigger.Trigger(self)
-        #self.triggers.load(STORE_DB)
-        # #self.triggers.save(STORE_DB)
-        #self.overrides = override.Overrides(self)
-        #self.overrides.load(STORE_DB)
-        # #self.overrides.save(STORE_DB)
-        #pass
-
+    
+    def add_entry(self, ent):
+        try:
+            self.conn.execute(self.insertEntrySQL, (ent.category, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not save entries in Entries table:\n', e.args[0])
+            return False
+        self.entries.append(ent)
+        return True
+       
     def cat_from_desc(self, desc):
         for over, cat in self.overrides.items():
             if over in desc:
@@ -101,7 +96,7 @@ class Database(object):
             try:
                 self.conn.execute(self.createEntriesSQL)
                 for row in self.conn.execute(self.selectAllEntriesSQL):
-                    self.entries.append(entry.Entry(row))
+                    self.entries.append(entry.Entry(self, row, entry.Entry.no_cat()))
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Entries table:\n', e.args[0])
                 
@@ -344,9 +339,20 @@ class Database(object):
         return False
     
     def merge_temp_entries(self):
-        for temp in self.temp_entries:
-            if temp not in self.entries:
-                self.entries.append(temp)
+        #As entries grows in size, make the search smarter, more code but faster
+        not_cats = []
+        self.temp_entries.reverse()
+        while len(self.temp_entries):
+            temp = self.temp_entries.pop()
+            if temp.category == None:
+                not_cats.append(temp)
+            else:
+                for perm_entry in self.entries:
+                    if temp == perm_entry:
+                        break
+                self.add_entry(temp)
+        if len(not_cats) > 0:
+            self.temp_entries = not_cats
     
     def open(self, name):
         self.dbname = name

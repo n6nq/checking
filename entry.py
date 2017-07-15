@@ -112,13 +112,16 @@ class Entry(dbrow.DBRow):
 #        self.desc = desc
 #        self.category = self.db.triggers.fromDesc(desc)
         
-    def compare(self, newEntry):
-        if (self.date - newEntry.date).total_seconds() == 0:
-            if self.amount.value == newEntry.amount.value:
-                if self.desc == newEntry.desc:
-                    return True
-        return False
-            
+    def __eq__(self, other):
+        return ((self.date - other.date).total_seconds() == 0 and \
+           self.amount.value == other.amount.value and \
+           self.desc == other.desc)
+    
+    def __ne__(self, other):
+        return (self.date != other.date or \
+           self.amount.value != other.amount.value or \
+           self.desc != other.desc)
+
     def asNotCatStr(self):
         retstr = self.date.strftime("%m/%d/%y") + ' ' + \
             self.amount.as_str() + ' ' + \
