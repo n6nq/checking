@@ -91,7 +91,7 @@ class Entry(dbrow.DBRow):
         self.oid = row[0]
         self.category = row[1]
         self.date = row[2]
-        self.amount = row[3]
+        self.amount = Money.from_number(row[3])
         self.cleared = row[4]
         self.checknum = row[5]
         self.desc = row[6]
