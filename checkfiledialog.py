@@ -34,8 +34,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnAddCat.clicked.connect(lambda: self.AddCategoryHndlr())
         self.listCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listCategorized))
         self.listUnCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listUnCategorized))     #self.connect(self.customContextMenuRequested, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.CategorizedPopUp)
-        self.btnAccept.connect(lambda: self.AcceptChanges())
-        self.btnCancel.connect(lambda: self.RejectChanges())
+        self.btnAccept.clicked.connect(lambda: self.AcceptChanges())
+        self.btnCancel.clicked.connect(lambda: self.RejectChanges())
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
     
@@ -63,8 +63,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.filePathEdit.setText(fileName[0])
         self.show()
         
-        self.cf.open(fileName[0])	
-        #iterate check file and load list widgets here
+        self.cf.open(fileName[0])
+        #iterate check file, disposing of dupes
+        new_checks = []
+        for check in self.db.temp_entries:
+            if check not in self.db.entries:
+                new_checks.append(check)
+        self.db.temp_entries = new_checks
+        #iterate remaining checks and load list widgets here
         for check in self.db.temp_entries:
             if check.category == None:
                 self.listUnCategorized.addItem(check.asNotCatStr())
@@ -208,6 +214,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         print('Accepted')
         self.db.merge_temp_entries()
         if len(self.db.temp_entries) > 0:
+            self.listCategorized.clear()
             return
         self.close()
         
