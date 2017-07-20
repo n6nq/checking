@@ -34,8 +34,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnAddCat.clicked.connect(lambda: self.AddCategoryHndlr())
         self.listCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listCategorized))
         self.listUnCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listUnCategorized))     #self.connect(self.customContextMenuRequested, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.CategorizedPopUp)
-        self.buttonBox.accepted.connect(lambda: self.AcceptChanges())
-        self.buttonBox.rejected.connect(lambda: self.RejectChanges())
+        self.btnAccept.connect(lambda: self.AcceptChanges())
+        self.btnCancel.connect(lambda: self.RejectChanges())
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
     

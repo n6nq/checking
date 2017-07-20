@@ -347,10 +347,12 @@ class Database(object):
             if temp.category == None:
                 not_cats.append(temp)
             else:
-                for perm_entry in self.entries:
-                    if temp == perm_entry:
-                        break
-                self.add_entry(temp)
+                if temp not in self.entries:
+                    self.add_entry(temp)
+                #for perm_entry in self.entries:
+                    #if temp == perm_entry:
+                        #continue
+                #self.add_entry(temp)
         if len(not_cats) > 0:
             self.temp_entries = not_cats
     

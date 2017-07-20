@@ -16,6 +16,10 @@ class Money(object):
         obj.value = int(float(amount_str) * 100)
         return obj
     
+    @classmethod
+    def str_to_num(cls, amount_str):
+        return int(float(amount_str) * 100)
+    
     def as_str(self):
         return '{}'.format(float(self.value) / 100)
     
