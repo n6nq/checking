@@ -69,6 +69,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         for check in self.db.temp_entries:
             if check not in self.db.entries:
                 new_checks.append(check)
+            
         self.db.temp_entries = new_checks
         #iterate remaining checks and load list widgets here
         for check in self.db.temp_entries:
