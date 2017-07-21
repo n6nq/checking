@@ -69,7 +69,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
     def reject_changes(self):
         # loads clear the current dictionaries and
         # read from original again
-        self.db.load()
+        #self.db.load()
+        pass
         #Trigger.load()
         #Category.load()
         #Override.load()

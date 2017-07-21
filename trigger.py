@@ -75,11 +75,3 @@ class Trigger(dbrow.DBRow):
         self.db.addTrigger(trig, cat)
         return True
     
-    def change_trigs_for_cat(self, current_cat, new_cat):
-        newd = {}
-        for trig, cat in self.cache.items():
-            if cat == current_cat:
-                newd[trig] = new_cat
-            else:
-                newd[trig] = cat
-        self.strings = newd

@@ -27,17 +27,6 @@ class Entries(object):
     def del_cat(self, cat):
         pass
     
-    def change_cat_of_entries(self, current, new, do_db):
-        list_affected = 0
-        for entry in self.entrylist:
-            if entry.category == current:
-                entry.category = new
-                list_affected += 1
-        if do_db:
-            db_affected = self.db.updateEntriesCats(current, new)
-            if db_affected != list_affected:
-                self.db.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
-
     def load(self, storage):
         if storage == database.STORE_PCKL:
             try:
