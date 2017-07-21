@@ -75,14 +75,6 @@ class Trigger(dbrow.DBRow):
         self.db.addTrigger(trig, cat)
         return True
     
-    def triggers_for_cat(self, lookFor):
-        triggers = []
-        for trig, cat in self.cache.items():
-            if cat == lookFor:
-                triggers.append(trig)
-                
-        return triggers
-    
     def change_trigs_for_cat(self, current_cat, new_cat):
         newd = {}
         for trig, cat in self.cache.items():

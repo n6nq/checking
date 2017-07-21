@@ -42,18 +42,18 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.btnDeleteCategory.clicked.connect(lambda: self.delete_category())
         self.btnDeleteTrigger.clicked.connect(lambda: self.delete_trigger())        
             
-        for cat in self.db.categories.strings:
+        for cat in self.db.categories:
             self.listCategories.addItem(cat)
         
         self.listCategories.setCurrentRow(0)
         selectedStr = self.listCategories.selectedItems()[0].text()
 
-        self.trigs = self.db.triggers.triggers_for_cat(selectedStr)
+        self.trigs = self.db.triggers_for_cat(selectedStr)
         for trig in self.trigs:
             self.listTriggers.addItem(trig)
         self.listTriggers.setCurrentRow(0)
         
-        self.overs = self.db.overrides.overs_for_cat(selectedStr)
+        self.overs = self.db.overs_for_cat(selectedStr)
         for over in self.overs:
             self.listOverrides.addItem(over)
         self.listOverrides.setCurrentRow(0)
@@ -94,8 +94,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         
         selected_str = self.listCategories.selectedItems()[0].text()
         self.category_str = selected_str
-        self.trigs = self.db.triggers.triggers_for_cat(selected_str)
-        self.overs = self.db.overrides.overs_for_cat(selected_str)
+        self.trigs = self.db.triggers_for_cat(selected_str)
+        self.overs = self.db.overs_for_cat(selected_str)
         self.edtCategory.setText(selected_str)
 
         for over in self.overs:
@@ -130,7 +130,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.category_str = self.edtCategory.text()
         #cat_list = self.listCategories.selectedItems()
     
-        self.db.categories.addCat(self.category_str)
+        self.db.add_cat(self.category_str)
         #self.db.overrides.add_over(self.override_str, cat_list[0].text())
         i = QListWidgetItem(self.category_str)
         self.listCategories.addItem(i)
@@ -154,10 +154,10 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_str = self.listOverrides.currentItem().text()
         newStr = self.edtOverride.text()
         self.listOverrides.takeItem(row)
-        over = self.db.overrides.strings[current_str]
-        del self.db.overrides.strings[current_str]
+        over = self.db.overrides[current_str]
+        del self.db.overrides[current_str]
         self.override_str = newStr
-        self.db.overrides.strings[newStr] = over
+        self.db.overrides[newStr] = over
         i = QListWidgetItem(newStr)
         self.listOverrides.addItem(i)
         self.listOverrides.setCurrentItem(i)        pass
@@ -167,7 +167,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         new_cat = self.edtCategory.text()
         row = self.listCategories.currentRow()
         self.listCategories.takeItem(row)
-        #cat = Category.strings[current_cat]
+        #cat = Category[current_cat]
         self.category_str = new_cat
         self.db.rename_category(current_cat, new_cat)
         i = QListWidgetItem(new_cat)
@@ -180,10 +180,10 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_str = self.listTriggers.currentItem().text()
         newStr = self.edtTrigger.text()
         self.listTriggers.takeItem(row)
-        trig = self.db.triggers.strings[current_str]
-        del self.db.triggers.strings[current_str]
+        trig = self.db.triggers[current_str]
+        del self.db.triggers[current_str]
         self.trigger_str = newStr
-        self.db.triggers.strings[newStr] = trig
+        self.db.triggers[newStr] = trig
         i = QListWidgetItem(newStr)
         self.listTriggers.addItem(i)
         self.listTriggers.setCurrentItem(i)
@@ -193,7 +193,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.override_str == '' or self.override_str == None:
             return False
         current = self.listOverrides.currentRow()
-        del self.db.overrides.strings[self.override_str]
+        del self.db.overrides[self.override_str]
         self.listOverrides.takeItem(current)
         if current > 0:
             current -= 1
@@ -218,7 +218,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listCategories.takeItem(current)
         #delete member of set
         self.db.categories.removeCat(current_str)
-        #del Category.strings[self.category_str]
+        #del Category[self.category_str]
         if current > 0:
             current -= 1
         self.listCategories.setCurrentRow(current)
@@ -230,7 +230,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.trigger_str == None:
             return False
         current = self.listTriggers.currentRow()
-        del self.db.triggers.strings[self.trigger_str]
+        del self.db.triggers[self.trigger_str]
         self.listTriggers.takeItem(current)
         if current > 0:
             current -= 1

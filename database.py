@@ -370,7 +370,25 @@ class Database(object):
         self.conn.commit()
         
     def save(self, storage):
+        print("Database.save is OBSOLTE")
         #self.categories.save(storage)
         #self.triggers.save(storage)
         #self.overrides.save(storage)
-        self.entries.save(storage)
+        #self.entries.save(storage)
+
+    def triggers_for_cat(self, lookFor):
+        triggers = []
+        for trig, cat in self.triggers.items():
+            if cat == lookFor:
+                triggers.append(trig)
+                
+        return triggers
+    
+    def overs_for_cat(self, lookFor):
+        overs = []
+        for over, cat in self.overrides.items():
+            if cat == lookFor:
+                overs.append(over)
+                
+        return overs
+

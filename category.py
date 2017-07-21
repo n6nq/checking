@@ -29,9 +29,7 @@ class Category(dbrow.DBRow):
                 newSet.add(cat)
         self.cache = newSet
 
-    def addCat(self, catStr):
-        self.cache.add(catStr)
-        self.db.addCat(catStr)
+
 
 #   def addToDB(self, catStr):
 #        try:

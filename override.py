@@ -61,16 +61,6 @@ class Override(dbrow.DBRow):
         self.strings[over_str] = cat
         
     
-
-    
-    def overs_for_cat(self, lookFor):
-        overs = []
-        for over, cat in self.strings.items():
-            if cat == lookFor:
-                overs.append(over)
-                
-        return overs
-    
     def change_overs_for_cat(self, current_cat, new_cat):
         newd = {}
         for over, cat in self.strings.items():
