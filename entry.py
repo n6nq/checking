@@ -21,9 +21,6 @@ class Entries(object):
         db.create_table(self.createSQL, 'Entries')  #TODO: maybe skip if temp_entries
         #self.load(storage)   load after it's created
 
-        #todo: decide about pickle files
-        #self.picklename = acct_str + '_entrylist.pckl'
-
     def del_cat(self, cat):
         pass
     

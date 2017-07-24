@@ -30,4 +30,5 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui \
     readcheckfile.ui \
-    categories.ui
+    categories.ui \
+    warninglistdlg.ui

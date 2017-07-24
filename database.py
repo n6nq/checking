@@ -230,7 +230,14 @@ class Database(object):
         
     def error(self, msg, reason):
         print (msg, reason)     #TODO make ui for error messages  
+    
+    def find_all_related_to_cat(self, cat):
+        affected = []
         
+        for row in self.conn.execute(self.findCatInOverridesSQL):
+            affected.append('<Override>'+row[1])
+            
+        return affected
     def get_all_accounts(self):
         acct_list = []
         try:

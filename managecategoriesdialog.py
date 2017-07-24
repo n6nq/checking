@@ -203,15 +203,16 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         pass
     
     def delete_category(self):
-        current = self.listCategories.currentRow()
-        current_str = self.listCategories.selectedItems()[0].text()
+        current_row = self.listCategories.currentRow()
+        selected_cat = self.listCategories.selectedItems()[0].text()
+        affected_list = self.db.find_all_related_to_cat(selected_cat)
         msgBox = QMessageBox()
         reply = msgBox.question(self, 'All entries with this category will become uncategorized!',
                         'Yes?', QMessageBox.Yes|QMessageBox.No)
         #msgBox.exec()
         if reply == QMessageBox.Yes:
             print('KaBoom')
-            self.db.removeCategory(current_str)
+            self.db.remove_category(current_str)
         else:
             print('KaBlam')
             return
