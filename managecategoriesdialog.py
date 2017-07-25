@@ -6,6 +6,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
 import PyQt5.QtGui
 from categories_auto import Ui_ManageCategoriesDialog
+from warninglistdlg_auto import Ui_warninglistdlg
+from warninglistdialog import WarningListDialog
 import database
 import accounts
 import category
@@ -16,10 +18,10 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
     
     def __init__(self, db):
         super(ManageCategoriesDialog, self).__init__()
+        self.db = db
         
         self.setupUi(self)
         
-        self.db = db
         self.override_str = ''
         self.category_str = ''
         self.trigger_str = ''
@@ -67,6 +69,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         #Override.save()
     
     def reject_changes(self):
+        print('Burp!')
         # loads clear the current dictionaries and
         # read from original again
         #self.db.load()
@@ -206,13 +209,18 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_row = self.listCategories.currentRow()
         selected_cat = self.listCategories.selectedItems()[0].text()
         affected_list = self.db.find_all_related_to_cat(selected_cat)
-        msgBox = QMessageBox()
-        reply = msgBox.question(self, 'All entries with this category will become uncategorized!',
-                        'Yes?', QMessageBox.Yes|QMessageBox.No)
+
+        dl = WarningListDialog(
+            'The Overrides and Triggers in the list below will be deleted!\n' + \
+            'All Entries will have their category changed to None.', \
+            affected_list)
+        #msgBox = QMessageBox()
+        #reply = msgBox.question(self, 'All entries with this category will become uncategorized!',
+        #                'Yes?', QMessageBox.Yes|QMessageBox.No)
         #msgBox.exec()
-        if reply == QMessageBox.Yes:
+        if dl.reply == True:
             print('KaBoom')
-            self.db.remove_category(current_str)
+            self.db.remove_category(selected_cat)
         else:
             print('KaBlam')
             return
