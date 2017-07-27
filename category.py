@@ -22,12 +22,12 @@ class Category(dbrow.DBRow):
         #db.create_table(self.createSQL, 'Categories')
         #self.load(storage)  load after they are created
 
-    def removeCat(self, catStr):
-        newSet = set()
-        for cat in self.cache:
-            if cat != catStr:
-                newSet.add(cat)
-        self.cache = newSet
+    #def removeCat(self, catStr):
+    #    newSet = set()
+    #    for cat in self.cache:
+    #        if cat != catStr:
+    #            newSet.add(cat)
+    #    self.cache = newSet
 
 
 

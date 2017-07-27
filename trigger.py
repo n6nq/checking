@@ -24,12 +24,12 @@ class Trigger(dbrow.DBRow):
         db.create_table(self.createSQL, 'Triggers')
         #self.load(storage)  load after they are created
 
-    def del_cat(self, lose_cat):
-        newd = {}
-        for trig, cat in self.cache.items():
-            if cat != lose_cat:
-                newd[trig] = cat
-        self.cache = newd
+    #def del_cat(self, lose_cat):
+    #    newd = {}
+    #    for trig, cat in self.cache.items():
+    #        if cat != lose_cat:
+    #            newd[trig] = cat
+    #    self.cache = newd
         
         #try:
         #    cur = self.db.conn.execute(self.deleteCatSQL)

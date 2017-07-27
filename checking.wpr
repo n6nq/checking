@@ -36,6 +36,8 @@ proj.file-list = [loc('accounts.py'),
                   loc('readcheckfile.ui'),
                   loc('readcheckfile_auto.py'),
                   loc('trigger.py'),
-                  loc('triggers.pckl')]
+                  loc('triggers.pckl'),
+                  loc('warninglistdialog.py'),
+                  loc('warninglistdlg_auto.py')]
 proj.file-type = 'shared'
 proj.main-file = 'entry:main.py'

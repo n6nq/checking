@@ -39,6 +39,7 @@ class Database(object):
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.selectAllEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
         self.insertEntrySQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
+        self.findCatInEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries where category = ?'
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
         
         self.entries = []
@@ -49,24 +50,32 @@ class Database(object):
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
         self.insertCatSQL = 'insert into Categories(name, super) VALUES (?,?)'
+        self.insertNoneCatSQL = 'insert or ignore into Categories(name, super) values (?, ?)'
+        self.deleteCatSQL = 'delete from Categories where name = ?'
         self.categories = set()
         self.load_categories()
         
         self.createTrigsSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
         self.selectAllTrigsSQL = 'select oid, trigger, category from Triggers'
         self.insertTrigsSQL = 'insert into Triggers(trigger, category) values(?, ?)'
+        self.findCatInTriggersSQL = 'select oid, trigger, category from Triggers where category = ?'
+        self.updateTriggersCatSQL = 'update Triggers set category = ? where category = ?'
         self.triggers = {}
         self.load_triggers()
         
         self.createOversSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
         self.selectAllOversSQL = 'select oid, override, category from Overrides'
+        self.insertOverrideSQL = 'insert into Overrides(override, category) values(?, ?)'
+        self.findCatInOverridesSQL = 'select oid, override, category from Overrides where category = ?'
+        self.updateOverridesCatSQL = 'update Overrides set category = ? where category = ?'
         self.overrides = {}
         self.load_overrides()
     
-    def add_account(self, row):
+    def add_account(self, name):
         try:
             self.conn.execute(self.insertAccountSQL, (name, today, today, ''))
             self.commit()
+            self.accounts.append(name)
             return True
         except sqlite3.Error as e:
             self.error('Could not create new Account record:\n', e.args[0])
@@ -80,6 +89,7 @@ class Database(object):
                 self.categories.add(catStr)
                 self.conn.execute(self.insertCatSQL, (catStr, None))
                 self.commit()
+                self.categories.add(catStr)
                 return True
         except sqlite3.Error as e:
             self.error('Could not save category in Category table:\n', e.args[0])
@@ -90,26 +100,29 @@ class Database(object):
         try:
             self.conn.execute(self.insertEntrySQL, (ent.category, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
             self.commit()
+            self.entries.append(ent)
+            return True
         except sqlite3.Error as e:
             self.error('Could not save entries in Entries table:\n', e.args[0])
             return False
-        self.entries.append(ent)
-        return True
        
-    def add_entry_list(self, entryList):
-        try:
-            for entry in self.entrylist:
-                cur = self.db.conn.cursor()
-                cur.execute(self.insertEntrySQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
-        except sqlite3.Error as e:
-            self.error('Could not save entries in EntryList table:\n', e.args[0])
+    #def add_entry_list(self, entryList):
+    #    try:
+    #        for entry in self.entrylist:
+    #            cur = self.db.conn.cursor()
+    #            cur.execute(self.insertEntrySQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
+    #    except sqlite3.Error as e:
+    #        self.error('Could not save entries in EntryList table:\n', e.args[0])
             
     def add_override(self, over, cat):
         try:
             self.conn.execute(self.insertOverrideSQL, (over, cat))
             self.commit()
+            self.overrides[over] = cat
+            return True
         except sqlite3.Error as e:
             self.error('Could save overrides in Overrides table:\n', e.args[0])
+            return False
             
             
         
@@ -121,8 +134,9 @@ class Database(object):
         try:
             if trig in self.triggers:
                 return False
-            self.triggers[trig] = cat
             self.conn.execute(self.insertTrigsSQL, (trig, cat))
+            self.commit()
+            self.triggers[trig] = cat
             return True
         except sqlite3.Error as e:
             self.error('Could not save triggers in Triggers table:\n', e.args[0])
@@ -228,16 +242,36 @@ class Database(object):
     def create_account(self, name):
         self.accts.createAccount(name)
         
+    
+    def delete_category(self, lose_cat):
+        try:
+            self.conn.execute(self.deleteCatSQL, (lose_cat, ))
+            self.commit()
+            self.categories.discard(lose_cat)
+        except sqlite3.Error as e:
+            self.error('Could not delete Category:')
+            
+    
     def error(self, msg, reason):
         print (msg, reason)     #TODO make ui for error messages  
     
-    def find_all_related_to_cat(self, cat):
+    def find_all_related_to_cat(self, catstr):
         affected = []
         
-        for row in self.conn.execute(self.findCatInOverridesSQL):
-            affected.append('<Override>'+row[1])
+        for over, cat in self.overrides.items():
+            if cat == catstr:
+                affected.append('<Override>'+over)
+
+        for trig, cat in self.triggers.items():
+            if cat == catstr:
+                affected.append('<Trigger>'+trig)
+        
+        for entry in self.entries:
+            if entry.category == catstr:
+                affected.append('<Entry>'+entry.asCategorizedStr())
             
         return affected
+    
     def get_all_accounts(self):
         acct_list = []
         try:
@@ -300,6 +334,7 @@ class Database(object):
         if len(self.categories) == 0:
             try:
                 self.conn.execute(self.createCatsSQL)
+                self.conn.execute(self.insertNoneCatSQL, ('None', 'None'))
                 for row in self.conn.execute(self.selectAllCatsSQL):
                     self.categories.add(category.Category(row).cat)
             except sqlite3.Error as e:
@@ -375,17 +410,17 @@ class Database(object):
         return overs
 
     def remove_category(self, cat):
-        #remove triggers
-        self.triggers.del_cat(cat)
-        #remove overrides
-        self.overrides.del_cat(cat)
-        #remove entries
-        self.entries.del_cat(cat)
-        #remove temp_entries
-        self.temp_entries.del_cat(cat)
+        """Change all entries and temp_entries with this cat to None. Change the Category
+        of all triggers and overrides with this cat to None. Finally remove this category."""
+        #update affected entries to None 
+        self.update_entries_cats(cat, category.Category.no_category())
+        #update affected triggers to None
+        self.update_triggers_cats(cat, category.Category.no_category())
+        #update affected overrides to None
+        self.update_overrides_cats(cat, category.Category.no_category())
         #remove category
-        self.categories.del_cat(cat)
-        pass
+        self.delete_category(cat)
+
     
     def rename_category(self, current_cat, new_cat):
         self.add_cat(new_cat)
@@ -415,7 +450,7 @@ class Database(object):
         
     
     def save(self, storage):
-        print("Database.save is OBSOLTE")
+        print("Database.save is OBSOLETE")
         #self.categories.save(storage)
         #self.triggers.save(storage)
         #self.overrides.save(storage)
@@ -432,7 +467,42 @@ class Database(object):
     def update_entries_cats(self, curCat, newCat):
         try:
             cur = self.conn.execute(self.updateEntryCatSQL, (curCat, newCat))
-            return cur.rowcount
+            self.commit()
+            for ent in self.entries:
+                if ent.category == curCat:
+                    ent.category = newCat
+                    
+            for ent in self.temp_entries:
+                if ent.category == curCat:
+                    ent.category = newCat
+            return True
         except sqlite3.Error as e:
             self.error('Error updating categories in Entries table:\n', e.args[0])
+            return False
     
+    def update_triggers_cats(self, curCat, newCat):
+        try:
+            self.conn.execute(self.updateTriggersCatSQL, (curCat, newCat))
+            self.commit()
+            for trig, cat in self.triggers.items():
+                if cat == curCat:
+                    self.triggers[trig] = newCat
+                    
+            return True
+        except sqlite3.Error as e:
+            self.error("Error while updating trigger's categories.", e.args[0])
+            return False
+        
+    def update_overrides_cats(self, curCat, newCat):
+        try:
+            self.conn.execute(self.updateOverridesCatSQL, (curCat, newCat))
+            self.commit()
+            for over, cat in self.overrides.items():
+                if cat == curCat:
+                    self.overrides[over] = newCat
+                    
+            return True
+        except sqlite3.Error as e:
+            self.error("Error while updating override's categories.", e.args[0])
+            return False
+        

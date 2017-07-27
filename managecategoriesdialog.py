@@ -123,7 +123,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.override_str = self.edtOverride.text()
         cat_list = self.listCategories.selectedItems()
         
-        self.db.overrides.add_over(self.override_str, cat_list[0].text())
+        self.db.add_override(self.override_str, cat_list[0].text())
         i = QListWidgetItem(self.override_str)
         self.listOverrides.addItem(i)
         self.listOverrides.setCurrentItem(i)
@@ -146,7 +146,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.trigger_str = self.edtTrigger.text()
         cat_list = self.listCategories.selectedItems()
 
-        self.db.triggers.addTrig(self.trigger_str, cat_list[0].text())
+        self.db.add_trigger(self.trigger_str, cat_list[0].text())
         i = QListWidgetItem(self.trigger_str)
         self.listTriggers.addItem(i)
         self.listTriggers.setCurrentItem(i)
@@ -225,13 +225,13 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             print('KaBlam')
             return
         #todo all entries with this category will be changed messageBox
-        self.listCategories.takeItem(current)
+        self.listCategories.takeItem(current_row)
         #delete member of set
-        self.db.categories.removeCat(current_str)
+        #self.db.categories.removeCat(current_str)
         #del Category[self.category_str]
-        if current > 0:
-            current -= 1
-        self.listCategories.setCurrentRow(current)
+        if current_row > 0:
+            current_row -= 1
+        self.listCategories.setCurrentRow(current_row)
         self.list_categories_select_changed()
         pass
     
