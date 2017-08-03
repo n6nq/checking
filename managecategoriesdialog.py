@@ -157,6 +157,9 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         row = self.listOverrides.currentRow()
         current_str = self.listOverrides.currentItem().text()
         newStr = self.edtOverride.text()
+        find_all_related_to_over
+        warn
+        db.rename_override
         self.listOverrides.takeItem(row)
         over = self.db.overrides[current_str]
         del self.db.overrides[current_str]
@@ -170,6 +173,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_cat = self.listCategories.currentItem().text()
         new_cat = self.edtCategory.text()
         row = self.listCategories.currentRow()
+        find_all_related_to_cat
+        warn
         self.listCategories.takeItem(row)
         #cat = Category[current_cat]
         self.category_str = new_cat
@@ -177,26 +182,36 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         i = QListWidgetItem(new_cat)
         self.listCategories.addItem(i)
         self.listCategories.setCurrentItem(i)
-        pass
     
     def rename_trigger(self):
         row = self.listTriggers.currentRow()
         current_str = self.listTriggers.currentItem().text()
-        newStr = self.edtTrigger.text()
+        new_str = self.edtTrigger.text()
+
+        affected_list = self.db.find_all_related_to_trig(current_str)
+        dl = WarningListDialog(
+            "All entries listed below are categorized by trigger string '"+current_str+"'.\n" + \
+            "If they have the new trigger string '"+new_str+"', they will keep their current category.\n"+ \
+            "If they do not contain the new trigger string, their category will be set to None.", 
+            affected_list)
+        
+        self.db.rename_trigger(current_str, new_str)
         self.listTriggers.takeItem(row)
-        trig = self.db.triggers[current_str]
-        del self.db.triggers[current_str]
-        self.trigger_str = newStr
-        self.db.triggers[newStr] = trig
-        i = QListWidgetItem(newStr)
+        #trig = self.db.triggers[current_str]
+        #del self.db.triggers[current_str]
+        self.trigger_str = new_str
+        #self.db.triggers[new_str] = trig
+        i = QListWidgetItem(new_str)
         self.listTriggers.addItem(i)
         self.listTriggers.setCurrentItem(i)
-        pass
     
     def delete_override(self):
         if self.override_str == '' or self.override_str == None:
             return False
         current = self.listOverrides.currentRow()
+        db.find_all_related_to_over
+        WarningListDialog
+        db.remove_override
         del self.db.overrides[self.override_str]
         self.listOverrides.takeItem(current)
         if current > 0:
@@ -240,6 +255,9 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.trigger_str == None:
             return False
         current = self.listTriggers.currentRow()
+        db.find_all_related_to_trigger
+        warn
+        db.remove_trigger
         del self.db.triggers[self.trigger_str]
         self.listTriggers.takeItem(current)
         if current > 0:
