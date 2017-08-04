@@ -69,14 +69,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         #Override.save()
     
     def reject_changes(self):
-        print('Burp!')
-        # loads clear the current dictionaries and
-        # read from original again
-        #self.db.load()
-        pass
-        #Trigger.load()
-        #Category.load()
-        #Override.load()
+        print('Burp!')      #todo change accept/reject buttons to a done button
     
     def list_overrides_select_changed(self):
         selected_list = self.listOverrides.selectedItems()
@@ -173,12 +166,19 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_cat = self.listCategories.currentItem().text()
         new_cat = self.edtCategory.text()
         row = self.listCategories.currentRow()
-        find_all_related_to_cat
-        warn
+        affected_list = self.db.find_all_related_to_cat(current_cat)
+        dl = WarningListDialog(
+            "All triggers, overrides and entries listed below are relatd to the category'"+current_cat+"'.\n" + \
+            "They will have their categories change to the new category '"+new_cat+"'.\n", 
+            affected_list)
+
+        if dl.reply == True:
+            print('KaBoom')
+            self.db.rename_category(current_cat, new_cat)
+
         self.listCategories.takeItem(row)
         #cat = Category[current_cat]
         self.category_str = new_cat
-        self.db.rename_category(current_cat, new_cat)
         i = QListWidgetItem(new_cat)
         self.listCategories.addItem(i)
         self.listCategories.setCurrentItem(i)
@@ -229,10 +229,6 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             'The Overrides and Triggers in the list below will be deleted!\n' + \
             'All Entries will have their category changed to None.', \
             affected_list)
-        #msgBox = QMessageBox()
-        #reply = msgBox.question(self, 'All entries with this category will become uncategorized!',
-        #                'Yes?', QMessageBox.Yes|QMessageBox.No)
-        #msgBox.exec()
         if dl.reply == True:
             print('KaBoom')
             self.db.remove_category(selected_cat)

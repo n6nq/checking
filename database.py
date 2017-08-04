@@ -509,7 +509,7 @@ class Database(object):
         a category. Changes database and memory copies of records.
         This function covers both the permanent entries and the temp_entries."""
         try:
-            cur = self.conn.execute(self.updateEntryCatSQL, (curCat, newCat))
+            cur = self.conn.execute(self.updateEntryCatSQL, (newCat, curCat))
             self.commit()
             for ent in self.entries:
                 if ent.category == curCat:
