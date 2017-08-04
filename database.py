@@ -527,7 +527,7 @@ class Database(object):
         """Changes all instances of triggers of a specific category to a new category.
         Changes database and memory records."""
         try:
-            self.conn.execute(self.updateTriggersCatSQL, (curCat, newCat))
+            self.conn.execute(self.updateTriggersCatSQL, (newCat, curCat))
             self.commit()
             for trig, cat in self.triggers.items():
                 if cat == curCat:
@@ -540,7 +540,7 @@ class Database(object):
         
     def update_overrides_cats(self, curCat, newCat):
         try:
-            self.conn.execute(self.updateOverridesCatSQL, (curCat, newCat))
+            self.conn.execute(self.updateOverridesCatSQL, (newCat, curCat))
             self.commit()
             for over, cat in self.overrides.items():
                 if cat == curCat:
