@@ -248,9 +248,10 @@ class Database(object):
             self.conn.execute(self.deleteCatSQL, (lose_cat, ))
             self.commit()
             self.categories.discard(lose_cat)
+            return True
         except sqlite3.Error as e:
             self.error('Could not delete Category:')
-            
+            return False
     
     def error(self, msg, reason):
         print (msg, reason)     #TODO make ui for error messages  
@@ -438,10 +439,10 @@ class Database(object):
     
     def rename_category(self, current_cat, new_cat):
         if self.add_cat(new_cat) == False or \
-           self.update_triggers_cats(current_cat, new_cat) == False or \
            self.update_overrides_cats(current_cat, new_cat) == False or \
+           self.update_triggers_cats(current_cat, new_cat) == False or \
            self.update_entries_cats(current_cat, new_cat) == False or \
-           self.categories.remove(current_cat) == False:
+           self.delete_category(self, current_cat) == False:
             return False
         else:
             self.commit()
@@ -450,8 +451,7 @@ class Database(object):
     def rename_trigger(self, cur_trig, new_trig):
         cat = self.triggers[cur_trig]
         try:
-            if self.add_trigger(new_trig, cat) == False or \
-               self.remove_trigger(cur_trig) == False:
+            if self.add_trigger(new_trig, cat) == False:
                 return False
             
             for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
@@ -465,6 +465,9 @@ class Database(object):
             for ent in self.temp_entries:
                 if new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
+            
+            if self.remove_trigger(cur_trig) == False:
+                        return False
             self.commit()
             return True
         except sqlite3.Error as e:
