@@ -14,6 +14,18 @@ import category
 import trigger
 import override
 
+class Message(QDialog):
+    
+    def __init__(self, message, parent=None):
+        super(Message, self).__init__(parent)
+
+        msgBox = QMessageBox()
+        msgBox.setText(message)
+        #msgBox.addButton(QtGui.QPushButton('Accept'), QtGui.QMessageBox.YesRole)
+        #msgBox.addButton(QtGui.QPushButton('Reject'), QtGui.QMessageBox.NoRole)
+        #msgBox.addButton(QtGui.QPushButton('Cancel'), QtGui.QMessageBox.RejectRole)
+        self.retval = msgBox.exec_()
+        
 class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
     
     def __init__(self, db):
@@ -174,7 +186,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
 
         if dl.reply == True:
             print('KaBoom')
-            self.db.rename_category(current_cat, new_cat)
+            self.db.rename_category_all(current_cat, new_cat)
 
         self.listCategories.takeItem(row)
         #cat = Category[current_cat]
@@ -195,7 +207,12 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             "If they do not contain the new trigger string, their category will be set to None.", 
             affected_list)
         
-        self.db.rename_trigger(current_str, new_str)
+        if self.db.rename_trigger_all(current_str, new_str) == False:
+            msgbox = Message('Rename of Trigger failed.')
+            retval = msgbox.retval
+            return
+            #msgBox.setText("Rename of Trigger failed.");
+            #msgBox.exec_();
         self.listTriggers.takeItem(row)
         #trig = self.db.triggers[current_str]
         #del self.db.triggers[current_str]
@@ -231,11 +248,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             affected_list)
         if dl.reply == True:
             print('KaBoom')
-            self.db.remove_category(selected_cat)
+            self.db.delete_category_all(selected_cat)
         else:
             print('KaBlam')
             return
-        #todo all entries with this category will be changed messageBox
+
         self.listCategories.takeItem(current_row)
         #delete member of set
         #self.db.categories.removeCat(current_str)
@@ -253,7 +270,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current = self.listTriggers.currentRow()
         db.find_all_related_to_trigger
         warn
-        db.remove_trigger
+        db.remove_trigger_related
         del self.db.triggers[self.trigger_str]
         self.listTriggers.takeItem(current)
         if current > 0:

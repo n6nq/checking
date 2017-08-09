@@ -60,6 +60,8 @@ class Database(object):
         self.insertTrigsSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         self.findCatInTriggersSQL = 'select oid, trigger, category from Triggers where category = ?'
         self.updateTriggersCatSQL = 'update Triggers set category = ? where category = ?'
+        self.deleteTrigSQL = 'delete from Triggers where trigger = ?'
+        
         self.triggers = {}
         self.load_triggers()
         
@@ -243,7 +245,7 @@ class Database(object):
         self.accts.createAccount(name)
         
     
-    def delete_category(self, lose_cat):
+    def delete_category_only(self, lose_cat):
         try:
             self.conn.execute(self.deleteCatSQL, (lose_cat, ))
             self.commit()
@@ -252,6 +254,37 @@ class Database(object):
         except sqlite3.Error as e:
             self.error('Could not delete Category:')
             return False
+    
+    def delete_category_all(self, cat):
+        """Change all entries and temp_entries with this cat to None. Change the Category
+        of all triggers and overrides with this cat to None. Finally remove this category."""
+        #update affected entries to None 
+        self.update_entries_cats(cat, category.Category.no_category())
+        #update affected triggers to None
+        self.update_triggers_cats(cat, category.Category.no_category())
+        #update affected overrides to None
+        self.update_overrides_cats(cat, category.Category.no_category())
+        #remove category
+        self.delete_category_only(cat)
+
+    def delete_trigger_only(self, trig):
+        if trig not in self.triggers:
+            return False
+        try:
+            self.conn.execute(self.deleteTrigSQL, (trig, ))
+            
+            del self.triggers[trig]
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not delete Trigger:')
+            return False
+            
+
+    def entry_is_dupe(self, newEtry):
+        for entry in self.entrylist:
+            if entry.compare(newEtry):
+                return True
+        return False
     
     def error(self, msg, reason):
         print (msg, reason)     #TODO make ui for error messages  
@@ -330,12 +363,6 @@ class Database(object):
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         return trigs
         
-    def isDupe(self, newEtry):
-        for entry in self.entrylist:
-            if entry.compare(newEtry):
-                return True
-        return False
-    
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:
@@ -424,31 +451,46 @@ class Database(object):
                 
         return overs
 
-    def remove_category(self, cat):
-        """Change all entries and temp_entries with this cat to None. Change the Category
-        of all triggers and overrides with this cat to None. Finally remove this category."""
-        #update affected entries to None 
-        self.update_entries_cats(cat, category.Category.no_category())
-        #update affected triggers to None
-        self.update_triggers_cats(cat, category.Category.no_category())
-        #update affected overrides to None
-        self.update_overrides_cats(cat, category.Category.no_category())
-        #remove category
-        self.delete_category(cat)
-
-    
-    def rename_category(self, current_cat, new_cat):
+    def rename_category_all(self, current_cat, new_cat):
         if self.add_cat(new_cat) == False or \
            self.update_overrides_cats(current_cat, new_cat) == False or \
            self.update_triggers_cats(current_cat, new_cat) == False or \
            self.update_entries_cats(current_cat, new_cat) == False or \
-           self.delete_category(self, current_cat) == False:
+           self.delete_category_only(current_cat) == False:
             return False
         else:
             self.commit()
             return True
         
-    def rename_trigger(self, cur_trig, new_trig):
+    def rename_override_all(self, cur_over, new_over):
+        cat = self.overrides[cur_over]
+        try:
+            if self.add_override(new_over, cat) == False:
+                return False
+            
+            for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
+                if new_over not in ent.desc:
+                    self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
+
+            for ent in self.entries:
+                if ent.category == cat and new_over not in ent.desc:
+                    ent.category = category.Category.no_category()
+                    
+            for ent in self.temp_entries:
+                if ent.category == cat and new_over not in ent.desc:
+                    ent.category = category.Category.no_category()
+            
+            if self.remove_override_only(cur_over) == False:
+                        return False
+            self.commit()
+            return True
+        except sqlite3.Error as e:
+            self.error('Error updating triggers in Entries table:\n', e.args[0])
+            return False
+
+    def rename_trigger_all(self, cur_trig, new_trig):
+        if new_trig in self.triggers:
+            return False
         cat = self.triggers[cur_trig]
         try:
             if self.add_trigger(new_trig, cat) == False:
@@ -459,14 +501,14 @@ class Database(object):
                     self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
 
             for ent in self.entries:
-                if new_trig not in ent.desc:
+                if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
                     
             for ent in self.temp_entries:
-                if new_trig not in ent.desc:
+                if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
             
-            if self.remove_trigger(cur_trig) == False:
+            if self.delete_trigger_only(cur_trig) == False:
                         return False
             self.commit()
             return True
