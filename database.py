@@ -60,7 +60,7 @@ class Database(object):
         self.insertTrigsSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         self.findCatInTriggersSQL = 'select oid, trigger, category from Triggers where category = ?'
         self.updateTriggersCatSQL = 'update Triggers set category = ? where category = ?'
-        self.deleteTrigSQL = 'delete from Triggers where trigger = ?'
+        self.deleteTrigSQL = 'delete from Triggers where trigger = ? and category = ?'
         
         self.triggers = {}
         self.load_triggers()
@@ -70,6 +70,8 @@ class Database(object):
         self.insertOverrideSQL = 'insert into Overrides(override, category) values(?, ?)'
         self.findCatInOverridesSQL = 'select oid, override, category from Overrides where category = ?'
         self.updateOverridesCatSQL = 'update Overrides set category = ? where category = ?'
+        self.deleteOverSQL = 'delete from Overrides where override = ? and category = ?'
+        
         self.overrides = {}
         self.load_overrides()
     
@@ -267,11 +269,23 @@ class Database(object):
         #remove category
         self.delete_category_only(cat)
 
-    def delete_trigger_only(self, trig):
+    def delete_override_only(self, over, cat):
+        if over not in self.overrides:
+            return False
+        try:
+            self.conn.execute(self.deleteOverSQL, (over, cat))
+            
+            del self.overrides[over]
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not delete Override:')
+            return False
+
+    def delete_trigger_only(self, trig, cat):
         if trig not in self.triggers:
             return False
         try:
-            self.conn.execute(self.deleteTrigSQL, (trig, ))
+            self.conn.execute(self.deleteTrigSQL, (trig, cat))
             
             del self.triggers[trig]
             self.commit()
@@ -316,6 +330,20 @@ class Database(object):
 
         for entry in self.temp_entries:
             if entry.category == catstr and current_str in entry.desc:
+                affected.append('<NewEntry>'+entry.asCategorizedStr())
+
+        return affected
+        
+    def find_all_related_to_over(self, over):
+        affected = []
+        #first, get the category for this trigger
+        catstr = self.overrides[over]
+        for entry in self.entries:
+            if entry.category == catstr and over in entry.desc:
+                affected.append('<Entry>'+entry.asCategorizedStr())
+
+        for entry in self.temp_entries:
+            if entry.category == catstr and over in entry.desc:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
         return affected
@@ -480,8 +508,8 @@ class Database(object):
                 if ent.category == cat and new_over not in ent.desc:
                     ent.category = category.Category.no_category()
             
-            if self.remove_override_only(cur_over) == False:
-                        return False
+            if self.delete_override_only(cur_over, cat) == False:
+                return False
             self.commit()
             return True
         except sqlite3.Error as e:
@@ -508,7 +536,7 @@ class Database(object):
                 if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
             
-            if self.delete_trigger_only(cur_trig) == False:
+            if self.delete_trigger_only(cur_trig, cat) == False:
                         return False
             self.commit()
             return True

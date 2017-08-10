@@ -161,16 +161,18 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
     def rename_override(self):
         row = self.listOverrides.currentRow()
         current_str = self.listOverrides.currentItem().text()
-        newStr = self.edtOverride.text()
-        find_all_related_to_over
-        warn
-        db.rename_override
+        new_str = self.edtOverride.text()
+        affected_list = self.db.find_all_related_to_over(current_str)
+        dl = WarningListDialog(
+            "All entries listed below are categorized by the override string '"+current_str+"'.\n" + \
+            "If they have the new override string '"+new_str+"', they will keep their current category.\n"+ \
+            "If they do not contain the new override string, their category will be set to None.", 
+            affected_list)
+
+        self.db.rename_override_all(current_str, new_str)
         self.listOverrides.takeItem(row)
-        over = self.db.overrides[current_str]
-        del self.db.overrides[current_str]
-        self.override_str = newStr
-        self.db.overrides[newStr] = over
-        i = QListWidgetItem(newStr)
+        self.override_str = new_str
+        i = QListWidgetItem(new_str)
         self.listOverrides.addItem(i)
         self.listOverrides.setCurrentItem(i)        pass
     
@@ -223,11 +225,15 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listTriggers.setCurrentItem(i)
     
     def delete_override(self):
+        affected = []
         if self.override_str == '' or self.override_str == None:
             return False
         current = self.listOverrides.currentRow()
-        db.find_all_related_to_over
-        WarningListDialog
+        affected = self.db.find_all_related_to_over(override_str)
+        dl = WarningListDialog(
+            'All Entries will have their category changed to None.', \
+            affected)
+        self.
         db.remove_override
         del self.db.overrides[self.override_str]
         self.listOverrides.takeItem(current)
