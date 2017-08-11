@@ -169,9 +169,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             "If they do not contain the new override string, their category will be set to None.", 
             affected_list)
         if dl.reply == True:
-            self.db.rename_override_all(current_str, new_str)
+            if self.db.rename_override_all(current_str, new_str) == False:
+                msgbox = Message('Rename of Override failed.')
+                return False
         else:
-            return
+            return False
 
         self.listOverrides.takeItem(row)
         self.override_str = new_str
@@ -190,9 +192,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             affected_list)
 
         if dl.reply == True:
-            self.db.rename_category_all(current_cat, new_cat)
+            if self.db.rename_category_all(current_cat, new_cat) == False:
+                msgbox = Message('Rename of Category failed.')
+                return False
         else:
-            return
+            return False
 
         self.listCategories.takeItem(row)
         #cat = Category[current_cat]
@@ -235,11 +239,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current = self.listOverrides.currentRow()
         affected = self.db.find_all_related_to_over(self.override_str)
         dl = WarningListDialog(
-            'All Entries will have their category changed to None.', \
+            'All Entries listed belowwill have their category changed to None.', \
             affected)
 
         if dl.reply == True:
-            if self.db.delete_override_only(self.override_str, cat) == False:
+            if self.db.delete_override_all(self.override_str, cat) == False:
                 msgbox = Message('Rename of Trigger failed.')
                 return False
         else:
@@ -284,14 +288,14 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.trigger_str == None:
             return False
         current = self.listTriggers.currentRow()
-        affected = self.db.find_all_related_to_over(self.trigger_str)
-        
+        affected = self.db.find_all_related_to_trig(self.trigger_str)
+        cat = self.db.triggers[self.trigger_str]
         dl = WarningListDialog(
             'All Entries will have their category changed to None.', \
             affected)
         
         if dl.reply == True:
-            if self.db.delete_category_all(selected_cat) == False:
+            if self.db.delete_trigger_all(self.trigger_str, cat) == False:
                 msgbox = Message('Delete of Category failed.')
                 return False
         else:

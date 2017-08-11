@@ -53,6 +53,62 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #Category.save()
         
     #---------- Event handlers ---------------------------
+    def AcceptChanges(self):
+        print('Accepted')
+        self.db.merge_temp_entries()
+        if len(self.db.temp_entries) > 0:
+            self.listCategorized.clear()
+            return
+        self.close()
+        
+        
+    def AddCategoryHndlr(self):
+        """The Add Cat button was pushed. If a string was entered, make a new
+        category and update the category list."""
+        catStr = self.edtNewCat.text()
+        if self.db.add_cat(catStr):
+            i = QListWidgetItem(catStr)
+            self.listCategories.addItem(i)
+            self.listCategories.setCurrentItem(i)
+        else:
+            self.edtNewCat.setText('')
+
+    def CategorizedPopUpHndlr(self, event, whichList):
+        """A right mouse click has happened in one of the Categorized list. If a Category
+        has been selected in the Category list, then find the entry that was clicked on,
+        set it's category to the selected one and then resort all the entries in the two
+        Categorized list. The list where the click happened is passed in as whichList.
+        This allows this code to function in either list with no list specific code."""
+        menu = QMenu(self)
+        newCatList = self.listCategories.selectedItems()
+        if len(newCatList) == 0:
+            str = 'None'
+        else:
+            str = newCatList[0].text()
+        
+        self.NewCatAct.setText(str)
+        menu.addAction(self.NewCatAct)
+        menu.addAction(self.NoneCatAct)
+        selectedEntryStr = whichList.currentItem().text()
+        self.newCatStr = str
+        self.selectedEntry = self.cf.find(selectedEntryStr)
+        #menu.addAction(copyAct)
+        #menu.addAction(pasteAct)
+        menu.show()
+        what = menu.exec_(PyQt5.QtGui.QCursor.pos())
+        if (what):
+            what.trigger()
+        pass
+    
+    def GetNewCatStrHndlr(self):
+        """A new category string has been entered in the new category edit field.
+        Get it and save in a dialog instance variable."""
+        self.newCatStr = self.edtNewCat.selectedText()
+
+    def OpenManageCats(self):
+        mc = ManageCategoriesDialog(self.db)
+        self.ResortList()
+        
     def ReadFileClickHndlr(self):
         """Opens the FileOpen dialog for file selection. Sets the fileName
            edit line to display the selected file. CCall the checkfile instance
@@ -78,39 +134,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
 
-    def UnCatHndlr(self):
-        selection = self.listCategorized.currentItem().text()
-        selectedEntry = self.cf.find(selection)
-        selectedEntry.category = None
-        
-        # clear the list
-        self.listCategorized.clear()
-        self.listUnCategorized.clear()
-        
-        for check in self.db.temp_entries:
-            if check.category == None:
-                check.category = self.db.cat_from_desc(check.desc)
-                self.listUnCategorized.addItem(check.asNotCatStr())
-            else:
-                self.listCategorized.addItem(check.asCategorizedStr())
-        self.listCategorized.repaint()
-        self.listUnCategorized.repaint()
-        
-    def UnCategorizedClickHndlr(self):
-        """Copy the selected entry from the UnCategorized list to the
-           trigger string select edit line."""
-        some = self.listUnCategorized.selectedItems()
-        if len(some) == 1:
-            self.edtSelectTrigger.setText(some[0].text())
-
-    def TriggerSelectedHndlr(self):
-        """A new trigger string has been selected in the trigger edit line.
-           Grab the selected string and save it in the dialog's instance
-           variables."""
-        trgStr = self.edtSelectTrigger.selectedText()
-        if len(trgStr) > 0:
-            self.selectedTriggerStr = trgStr
-        print('>'+self.selectedTriggerStr+'<')
+    def RejectChanges(self):
+        print('Rejected')
+        self.close()
         
     def SetCatHndlr(self):
         """The Set Cat button has been pushed. Set the Category of the
@@ -168,65 +194,39 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listCategorized.repaint()
         self.listUnCategorized.repaint()
         
-    def GetNewCatStrHndlr(self):
-        """A new category string has been entered in the new category edit field.
-        Get it and save in a dialog instance variable."""
-        self.newCatStr = self.edtNewCat.selectedText()
+    def TriggerSelectedHndlr(self):
+        """A new trigger string has been selected in the trigger edit line.
+           Grab the selected string and save it in the dialog's instance
+           variables."""
+        trgStr = self.edtSelectTrigger.selectedText()
+        if len(trgStr) > 0:
+            self.selectedTriggerStr = trgStr
+        print('>'+self.selectedTriggerStr+'<')
+        
+    def UnCategorizedClickHndlr(self):
+        """Copy the selected entry from the UnCategorized list to the
+           trigger string select edit line."""
+        some = self.listUnCategorized.selectedItems()
+        if len(some) == 1:
+            self.edtSelectTrigger.setText(some[0].text())
 
-    def AddCategoryHndlr(self):
-        """The Add Cat button was pushed. If a string was entered, make a new
-        category and update the category list."""
-        catStr = self.edtNewCat.text()
-        if self.db.add_cat(catStr):
-            i = QListWidgetItem(catStr)
-            self.listCategories.addItem(i)
-            self.listCategories.setCurrentItem(i)
-        else:
-            self.edtNewCat.setText('')
-
-    def CategorizedPopUpHndlr(self, event, whichList):
-        """A right mouse click has happened in one of the Categorized list. If a Category
-        has been selected in the Category list, then find the entry that was clicked on,
-        set it's category to the selected one and then resort all the entries in the two
-        Categorized list. The list where the click happened is passed in as whichList.
-        This allows this code to function in either list with no list specific code."""
-        menu = QMenu(self)
-        newCatList = self.listCategories.selectedItems()
-        if len(newCatList) == 0:
-            str = 'None'
-        else:
-            str = newCatList[0].text()
+    def UnCatHndlr(self):
+        selection = self.listCategorized.currentItem().text()
+        selectedEntry = self.cf.find(selection)
+        selectedEntry.category = None
         
-        self.NewCatAct.setText(str)
-        menu.addAction(self.NewCatAct)
-        menu.addAction(self.NoneCatAct)
-        selectedEntryStr = whichList.currentItem().text()
-        self.newCatStr = str
-        self.selectedEntry = self.cf.find(selectedEntryStr)
-        #menu.addAction(copyAct)
-        #menu.addAction(pasteAct)
-        menu.show()
-        what = menu.exec_(PyQt5.QtGui.QCursor.pos())
-        if (what):
-            what.trigger()
-        pass
-    
-    def AcceptChanges(self):
-        print('Accepted')
-        self.db.merge_temp_entries()
-        if len(self.db.temp_entries) > 0:
-            self.listCategorized.clear()
-            return
-        self.close()
+        # clear the list
+        self.listCategorized.clear()
+        self.listUnCategorized.clear()
         
-        
-    def RejectChanges(self):
-        print('Rejected')
-        self.close()
-        
-    def OpenManageCats(self):
-        mc = ManageCategoriesDialog(self.db)
-        self.ResortList()
+        for check in self.db.temp_entries:
+            if check.category == None:
+                check.category = self.db.cat_from_desc(check.desc)
+                self.listUnCategorized.addItem(check.asNotCatStr())
+            else:
+                self.listCategorized.addItem(check.asCategorizedStr())
+        self.listCategorized.repaint()
+        self.listUnCategorized.repaint()
         
     #------------ End of Event Handlers ----------------
 

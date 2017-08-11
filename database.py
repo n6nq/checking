@@ -41,6 +41,7 @@ class Database(object):
         self.insertEntrySQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
         self.findCatInEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries where category = ?'
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
+        self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
         
         self.entries = []
         self.load_entries()
@@ -269,6 +270,29 @@ class Database(object):
         #remove category
         self.delete_category_only(cat)
 
+    def delete_override_all(self, over, cat):
+        if over not in self.overrides:
+            return False
+        try:
+            cat = self.overrides[over]
+            cur = self.conn.execute(self.updateEntryCatForOverSQL, (category.Category.no_category(), cat, "'%"+over+"%'"))
+            rowcount = cur.rowcount
+            
+            for ent in self.entries:
+                if ent.category == cat and over in ent.desc:
+                    ent.category = category.Category.no_category()
+                    
+            for ent in self.entries:
+                if ent.category == cat and over in ent.desc:
+                    ent.category = category.Category.no_category()
+                            
+            self.conn.execute(self.deleteOverSQL, (over, cat))
+            
+            del self.overrides[over]
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not delete Override:')
+            return False
     def delete_override_only(self, over, cat):
         if over not in self.overrides:
             return False
