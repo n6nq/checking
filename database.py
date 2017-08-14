@@ -42,7 +42,7 @@ class Database(object):
         self.findCatInEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries where category = ?'
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
         self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
-        
+        self.updateEntryCatForTrigSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
         self.entries = []
         self.load_entries()
         
@@ -75,7 +75,9 @@ class Database(object):
         
         self.overrides = {}
         self.load_overrides()
-    
+
+        self.sanity_check_db()  # todo remove after dev is done
+        
     def add_account(self, name):
         try:
             self.conn.execute(self.insertAccountSQL, (name, today, today, ''))
@@ -270,6 +272,41 @@ class Database(object):
         #remove category
         self.delete_category_only(cat)
 
+    def delete_trigger_all(self, trig, cat):
+        if trig not in self.triggers:
+            return False
+        try:
+            cat = self.triggers[trig]
+            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (category.Category.no_category(), cat, "'%"+trig+"%'"))
+            rowcount = cur.rowcount
+            
+            for ent in self.entries:
+                if ent.category == cat and trig in ent.desc:
+                    ent.category = category.Category.no_category()
+                    
+            for ent in self.entries:
+                if ent.category == cat and trig in ent.desc:
+                    ent.category = category.Category.no_category()
+                            
+            self.conn.execute(self.deleteTrigSQL, (trig, cat))
+            
+            del self.triggers[trig]
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not delete Override:')
+            return False
+    def delete_override_only(self, over, cat):
+        if over not in self.overrides:
+            return False
+        try:
+            self.conn.execute(self.deleteOverSQL, (over, cat))
+            
+            del self.overrides[over]
+            self.commit()
+        except sqlite3.Error as e:
+            self.error('Could not delete Override:')
+            return False
+
     def delete_override_all(self, over, cat):
         if over not in self.overrides:
             return False
@@ -293,18 +330,6 @@ class Database(object):
         except sqlite3.Error as e:
             self.error('Could not delete Override:')
             return False
-    def delete_override_only(self, over, cat):
-        if over not in self.overrides:
-            return False
-        try:
-            self.conn.execute(self.deleteOverSQL, (over, cat))
-            
-            del self.overrides[over]
-            self.commit()
-        except sqlite3.Error as e:
-            self.error('Could not delete Override:')
-            return False
-
     def delete_trigger_only(self, trig, cat):
         if trig not in self.triggers:
             return False
@@ -593,6 +618,58 @@ class Database(object):
         #self.overrides.save(storage)
         #self.entries.save(storage)
 
+    def sanity_check_db(self):
+        # first check that every override refers to a category that exists
+        for over, cat in self.overrides.items():
+            if cat in self.categories:
+                print('Override: '+over+' Category: '+cat+' is GOOD.')
+            else:
+                print('Override: '+over+' Missing Cat: '+cat+' is BAD BAD.')      
+                
+        # check that all triggers refer to a category that exists
+        for trig, cat in self.triggers.items():
+            if cat in self.categories:
+                print('Trigger: '+trig+' Category: '+cat+' is GOOD.')
+            else:
+                print('Trigger: '+trig+' Missing Cat: '+cat+' is BAD BAD.')      
+            
+        # check that all categories have a least one category or overrides
+        for cat in self.categories:
+            trig_count = 0
+            over_count = 0
+            for over, ocat in self.overrides.items():
+                if cat == ocat:
+                    over_count += 1
+                    print ("Category: "+cat+" has over: "+over+" GOOD.")
+            for trig, tcat in self.triggers.items():
+                if cat == tcat:
+                    trig_count += 1
+                    print("Category: "+cat+" has trig: "+trig+" GOOD.")
+            if trig_count == 0 and over_count == 0:
+                print("Category: "+cat+" has no triggers or overrides.  BAD BAD.")
+                
+        # check that all entries have a category that exist and that their description contains a trigger
+        # or override that belongs to that category. Remember, overrides first.
+        for ent in self.entries:
+            got_one = False
+            if ent.category not in self.categories:
+                print("Entry: "+ent.asCategorizedStr() + " No category. BAD BAD.")
+                continue
+            for over in self.overrides:
+                if over in ent.desc:
+                    got_one = True
+                    break
+            if got_one:
+                continue
+            for trig in self.triggers:
+                if trig in ent.desc:
+                    got_one = True
+                    break
+            if got_one:
+                continue
+            else:
+                print("Entry: "+ent.asCategorizedStr() + " No trig or over. BAD BAD.")
+                
     def triggers_for_cat(self, lookFor):
         triggers = []
         for trig, cat in self.triggers.items():
