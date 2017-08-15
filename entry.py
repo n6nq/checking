@@ -109,9 +109,9 @@ class Entry(dbrow.DBRow):
            self.desc != other.desc)
 
     def asNotCatStr(self):
-        retstr = self.date.strftime("%m/%d/%y") + ' ' + \
-            self.amount.as_str() + ' ' + \
-            '<' + '{}'.format(int(self.checknum)) + '> ' + \
+        retstr = self.date.strftime("%m/%d/%y") + '\t' + \
+            self.amount.as_str() + '\t' + \
+            '{}'.format(int(self.checknum)) + '\t' + \
             self.desc
         return retstr
     
@@ -120,7 +120,7 @@ class Entry(dbrow.DBRow):
             cat_str = 'None'
         else:
             cat_str = self.category
-        return cat_str + ' ' + self.asNotCatStr()
+        return cat_str + '\t' + self.asNotCatStr()
     
     def isMatch(self, line):
         thisStr = self.asNotCatStr()

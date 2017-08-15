@@ -130,7 +130,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #iterate remaining checks and load list widgets here
         for check in self.db.temp_entries:
             if check.category == None:
-                self.listUnCategorized.addItem(check.asNotCatStr())
+                self.listUnCategorized.addItem('\t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
 
@@ -163,7 +163,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         for check in self.db.temp_entries:
             if check.category == None:
                 check.category = self.db.cat_from_desc(check.desc)
-                self.listUnCategorized.addItem(check.asNotCatStr())
+                self.listUnCategorized.addItem('\t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
         self.listCategorized.repaint()
@@ -188,7 +188,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             if check.category == None:
                 check.category = self.db.cat_from_desc(check.desc)
             if check.category == None:
-                self.listUnCategorized.addItem(check.asNotCatStr())
+                self.listUnCategorized.addItem('/t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
         self.listCategorized.repaint()
@@ -222,7 +222,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         for check in self.db.temp_entries:
             if check.category == None:
                 check.category = self.db.cat_from_desc(check.desc)
-                self.listUnCategorized.addItem(check.asNotCatStr())
+                self.listUnCategorized.addItem('/t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
         self.listCategorized.repaint()
@@ -255,7 +255,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         for check in self.db.entries:
             #check.category = Trigger.fromDesc(check.desc)
             if check.category == None:
-                self.listUnCategorized.addItem(check.asNotCatStr())
+                self.listUnCategorized.addItem('/t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
         self.listCategorized.repaint()

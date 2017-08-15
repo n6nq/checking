@@ -26,19 +26,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         curr = os.getcwd()
         self.db = database.Database(curr+'\\checking')
-#       self.db.open(curr+'\\checking')
-#        self.db.createAccount('checking')
-        pass
-    
+        #self.cvEntries.
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):
             self.listCategorized.addItem("Number %d" % i)
         
     def pressedReadCheckFileButton(self):
-        print ("Pressed Off!")
-        for i in range(5):
-            self.listUnCategorized.addItem("Numero %d" % i)
+        print ("Pressed ReadCheckFile")
         
         readIt = CheckFileDialog(self.db)
         print(readIt.cf)
