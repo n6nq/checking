@@ -406,26 +406,34 @@ class Database(object):
             self.error('Error loading memory from the Accounts table:\n', e.args[0])
         return acct_list
     
-    def get_all_entries(self):
-        entry_list = []
-        try:
-            for row in self.conn.execute(self.entries.selectAllSQL):
-                entry_list.append(row)
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Entries table:\n', e.args[0])
-        return entry_list
-
     def get_all_cats(self):
         if len(self.categories) == 0:
             self.load_categories()
         return self.categories
+    
+    def get_all_entries(self):
+        return self.entries
+#        entry_list = []
+#        try:
+#            for row in self.conn.execute(self.entries.selectAllSQL):
+#                entry_list.append(row)
+#        except sqlite3.Error as e:
+#            self.error('Error loading memory from the Entries table:\n', e.args[0])
+#        return entry_list
+
+    def get_all_entries_with_cat(self, cat):
+        requested = []
+        for ent in self.entries:
+            if ent.category == cat:
+                requested.append(ent)
+        return requested
     
     def get_all_overrides(self):
         if self.overrides.cache_loaded():
             return self.overrides.get_cache()
         overrides = {}
         try:
-            for row in self.conn.execute(self.overrides.selectAllSQL):
+            for row in self.ceonn.execute(self.overrides.selectAllSQL):
                 overrides[row[1]] = row[2]
         except sqlite3.Error as e:
             self.error('Error loading memory from the Overrides table:\n', e.args[0])

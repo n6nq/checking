@@ -63,5 +63,5 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.btnOn.setText(_translate("MainWindow", "ON"))
         self.btnReadFile.setText(_translate("MainWindow", "Read Check File"))
-        self.listEntries.setSortingEnabled(True)
+        self.listEntries.setSortingEnabled(False)
 

@@ -27,13 +27,30 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         curr = os.getcwd()
         self.db = database.Database(curr+'\\checking')
 
-        for ent in self.db.entries:
+
+        for ent in sorted(self.db.get_all_entries(), key=lambda ent: ent.asCategorizedStr()):
             self.listEntries.addItem(ent.asCategorizedStr())
             
         self.cbCategory.addItems(['Ascend', 'Descend'])
         for cat in sorted(self.db.categories):
             self.cbCategory.addItem(cat)
+        
+        self.cbCategory.currentTextChanged.connect(lambda: self.newCategoryFilter())
+        
+    def newCategoryFilter(self):
+        cat = self.cbCategory.currentText()
+        self.listEntries.clear()
+
+        if cat == 'Ascend':
+            filtered = sorted(self.db.get_all_entries(), key=lambda ent: ent.get_category())
+        elif cat == 'Descend':
+            filtered = sorted(self.db.get_all_entries(), key=lambda ent: ent.get_category(), reverse=True)
+        else:
+            filtered = sorted(self.db.get_all_entries_with_cat(cat), key=lambda ent: ent.asCategorizedStr())
             
+        for ent in filtered:
+            self.listEntries.addItem(ent.asCategorizedStr())
+
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):

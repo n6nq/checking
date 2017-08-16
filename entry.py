@@ -127,6 +127,9 @@ class Entry(dbrow.DBRow):
             cat_str = self.category
         return cat_str + '\t' + self.asNotCatStr()
     
+    def get_category(self):
+        return self.category
+    
     def isMatch(self, line):
         thisStr = self.asNotCatStr()
         if thisStr in line:
