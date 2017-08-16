@@ -78,8 +78,8 @@ class Entry(dbrow.DBRow):
         self.category = row[1]
         self.date = row[2]
         self.amount = Money.from_number(row[3])
-        self.cleared = row[4]
-        self.checknum = row[5]
+        self.cleared = row[5]
+        self.checknum = row[4]
         self.desc = row[6]
         if how_to_cat == Entry.categorize():
             self.category = self.db.cat_from_desc(self.desc)
@@ -109,9 +109,14 @@ class Entry(dbrow.DBRow):
            self.desc != other.desc)
 
     def asNotCatStr(self):
+        if self.checknum == 0:
+            checknum_str = '    '
+        else:
+            checknum_str = '{}'.format(self.checknum) 
+
         retstr = self.date.strftime("%m/%d/%y") + '\t' + \
             self.amount.as_str() + '\t' + \
-            '{}'.format(int(self.checknum)) + '\t' + \
+            checknum_str + '\t' + \
             self.desc
         return retstr
     

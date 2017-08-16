@@ -26,7 +26,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         curr = os.getcwd()
         self.db = database.Database(curr+'\\checking')
-        #self.cvEntries.
+
+        for ent in self.db.entries:
+            self.listEntries.addItem(ent.asCategorizedStr())
+            
+        self.cbCategory.addItems(['Ascend', 'Descend'])
+        for cat in sorted(self.db.categories):
+            self.cbCategory.addItem(cat)
+            
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):
