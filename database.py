@@ -428,6 +428,14 @@ class Database(object):
                 requested.append(ent)
         return requested
     
+    
+    def get_all_entries_with_date(self, date):
+        requested = []
+        for ent in self.entries:
+            if ent.date == date:
+                requested.append(ent)
+        return requested
+    
     def get_all_overrides(self):
         if self.overrides.cache_loaded():
             return self.overrides.get_cache()

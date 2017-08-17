@@ -5,6 +5,7 @@ import os
 import PyQt5
 from PyQt5.QtWidgets import *
 import database
+import datetime
 
 # get the window
 import mainwindow_auto
@@ -27,7 +28,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         # Setup calender
         self.calendar.hide()
-        self.calendar.selectionChanged.connect(lambda: self.get_calender_filter())
+        self.calendar.clicked.connect(lambda: self.new_calender_filter())
         
         # Setup the database
         curr = os.getcwd()
@@ -42,21 +43,28 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.listEntries.addItem(ent.asCategorizedStr())
             
         # Setup the Category combobox
-        self.cbCategory.currentTextChanged.connect(lambda: self.newCategoryFilter())
+        self.cbCategory.activated.connect(lambda: self.new_category_filter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
         for cat in sorted(self.db.categories):
             self.cbCategory.addItem(cat)
         
         # Setup the Date combobox
-        self.cbDate.currentTextChanged.connect(lambda: self.newDateFilter())
+        self.cbDate.activated.connect(lambda: self.newDateFilter())
         for filtStr in self.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
            
-    def get_calender_filter(self):
-        date = self.calendar.selectedDate()
-        pass
+    def new_calender_filter(self):
+        qdate = self.calendar.selectedDate()
+        self.search_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
+        self.calendar.hide()
+        self.listEntries.clear()
+
+        filtered = sorted(self.db.get_all_entries_with_date(self.search_date), key=lambda ent: ent.asCategorizedStr())
+            
+        for ent in filtered:
+            self.listEntries.addItem(ent.asCategorizedStr())
     
-    def newCategoryFilter(self):
+    def new_category_filter(self):
         cat = self.cbCategory.currentText()
         self.listEntries.clear()
 
