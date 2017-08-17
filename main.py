@@ -24,7 +24,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
-
+        
+        # Setup calender
+        self.calendar.hide()
+        self.calendar.selectionChanged.connect(lambda: self.get_calender_filter())
+        
         # Setup the database
         curr = os.getcwd()
         self.db = database.Database(curr+'\\checking')
@@ -47,7 +51,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbDate.currentTextChanged.connect(lambda: self.newDateFilter())
         for filtStr in self.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
-            
+           
+    def get_calender_filter(self):
+        date = self.calendar.selectedDate()
+        pass
+    
     def newCategoryFilter(self):
         cat = self.cbCategory.currentText()
         self.listEntries.clear()
@@ -63,6 +71,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.listEntries.addItem(ent.asCategorizedStr())
 
     def newDateFilter(self):
+        choice = self.cbDate.currentText()
+        if choice == 'Find':
+            self.calendar.show()
         pass
     
     def pressedOnButton(self):
