@@ -27,7 +27,7 @@ class Ui_MainWindow(object):
         self.cbCategory.setModelColumn(0)
         self.cbCategory.setObjectName("cbCategory")
         self.cbDate = QtWidgets.QComboBox(self.centralWidget)
-        self.cbDate.setGeometry(QtCore.QRect(120, 0, 69, 22))
+        self.cbDate.setGeometry(QtCore.QRect(90, 0, 69, 22))
         self.cbDate.setObjectName("cbDate")
         self.cbAmount = QtWidgets.QComboBox(self.centralWidget)
         self.cbAmount.setGeometry(QtCore.QRect(250, 0, 69, 22))

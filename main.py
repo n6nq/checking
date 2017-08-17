@@ -11,32 +11,43 @@ import mainwindow_auto
 from checkfiledialog import CheckFileDialog
 import readcheckfile_auto
 
-# create class for Raspberry Pi GUI
+# create class for Raspberry Pi GUI (currently Windows PC only)
 ########################################################################
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     """"""
 
+    # Date filter dictionary
+    dateFilterMap = {'Ascend': 'A', 'Descend': 'D', 'Find': 'F', 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, \
+                     'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12, \
+                     'ThisY': 'T', 'LastY': 'L'}
     # access variables inside the UI's file
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
-        
-        self.btnOn.clicked.connect(lambda: self.pressedOnButton())
-        self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
-        
+
+        # Setup the database
         curr = os.getcwd()
         self.db = database.Database(curr+'\\checking')
 
-
+        # Setup the buttons
+        self.btnOn.clicked.connect(lambda: self.pressedOnButton())
+        self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
+        
+        # Setup the entry list
         for ent in sorted(self.db.get_all_entries(), key=lambda ent: ent.asCategorizedStr()):
             self.listEntries.addItem(ent.asCategorizedStr())
             
+        # Setup the Category combobox
+        self.cbCategory.currentTextChanged.connect(lambda: self.newCategoryFilter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
         for cat in sorted(self.db.categories):
             self.cbCategory.addItem(cat)
         
-        self.cbCategory.currentTextChanged.connect(lambda: self.newCategoryFilter())
-        
+        # Setup the Date combobox
+        self.cbDate.currentTextChanged.connect(lambda: self.newDateFilter())
+        for filtStr in self.dateFilterMap.keys():
+            self.cbDate.addItem(filtStr)
+            
     def newCategoryFilter(self):
         cat = self.cbCategory.currentText()
         self.listEntries.clear()
@@ -51,6 +62,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
 
+    def newDateFilter(self):
+        pass
+    
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):

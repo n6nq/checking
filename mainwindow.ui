@@ -65,7 +65,7 @@
    <widget class="QComboBox" name="cbDate">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>90</x>
       <y>0</y>
       <width>69</width>
       <height>22</height>
