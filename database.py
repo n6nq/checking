@@ -429,10 +429,14 @@ class Database(object):
         return requested
     
     
-    def get_all_entries_with_date(self, date):
+    def get_all_entries_with_date_range(self, date1, date2):
         requested = []
+        if date1 > date2:
+            temp = date1
+            date1 = date2
+            date2 = temp
         for ent in self.entries:
-            if ent.date == date:
+            if ent.date >= date1 and ent.date <= date2:
                 requested.append(ent)
         return requested
     

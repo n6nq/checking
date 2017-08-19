@@ -6,6 +6,7 @@ import PyQt5
 from PyQt5.QtWidgets import *
 import database
 import datetime
+from enum import Enum
 
 # get the window
 import mainwindow_auto
@@ -14,21 +15,33 @@ import readcheckfile_auto
 
 # create class for Raspberry Pi GUI (currently Windows PC only)
 ########################################################################
+class DateState(Enum):
+    START = 0
+    GOT_FIRST = 1
+    GOT_SECOND = 2
+
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     """"""
 
     # Date filter dictionary
-    dateFilterMap = {'Ascend': 'A', 'Descend': 'D', 'Find': 'F', 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, \
+    dateFilterMap = {'Ascend': 'A', 'Descend': 'D', 'Find': 'F', 'Range': 'R','Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, \
                      'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12, \
                      'ThisY': 'T', 'LastY': 'L'}
+
+
     # access variables inside the UI's file
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         
-        # Setup calender
-        self.calendar.hide()
-        self.calendar.clicked.connect(lambda: self.new_calender_filter())
+        # Setup calenders
+        self.calendar1.hide()
+        self.calendar2.hide()
+        self.calendar1.clicked.connect(lambda: self.select_first_date())
+        self.calendar2.clicked.connect(lambda: self.select_second_date())
+        self.date_in_state = DateState.START
+        self.got_first_date = False
+        self.got_second_date = False
         
         # Setup the database
         curr = os.getcwd()
@@ -49,21 +62,41 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.cbCategory.addItem(cat)
         
         # Setup the Date combobox
-        self.cbDate.activated.connect(lambda: self.newDateFilter())
+        self.cbDate.activated.connect(lambda: self.new_date_filter())
         for filtStr in self.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
            
+    def select_first_date(self):
+        qdate = self.calendar1.selectedDate()
+        self.first_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
+        self.got_first_date = True
+        if self.date_choice == 'Find':
+            self.got_second_date = True
+            self.second_date = self.first_date
+            self.new_calender_filter()
+        if self.date_choice == 'Range' and self.got_second_date:
+            self.new_calender_filter()
+                
+    def select_second_date(self):
+        qdate = self.calendar2.selectedDate()
+        self.second_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
+        self.got_second_date = True
+        if self.got_first_date and self.date_choice == 'Range':
+            self.new_calender_filter()
+            
     def new_calender_filter(self):
-        qdate = self.calendar.selectedDate()
-        self.search_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
-        self.calendar.hide()
+        self.calendar1.hide()
+        self.calendar2.hide()
         self.listEntries.clear()
 
-        filtered = sorted(self.db.get_all_entries_with_date(self.search_date), key=lambda ent: ent.asCategorizedStr())
+        filtered = sorted(self.db.get_all_entries_with_date_range(self.first_date, 
+                          self.second_date), key=lambda ent: ent.asCategorizedStr())
             
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
-    
+
+        self.got_first_date = self.got_second_date = False
+        
     def new_category_filter(self):
         cat = self.cbCategory.currentText()
         self.listEntries.clear()
@@ -78,10 +111,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
 
-    def newDateFilter(self):
-        choice = self.cbDate.currentText()
-        if choice == 'Find':
-            self.calendar.show()
+    def new_date_filter(self):
+        self.date_choice = self.cbDate.currentText()
+        if self.date_choice == 'Find':
+            self.calendar1.show()
+        elif self.date_choice == 'Range':
+            self.calendar1.show()
+            self.calendar2.show()
         pass
     
     def pressedOnButton(self):
