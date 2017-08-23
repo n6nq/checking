@@ -411,8 +411,13 @@ class Database(object):
             self.load_categories()
         return self.categories
     
-    def get_all_entries(self):
-        return self.entries
+    def get_all_entries(self, which):
+        if which == 'All':
+            self.temp_entries = self.entries
+            return self.entries
+        elif which == 'Results':
+            return self.temp_entries
+        
 #        entry_list = []
 #        try:
 #            for row in self.conn.execute(self.entries.selectAllSQL):
@@ -421,23 +426,34 @@ class Database(object):
 #            self.error('Error loading memory from the Entries table:\n', e.args[0])
 #        return entry_list
 
-    def get_all_entries_with_cat(self, cat):
+    def get_all_entries_with_cat(self, which, cat):
         requested = []
-        for ent in self.entries:
+        if which == 'All':
+            search_list = self.entries
+        else:
+            search_list = self.temp_entries
+            
+        for ent in search_list:
             if ent.category == cat:
                 requested.append(ent)
+        self.temp_entries = requested
         return requested
     
     
-    def get_all_entries_with_date_range(self, date1, date2):
+    def get_all_entries_with_date_range(self, which, date1, date2):
         requested = []
+        if which == 'All':
+            search_list = self.entries
+        else:
+            search_list = self.temp_entries
         if date1 > date2:
             temp = date1
             date1 = date2
             date2 = temp
-        for ent in self.entries:
+        for ent in search_list:
             if ent.date >= date1 and ent.date <= date2:
                 requested.append(ent)
+        self.temp_entries = requested
         return requested
     
     def get_all_overrides(self):

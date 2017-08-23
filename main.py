@@ -52,7 +52,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         
         # Setup the entry list
-        for ent in sorted(self.db.get_all_entries(), key=lambda ent: ent.asCategorizedStr()):
+        self.search_filter = 'All'        
+        for ent in sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.asCategorizedStr()):
             self.listEntries.addItem(ent.asCategorizedStr())
             
         # Setup the Category combobox
@@ -65,25 +66,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbDate.activated.connect(lambda: self.new_date_filter())
         for filtStr in self.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
-           
-    def select_first_date(self):
-        qdate = self.calendar1.selectedDate()
-        self.first_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
-        self.got_first_date = True
-        if self.date_choice == 'Find':
-            self.got_second_date = True
-            self.second_date = self.first_date
-            self.new_calender_filter()
-        if self.date_choice == 'Range' and self.got_second_date:
-            self.new_calender_filter()
-                
-    def select_second_date(self):
-        qdate = self.calendar2.selectedDate()
-        self.second_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
-        self.got_second_date = True
-        if self.got_first_date and self.date_choice == 'Range':
-            self.new_calender_filter()
-            
+
+        # Setup search scope combobox
+        self.cbSearchIn.activated.connect(lambda: self.new_search_filter())
+        self.cbSearchIn.addItems(('All', 'Results'))
+
     def new_calender_filter(self):
         self.calendar1.hide()
         self.calendar2.hide()
@@ -102,11 +89,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.listEntries.clear()
 
         if cat == 'Ascend':
-            filtered = sorted(self.db.get_all_entries(), key=lambda ent: ent.get_category())
+            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.get_category())
         elif cat == 'Descend':
-            filtered = sorted(self.db.get_all_entries(), key=lambda ent: ent.get_category(), reverse=True)
+            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.get_category(), reverse=True)
         else:
-            filtered = sorted(self.db.get_all_entries_with_cat(cat), key=lambda ent: ent.asCategorizedStr())
+            filtered = sorted(self.db.get_all_entries_with_cat(self.search_filter, cat), key=lambda ent: ent.asCategorizedStr())
             
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
@@ -118,8 +105,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         elif self.date_choice == 'Range':
             self.calendar1.show()
             self.calendar2.show()
-        pass
-    
+
+    def new_search_filter(self):
+        self.search_filter = self.cbSearchIn.currentText
+        
     def pressedOnButton(self):
         print ("Pressed On!")
         for i in range(1, 11):
@@ -131,6 +120,24 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         readIt = CheckFileDialog(self.db)
         print(readIt.cf)
         
+    def select_first_date(self):
+        qdate = self.calendar1.selectedDate()
+        self.first_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
+        self.got_first_date = True
+        if self.date_choice == 'Find':
+            self.got_second_date = True
+            self.second_date = self.first_date
+            self.new_calender_filter()
+        if self.date_choice == 'Range' and self.got_second_date:
+            self.new_calender_filter()
+                
+    def select_second_date(self):
+        qdate = self.calendar2.selectedDate()
+        self.second_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
+        self.got_second_date = True
+        if self.got_first_date and self.date_choice == 'Range':
+            self.new_calender_filter()
+            
         
 def main():
     app = QApplication(sys.argv)
