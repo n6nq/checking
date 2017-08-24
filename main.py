@@ -35,12 +35,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.setupUi(self)
         
         # Setup calenders
+        self.second_date = datetime.date.today()
+        self.first_date = self.second_date - datetime.timedelta(days=365)
         self.calendar1.hide()
         self.calendar2.hide()
         self.calendar1.clicked.connect(lambda: self.select_first_date())
         self.calendar2.clicked.connect(lambda: self.select_second_date())
         self.date_in_state = DateState.START
-        self.got_first_date = False
+        self.got_first_date = False     # these signify where the user is in the process of entering a date range
         self.got_second_date = False
         
         # Setup the database
@@ -110,23 +112,28 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             return
         elif self.date_choice == 'Ascend':
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
-                            self.second_date), key=lambda ent: ent.asCategorizedStr())
+                            self.second_date), key=lambda ent: ent.date.isoformat())
         elif self.date_choice == 'Descend':
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
-                            self.second_date), key=lambda ent: ent.asCategorizedStr())
+                            self.second_date), key=lambda ent: ent.date.isoformat(), reverse=True)
         else:
             if self.date_choice in self.dateFilterMap:
+                days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
                 month = self.dateFilterMap[self.date_choice]
                 today = datetime.date.today()
+                year = today.year
                 if month > today.month:
-                    today.year -= 1
-                self.first_date = datetime.date(today.year, month, 1)
-                self.second_date = datetime.date(today.year, month+1, 1) - datetime.timedelta(days=1)
+                    year -= 1
+                    
+                self.first_date = datetime.date(year, month, 1)
+                
+                self.second_date = datetime.date(year, month, days[month])
+                
                 filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
-                                    self.second_date), key=lambda ent: ent.asCategorizedStr())
-
-            for ent in filtered:
-                self.listEntries.addItem(ent.asCategorizedStr())
+                                    self.second_date), key=lambda ent: ent.date.isoformat())
+        self.listEntries.clear()
+        for ent in filtered:
+            self.listEntries.addItem(ent.asCategorizedStr())
                 
     def new_search_filter(self):
         self.search_filter = self.cbSearchIn.currentText()
