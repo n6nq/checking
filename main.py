@@ -68,11 +68,24 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbDate.activated.connect(lambda: self.new_date_filter())
         for filtStr in self.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
+            
+        # Setup Amount combo
+        self.cbAmount.activated.connect(lambda: self.new_amount_filter())
+        self.cbAmount.addItems(['Ascend', 'Descent', 'Find', '>100', 'Deposit'])
 
         # Setup search scope combobox
         self.cbSearchIn.activated.connect(lambda: self.new_search_filter())
         self.cbSearchIn.addItems(('All', 'Results'))
 
+    def new_amount_filter(self):
+        choice = self.cbAmount.currentText()
+        if choice == 'Ascend':
+        elif choice == 'Descent':
+        elif choice == 'Find':
+        elif choice == '>100':
+        elif choice == 'Deposit':
+        else:
+            return
     def new_calender_filter(self):
         self.calendar1.hide()
         self.calendar2.hide()
@@ -101,6 +114,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.listEntries.addItem(ent.asCategorizedStr())
 
     def new_date_filter(self):
+        today = datetime.date.today()
         self.date_choice = self.cbDate.currentText()
         
         if self.date_choice == 'Find':
@@ -116,6 +130,16 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         elif self.date_choice == 'Descend':
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat(), reverse=True)
+        elif self.date_choice == 'ThisY':
+            self.first_date = datetime.date(today.year, 1, 1)
+            self.second_date = datetime.date(today.year, 12, 31)
+            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+                            self.second_date), key=lambda ent: ent.date.isoformat())
+        elif self.date_choice == 'LastY':
+            self.first_date = datetime.date(today.year - 1, 1, 1)
+            self.second_date = datetime.date(today.year - 1, 12, 31)
+            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+                            self.second_date), key=lambda ent: ent.date.isoformat())
         else:
             if self.date_choice in self.dateFilterMap:
                 days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
