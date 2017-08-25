@@ -108,6 +108,9 @@ class Entry(dbrow.DBRow):
            self.amount.value != other.amount.value or \
            self.desc != other.desc)
 
+    def amount_as_str(self):
+        return self.amount.as_str()
+
     def asNotCatStr(self):
         if self.checknum == 0:
             checknum_str = '    '

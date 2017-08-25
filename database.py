@@ -16,12 +16,16 @@ import entry
 import category
 import trigger
 import override
+from enum import Enum
 
 # storage defines
 EMPTY = 0
 STORE_DB = 1
 STORE_PCKL = 2
 
+class CompareOps(Enum):
+    VALUE_LESS_THAN = 1
+    VALUE_MORE_THAN = 2
     
 class Database(object):
 
@@ -418,14 +422,6 @@ class Database(object):
         elif which == 'Results':
             return self.temp_entries
         
-#        entry_list = []
-#        try:
-#            for row in self.conn.execute(self.entries.selectAllSQL):
-#                entry_list.append(row)
-#        except sqlite3.Error as e:
-#            self.error('Error loading memory from the Entries table:\n', e.args[0])
-#        return entry_list
-
     def get_all_entries_with_cat(self, which, cat):
         requested = []
         if which == 'All':

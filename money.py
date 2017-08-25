@@ -23,3 +23,6 @@ class Money(object):
     def as_str(self):
         return '{}'.format(float(self.value) / 100)
     
+    def value(self):
+        return self.value
+    

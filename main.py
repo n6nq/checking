@@ -80,20 +80,36 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
         if choice == 'Ascend':
+            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.amount.value)
         elif choice == 'Descent':
+            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == 'Find':
+            pass
         elif choice == '>100':
+            op = database.CompareOps.VALUE_LESS_THAN
+            value = -100
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_filter, op, value), key=lambda ent: ent.amount.value, reverse=True)
+            pass
         elif choice == 'Deposit':
+            op = database.CompareOps.VALUE_MORE_THAN
+            value = 0
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_filter, op, value), key=lambda ent: ent.amount.value, reverse=True)
+            pass
         else:
             return
+
+        self.listEntries.clear()
+        for ent in filtered:
+            self.listEntries.addItem(ent.asCategorizedStr())
+        
     def new_calender_filter(self):
         self.calendar1.hide()
         self.calendar2.hide()
-        self.listEntries.clear()
 
         filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
                           self.second_date), key=lambda ent: ent.asCategorizedStr())
             
+        self.listEntries.clear()
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
 
@@ -101,7 +117,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def new_category_filter(self):
         cat = self.cbCategory.currentText()
-        self.listEntries.clear()
 
         if cat == 'Ascend':
             filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.get_category())
@@ -110,6 +125,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         else:
             filtered = sorted(self.db.get_all_entries_with_cat(self.search_filter, cat), key=lambda ent: ent.asCategorizedStr())
             
+        self.listEntries.clear()
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
 
