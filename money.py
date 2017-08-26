@@ -26,3 +26,8 @@ class Money(object):
     def value(self):
         return self.value
     
+    def __gt__(self, other):
+        return self.value > other.value
+    
+    def __lt__(self, other):
+        return self.value < other.value
