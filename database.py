@@ -17,6 +17,7 @@ import category
 import trigger
 import override
 from enum import Enum
+from money import Money
 
 # storage defines
 EMPTY = 0
@@ -24,8 +25,11 @@ STORE_DB = 1
 STORE_PCKL = 2
 
 class CompareOps(Enum):
-    VALUE_LESS_THAN = 1
-    VALUE_MORE_THAN = 2
+    MONEY_LESS_THAN = 1
+    MONEY_MORE_THAN = 2
+    MONEY_EQUALS = 3
+    CHECKNUM_EQUALS = 4
+    SEARCH_DESC = 5
     
 class Database(object):
 
@@ -422,6 +426,34 @@ class Database(object):
         elif which == 'Results':
             return self.temp_entries
         
+    def get_all_entries_meeting(self, which, op, value):
+        requested = []
+        if which == 'All':
+            search_list = self.entries
+        else:
+            search_list = self.temp_entries
+        
+        for ent in search_list:
+            if op == CompareOps.MONEY_LESS_THAN:
+                if ent.amount < Money.from_str(value):
+                    requested.append(ent)
+            elif op == CompareOps.MONEY_MORE_THAN:
+                if ent.amount > Money.from_str(value):
+                    requested.append(ent)
+            elif op == CompareOps.MONEY_EQUALS:
+                if ent.amount == Money.from_str(value):
+                    requested.append(ent)
+            elif op == CompareOps.CHECKNUM_EQUALS:
+                if ent.checknum == value:
+                    requested.append(ent)
+            elif op == CompareOps.SEARCH_DESC:
+                if value in ent.desc:
+                    requested.append(ent)
+            else:
+                print('YIKES1')
+        
+        return requested
+    
     def get_all_entries_with_cat(self, which, cat):
         requested = []
         if which == 'All':

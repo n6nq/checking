@@ -31,6 +31,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     # access variables inside the UI's file
     def __init__(self):
+        
         super(self.__class__, self).__init__()
         self.setupUi(self)
         
@@ -54,8 +55,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         
         # Setup the entry list
-        self.search_filter = 'All'        
-        for ent in sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.asCategorizedStr()):
+        self.search_choice = 'All'        
+        for ent in sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr()):
             self.listEntries.addItem(ent.asCategorizedStr())
             
         # Setup the Category combobox
@@ -71,30 +72,39 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             
         # Setup Amount combo
         self.cbAmount.activated.connect(lambda: self.new_amount_filter())
-        self.cbAmount.addItems(['Ascend', 'Descent', 'Find', '>100', 'Deposit'])
+        self.cbAmount.addItems(['Ascend', 'Descend', 'Find', '>100', 'Deposit'])
 
+        # Setup check number combo box
+        self.cbCheckNum.activated.connect(lambda: self.new_checknum_filter())
+        self.cbCheckNum.addItems(['Ascend', 'Descend', 'Find'])
+        
+        # Setup description combo box
+        self.cbDescription.activated.connect(lambda: self.new_description_filter())
+        self.cbDescription.addItems(['Ascend', 'Descend', 'Find'])
+        
         # Setup search scope combobox
         self.cbSearchIn.activated.connect(lambda: self.new_search_filter())
         self.cbSearchIn.addItems(('All', 'Results'))
 
+        
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
         if choice == 'Ascend':
-            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.amount.value)
-        elif choice == 'Descent':
-            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.amount.value, reverse=True)
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value)
+        elif choice == 'Descend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == 'Find':
-            pass
+            op = database.CompareOps.MONEY_EQUALS
+            value = QInputDialog.getText(self, 'Amount to search for:', 'Amount:')
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.amount.value)
         elif choice == '>100':
-            op = database.CompareOps.VALUE_LESS_THAN
-            value = -100
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_filter, op, value), key=lambda ent: ent.amount.value, reverse=True)
-            pass
+            op = database.CompareOps.MONEY_LESS_THAN
+            value = '-100'
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == 'Deposit':
-            op = database.CompareOps.VALUE_MORE_THAN
-            value = 0
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_filter, op, value), key=lambda ent: ent.amount.value, reverse=True)
-            pass
+            op = database.CompareOps.MONEY_MORE_THAN
+            value = '0'
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
         else:
             return
 
@@ -102,11 +112,28 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
         
+    def new_checknum_filter(self):
+        choice = self.cbCheckNum.currentText()
+        if choice == 'Ascend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum)
+        elif choice == 'Descend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum, reverse=True)
+        elif choice == 'Find':
+            op = database.CompareOps.CHECKNUM_EQUALS
+            value = QInputDialog.getText(self, 'Check Number to search for:', 'Check Number:')
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
+        else:    
+            return
+
+        self.listEntries.clear()
+        for ent in filtered:
+            self.listEntries.addItem(ent.asCategorizedStr())
+
     def new_calender_filter(self):
         self.calendar1.hide()
         self.calendar2.hide()
 
-        filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+        filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                           self.second_date), key=lambda ent: ent.asCategorizedStr())
             
         self.listEntries.clear()
@@ -119,11 +146,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         cat = self.cbCategory.currentText()
 
         if cat == 'Ascend':
-            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.get_category())
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
         elif cat == 'Descend':
-            filtered = sorted(self.db.get_all_entries(self.search_filter), key=lambda ent: ent.get_category(), reverse=True)
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
         else:
-            filtered = sorted(self.db.get_all_entries_with_cat(self.search_filter, cat), key=lambda ent: ent.asCategorizedStr())
+            filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
             
         self.listEntries.clear()
         for ent in filtered:
@@ -141,20 +168,20 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.calendar2.show()
             return
         elif self.date_choice == 'Ascend':
-            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat())
         elif self.date_choice == 'Descend':
-            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat(), reverse=True)
         elif self.date_choice == 'ThisY':
             self.first_date = datetime.date(today.year, 1, 1)
             self.second_date = datetime.date(today.year, 12, 31)
-            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat())
         elif self.date_choice == 'LastY':
             self.first_date = datetime.date(today.year - 1, 1, 1)
             self.second_date = datetime.date(today.year - 1, 12, 31)
-            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+            filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat())
         else:
             if self.date_choice in self.dateFilterMap:
@@ -169,14 +196,32 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 
                 self.second_date = datetime.date(year, month, days[month])
                 
-                filtered = sorted(self.db.get_all_entries_with_date_range(self.search_filter, self.first_date, 
+                filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                                     self.second_date), key=lambda ent: ent.date.isoformat())
         self.listEntries.clear()
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
                 
+
+    def new_description_filter(self):
+        choice = self.cbDescription.currentText()
+        if choice == 'Ascend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.desc)
+        elif choice == 'Descend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.desc, reverse=True)
+        elif choice == 'Find':
+            op = database.CompareOps.SEARCH_DESC
+            value = QInputDialog.getText(self, 'String to search for:', 'String:')
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.checknum)
+        else:    
+            return
+
+        self.listEntries.clear()
+        for ent in filtered:
+            self.listEntries.addItem(ent.asCategorizedStr())
+        
     def new_search_filter(self):
-        self.search_filter = self.cbSearchIn.currentText()
+        self.search_choice = self.cbSearchIn.currentText()
         
     def pressedOnButton(self):
         print ("Pressed On!")
