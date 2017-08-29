@@ -11,9 +11,9 @@ class CheckFile(object):
     def __init__(self, db):
         """Read the check file into memory"""
         self.db = db
-        #self.entries = db.temp_entries
         
     def open(self, filename):
+        self.db.clear_temp()
         f = open(filename, 'r')
         line = f.readline()
         

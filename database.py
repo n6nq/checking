@@ -220,6 +220,9 @@ class Database(object):
                 
         #self.overrides = newd
 
+    def clear_temp(self):
+        self.temp_entries = []
+
     def commit(self):
         self.conn.commit()
         

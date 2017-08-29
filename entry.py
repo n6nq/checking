@@ -99,14 +99,23 @@ class Entry(dbrow.DBRow):
 #        self.category = self.db.triggers.fromDesc(desc)
         
     def __eq__(self, other):
-        return ((self.date - other.date).total_seconds() == 0 and \
-           self.amount.value == other.amount.value and \
-           self.desc == other.desc)
+        #print(self.asNotCatStr())
+        #print(other.asNotCatStr())
+        if (self.date - other.date).total_seconds() != 0:
+            return False
+        if self.amount.value != other.amount.value:
+            return False
+        if self.desc != other.desc:
+            return False
+        return True
     
     def __ne__(self, other):
         return (self.date != other.date or \
            self.amount.value != other.amount.value or \
            self.desc != other.desc)
+    
+    def __hash__(self):
+        return hash((self.date, self.amount.value, self.desc))
 
     def amount_as_str(self):
         return self.amount.as_str()

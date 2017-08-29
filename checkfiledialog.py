@@ -121,9 +121,15 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         
         self.cf.open(fileName[0])
         #iterate check file, disposing of dupes
+        current = set(self.db.entries)
         new_checks = []
-        for check in self.db.temp_entries:
-            if check not in self.db.entries:
+        dupes = []
+        new_sorted = sorted(self.db.temp_entries, key=lambda ent: ent.date.isoformat())
+        for check in new_sorted:
+            print(check.asNotCatStr())
+            if check in current:
+                dupes.append(check)
+            else:
                 new_checks.append(check)
             
         self.db.temp_entries = new_checks
