@@ -454,7 +454,7 @@ class Database(object):
                     requested.append(ent)
             else:
                 print('YIKES1')
-        
+        self.temp_entries = requested
         return requested
     
     def get_all_entries_with_cat(self, which, cat):
