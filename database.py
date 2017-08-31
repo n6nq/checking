@@ -51,7 +51,8 @@ class Database(object):
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
         self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
         self.updateEntryCatForTrigSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
-        self.get_yrmo_groupsSQL = 'select yrmo(sdate), sum(amount) from Entries group by category'
+        self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
+        self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by category, ym'
         self.entries = []
         self.load_entries()
         self.conn.create_function('yrmo', 1, self.yrmo)
@@ -514,10 +515,17 @@ class Database(object):
     
     def get_cat_by_month(self):
         """Get totals of all categories grouped by month"""
-        for row in self.conn.execute('select yrmo(sdate), category,sum(amount) from Entries group by category'):
-            print(row)
-        
-        pass
+        requested = []
+        for row in self.conn.execute(self.get_yrmo_groups_by_monSQL):
+            requested.append(row)
+        return requested
+    
+    def get_month_by_cat(self):
+        """Get totals for all months grouped by category"""
+        requested = []
+        for row in self.conn.execute(self.get_yrmo_groups_by_catSQL):
+            requested.append(row)
+        return requested
         
 
     def load_accounts(self):

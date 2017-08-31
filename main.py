@@ -232,10 +232,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         """
         choice = self.cbGroupBy.currentText()
         if choice == 'MonthByCat':
-            pass
+            filtered = self.db.get_month_by_cat()
         elif choice == 'CatByMonth':
             filtered = self.db.get_cat_by_month()
-            pass
+        else:
+            return
+        self.listEntries.clear()
+        for row in filtered:
+            self.listEntries.addItem(row[0]+'\t\t'+row[1]+'\t\t'+str(row[2]/100.0))
         
     def new_search_filter(self):
         self.search_choice = self.cbSearchIn.currentText()
