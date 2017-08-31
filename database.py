@@ -51,9 +51,10 @@ class Database(object):
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
         self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
         self.updateEntryCatForTrigSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
+        self.get_yrmo_groupsSQL = 'select yrmo(sdate), sum(amount) from Entries group by category'
         self.entries = []
         self.load_entries()
-        
+        self.conn.create_function('yrmo', 1, self.yrmo)
         self.temp_entries = []
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
@@ -507,6 +508,18 @@ class Database(object):
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         return trigs
         
+    #----------------------------------------------------------------------
+    def yrmo(self, d):
+        return d[:7]
+    
+    def get_cat_by_month(self):
+        """Get totals of all categories grouped by month"""
+        for row in self.conn.execute('select yrmo(sdate), category,sum(amount) from Entries group by category'):
+            print(row)
+        
+        pass
+        
+
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:

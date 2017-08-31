@@ -86,6 +86,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbSearchIn.activated.connect(lambda: self.new_search_filter())
         self.cbSearchIn.addItems(('All', 'Results'))
 
+        # Setup group by combo box
+        self.cbGroupBy.activated.connect(lambda: self.new_group_by_filter())
+        self.cbGroupBy.addItems(('None', 'MonthByCat', 'CatByMonth'))
         
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
@@ -219,6 +222,20 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.listEntries.clear()
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
+        
+    #----------------------------------------------------------------------
+    def new_group_by_filter(self):
+        """Display totals, grouping in different ways. For now we'll do:
+        None = Normal check by check Display
+        MonthByCat = Group by month first and then by Category
+        CatByMonth = Group by Category first and then by month
+        """
+        choice = self.cbGroupBy.currentText()
+        if choice == 'MonthByCat':
+            pass
+        elif choice == 'CatByMonth':
+            filtered = self.db.get_cat_by_month()
+            pass
         
     def new_search_filter(self):
         self.search_choice = self.cbSearchIn.currentText()
