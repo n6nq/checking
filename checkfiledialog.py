@@ -260,8 +260,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.db.entries:
             #check.category = Trigger.fromDesc(check.desc)
-            if check.category == None:
-                self.listUnCategorized.addItem('/t'+check.asNotCatStr())
+            if check.category == 'None':
+                self.listUnCategorized.addItem(check.asCategorizedStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
         self.listCategorized.repaint()

@@ -149,12 +149,18 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
     
     def make_new_trigger(self):
         self.trigger_str = self.edtTrigger.text()
-        cat_list = self.listCategories.selectedItems()
-
-        self.db.add_trigger(self.trigger_str, cat_list[0].text())
+        cat = self.listCategories.selectedItems()[0].text()
+        self.db.add_trigger(self.trigger_str, cat)
         i = QListWidgetItem(self.trigger_str)
         self.listTriggers.addItem(i)
         self.listTriggers.setCurrentItem(i)
+        affected = self.db.find_all_with_trig(self.trigger_str)
+        dl = WarningListDialog(
+            "All entries listed below have the new trigger string '"+self.trigger_str+"'.\n" + \
+            "They will have their category changed to '"+cat+"'.", 
+            affected)
+        if dl.reply == True:
+            self.db
         #out = self.listOverrides.find(over_str, Qt.MatchExactly)
         pass
     

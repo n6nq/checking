@@ -158,7 +158,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.listEntries.clear()
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
-
+        self.show()
+        
     def new_date_filter(self):
         today = datetime.date.today()
         self.date_choice = self.cbDate.currentText()
