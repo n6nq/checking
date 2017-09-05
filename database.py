@@ -51,6 +51,7 @@ class Database(object):
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
         self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
         self.updateEntryCatForTrigSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
+        self.updateEntryCatByOverOnlySQL = 'update Entries set category = ? where desc LIKE ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
         self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
         self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by category, ym'
@@ -417,9 +418,9 @@ class Database(object):
             if trig in entry.desc:
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
-        for entry in self.temp_entries:
-            if trig in entry.desc:
-                affected.append('<NewEntry>'+entry.asCategorizedStr())
+        #for entry in self.temp_entries:
+        #    if trig in entry.desc:
+        #        affected.append('<NewEntry>'+entry.asCategorizedStr())
 
         return affected
 
@@ -774,13 +775,14 @@ class Database(object):
     def set_cat_for_all_with_trigger(self, cat, trig):
         try:
             self.conn.execute(self.updateEntryCatByTrigOnlySQL, (cat, trig))
+            self.commit()
             for entry in self.entries:
                 if trig in entry.desc:
                     entry.category = cat
 
-            for entry in self.temp_entries:
-                if trig in entry.desc:
-                    entry.category = cat
+            #for entry in self.temp_entries:
+            #    if trig in entry.desc:
+            #        entry.category = cat
             return True
         except sqlite3.Error as e:
             self.error('Error updating categories in Entries table:\n', e.args[0])

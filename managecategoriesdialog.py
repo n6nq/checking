@@ -126,14 +126,19 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         
     def make_new_override(self):
         self.override_str = self.edtOverride.text()
-        cat_list = self.listCategories.selectedItems()
+        cat = self.listCategories.selectedItems()[0].text()
         
-        self.db.add_override(self.override_str, cat_list[0].text())
+        self.db.add_override(self.override_str, cat)
         i = QListWidgetItem(self.override_str)
         self.listOverrides.addItem(i)
         self.listOverrides.setCurrentItem(i)
-        #out = self.listOverrides.find(over_str, Qt.MatchExactly)
-        pass
+        affected = self.db.find_all_with_trigger(self.override_str)
+        dl = WarningListDialog(
+            "All entries listed below have the new override string '"+self.override_str+"'.\n" + \
+            "They will have their category changed to '"+cat+"'.", 
+            affected)
+        if dl.reply == True:
+            self.db.set_cat_for_all_with_override(cat, self.override_str)
     
     def make_new_category(self):
         self.category_str = self.edtCategory.text()
@@ -154,15 +159,13 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         i = QListWidgetItem(self.trigger_str)
         self.listTriggers.addItem(i)
         self.listTriggers.setCurrentItem(i)
-        affected = self.db.find_all_with_trig(self.trigger_str)
+        affected = self.db.find_all_with_trigger(self.trigger_str)
         dl = WarningListDialog(
             "All entries listed below have the new trigger string '"+self.trigger_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
             affected)
         if dl.reply == True:
-            self.db
-        #out = self.listOverrides.find(over_str, Qt.MatchExactly)
-        pass
+            self.db.set_cat_for_all_with_trigger(cat, self.trigger_str)
     
     def rename_override(self):
         row = self.listOverrides.currentRow()
