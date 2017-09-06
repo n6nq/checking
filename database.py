@@ -293,20 +293,21 @@ class Database(object):
         try:
             cat = self.triggers[trig]
             cur = self.conn.execute(self.updateEntryCatForTrigSQL, (category.Category.no_category(), cat, "'%"+trig+"%'"))
+            self.commit()
             rowcount = cur.rowcount
             
             for ent in self.entries:
                 if ent.category == cat and trig in ent.desc:
                     ent.category = category.Category.no_category()
                     
-            for ent in self.entries:
+            for ent in self.temp_entries:
                 if ent.category == cat and trig in ent.desc:
                     ent.category = category.Category.no_category()
                             
             self.conn.execute(self.deleteTrigSQL, (trig, cat))
+            self.commit()
             
             del self.triggers[trig]
-            self.commit()
         except sqlite3.Error as e:
             self.error('Could not delete Trigger:')
             return False
@@ -334,14 +335,14 @@ class Database(object):
                 if ent.category == cat and over in ent.desc:
                     ent.category = category.Category.no_category()
                     
-            for ent in self.entries:
+            for ent in self.temp_entries:
                 if ent.category == cat and over in ent.desc:
                     ent.category = category.Category.no_category()
                             
             self.conn.execute(self.deleteOverSQL, (over, cat))
+            self.commit()
             
             del self.overrides[over]
-            self.commit()
         except sqlite3.Error as e:
             self.error('Could not delete Override:')
             return False
@@ -650,6 +651,7 @@ class Database(object):
             for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
                 if new_over not in ent.desc:
                     self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
+                    self.commit()
 
             for ent in self.entries:
                 if ent.category == cat and new_over not in ent.desc:
@@ -678,7 +680,7 @@ class Database(object):
             for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
                 if new_trig not in ent.desc:
                     self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
-
+                    self.commit()
             for ent in self.entries:
                 if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()

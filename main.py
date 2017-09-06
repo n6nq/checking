@@ -58,7 +58,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.search_choice = 'All'        
         for ent in sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr()):
             self.listEntries.addItem(ent.asCategorizedStr())
-            
+            print(ent.asCategorizedStr())
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
@@ -82,13 +82,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbDescription.activated.connect(lambda: self.new_description_filter())
         self.cbDescription.addItems(['Ascend', 'Descend', 'Find'])
         
-        # Setup search scope combobox
+        # Setup search scope combobox 
         self.cbSearchIn.activated.connect(lambda: self.new_search_filter())
         self.cbSearchIn.addItems(('All', 'Results'))
 
         # Setup group by combo box
         self.cbGroupBy.activated.connect(lambda: self.new_group_by_filter())
         self.cbGroupBy.addItems(('None', 'MonthByCat', 'CatByMonth'))
+        self.show()
         
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
@@ -224,7 +225,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         for ent in filtered:
             self.listEntries.addItem(ent.asCategorizedStr())
         
-    #----------------------------------------------------------------------
     def new_group_by_filter(self):
         """Display totals, grouping in different ways. For now we'll do:
         None = Normal check by check Display
