@@ -16,6 +16,7 @@ import entry
 import category
 import trigger
 import override
+import datetime
 from enum import Enum
 from money import Money
 
@@ -524,7 +525,6 @@ class Database(object):
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         return trigs
         
-    #----------------------------------------------------------------------
     def yrmo(self, d):
         return d[:7]
     
@@ -543,6 +543,13 @@ class Database(object):
         return requested
         
 
+    def get_recent_entries(self, limit):
+        today = datetime.date.today()
+        previous = today - datetime.timedelta(months = 2)
+        for ent in self.entries:
+            if ent.date < previous:
+                howmany += 1
+        
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:

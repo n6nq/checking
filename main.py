@@ -55,10 +55,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         
         # Setup the entry list
-        self.search_choice = 'All'        
+        self.search_choice = 'All'
+        listCount = 0
+        showing = 750
         for ent in sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr()):
-            self.listEntries.addItem(ent.asCategorizedStr())
-            print(ent.asCategorizedStr())
+            if listCount < showing:
+                self.listEntries.addItem(ent.asCategorizedStr())
+            listCount += 1    
+        print('listCount= ' + str(listCount) +'showing='+str(showing))
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
