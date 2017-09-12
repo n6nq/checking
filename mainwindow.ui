@@ -102,7 +102,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListWidget" name="listEntries">
+   <widget class="QListView" name="listEntries">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -119,9 +119,6 @@
     </property>
     <property name="layoutMode">
      <enum>QListView::Batched</enum>
-    </property>
-    <property name="sortingEnabled">
-     <bool>false</bool>
     </property>
    </widget>
    <widget class="QCalendarWidget" name="calendar1">
@@ -203,6 +200,20 @@
      </rect>
     </property>
    </widget>
+   <zorder>listEntries</zorder>
+   <zorder>btnOn</zorder>
+   <zorder>btnReadFile</zorder>
+   <zorder>cbCategory</zorder>
+   <zorder>cbDate</zorder>
+   <zorder>cbAmount</zorder>
+   <zorder>cbCheckNum</zorder>
+   <zorder>cbDescription</zorder>
+   <zorder>calendar1</zorder>
+   <zorder>cbSearchIn</zorder>
+   <zorder>labelSearchIn</zorder>
+   <zorder>label</zorder>
+   <zorder>cbGroupBy</zorder>
+   <zorder>calendar2</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

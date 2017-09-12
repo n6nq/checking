@@ -37,6 +37,8 @@ class Database(object):
     def __init__(self, name):
         
         self.dbname = name
+        self.start_date = datetime.date(9999, 1, 1)  # these will be set by load_entries()
+        self.end_date = datetime.date(1, 1, 1)
         conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
         
@@ -57,6 +59,7 @@ class Database(object):
         self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
         self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by category, ym'
         self.entries = []
+        self.num_entries = 0
         self.load_entries()
         self.conn.create_function('yrmo', 1, self.yrmo)
         self.temp_entries = []
@@ -544,10 +547,12 @@ class Database(object):
         
 
     def get_recent_entries(self, limit):
+        if self.num_entries <= limit:
+            return self.get_all_entries(which)
         today = datetime.date.today()
-        previous = today - datetime.timedelta(months = 2)
+        trial = today - datetime.timedelta(months = 2)
         for ent in self.entries:
-            if ent.date < previous:
+            if ent.date > previous:
                 howmany += 1
         
     def load_accounts(self):
@@ -574,7 +579,12 @@ class Database(object):
             try:
                 self.conn.execute(self.createEntriesSQL)
                 for row in self.conn.execute(self.selectAllEntriesSQL):
-                    self.entries.append(entry.Entry(self, row, entry.Entry.no_cat()))
+                    ent = entry.Entry(self, row, entry.Entry.no_cat())
+                    self.entries.append(ent)
+                    self.num_entries += 1
+                    print(ent.date, self.start_date, self.end_date)
+                    self.start_date = min(self.start_date, ent.date)
+                    self.end_date = max(self.end_date, ent.date)
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Entries table:\n', e.args[0])
                 

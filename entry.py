@@ -126,10 +126,14 @@ class Entry(dbrow.DBRow):
         else:
             checknum_str = '{}'.format(self.checknum) 
 
-        retstr = self.date.strftime("%m/%d/%y") + '\t' + \
-            self.amount.as_str() + '\t' + \
-            checknum_str + '\t' + \
+        retstr = self.date.strftime("%m/%d/%y") + ' ' + \
+            self.amount.as_str() + ' ' + \
+            checknum_str + ' ' + \
             self.desc
+            #retstr = self.date.strftime("%m/%d/%y") + '\t' + \
+            #    self.amount.as_str() + '\t' + \
+            #    checknum_str + '\t' + \
+            #    self.desc
         return retstr
     
     def asCategorizedStr(self):
@@ -137,7 +141,7 @@ class Entry(dbrow.DBRow):
             cat_str = 'None'
         else:
             cat_str = self.category
-        return cat_str + '\t' + self.asNotCatStr()
+        return cat_str + ' ' + self.asNotCatStr()
     
     def get_category(self):
         return self.category

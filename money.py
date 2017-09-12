@@ -6,7 +6,7 @@ class Money(object):
     @classmethod
     def from_number(cls, number):
         obj = cls()
-        print(type(number))
+        #print(type(number))
         obj.value = number
         return obj
 

@@ -3,11 +3,14 @@ import sys
 import os
 # get the Qt files
 import PyQt5
-from PyQt5.QtWidgets import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import * 
+
 import database
 import datetime
 from enum import Enum
-
 # get the window
 import mainwindow_auto
 from checkfiledialog import CheckFileDialog
@@ -19,6 +22,23 @@ class DateState(Enum):
     START = 0
     GOT_FIRST = 1
     GOT_SECOND = 2
+
+class MyListModel(QAbstractListModel): 
+    def __init__(self, datain, parent=None, *args): 
+        """ datain: a list where each item is a row
+        """
+        QAbstractListModel.__init__(self, parent, *args) 
+        self.listdata = datain
+ 
+    def rowCount(self, parent=QModelIndex()): 
+        return len(self.listdata) 
+ 
+    def data(self, index, role): 
+        if index.isValid() and role == Qt.DisplayRole:
+            return QVariant(self.listdata[index.row()])
+        else: 
+            return QVariant()
+
 
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     """"""
@@ -56,13 +76,21 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         # Setup the entry list
         self.search_choice = 'All'
-        listCount = 0
-        showing = 750
-        for ent in sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr()):
-            if listCount < showing:
-                self.listEntries.addItem(ent.asCategorizedStr())
-            listCount += 1    
-        print('listCount= ' + str(listCount) +'showing='+str(showing))
+        #lv = QListView()
+        #lv.setModel(lm)
+        list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
+        # #model_data = []
+        # #for ent in list_data:
+        # #    model_data.append(ent.asCategorizedStr())
+        #for i in range(10000):
+        #    model_data.append(str(i) +'Hello')
+        #lm = MyListModel(list_data, self)
+        self.set_list_model(list_data)
+        # #lm = MyListModel(model_data, self.listEntries)
+        # #self.listEntries.setModel(lm)
+        #for ent in sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr()):
+            #self.listEntries.addItem(ent.asCategorizedStr())
+
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
@@ -116,9 +144,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         else:
             return
 
-        self.listEntries.clear()
-        for ent in filtered:
-            self.listEntries.addItem(ent.asCategorizedStr())
+        self.set_list_model(filtered)
+        #self.listEntries.clear()
+        #for ent in filtered:
+            #self.listEntries.addItem(ent.asCategorizedStr())
         
     def new_checknum_filter(self):
         choice = self.cbCheckNum.currentText()
@@ -132,10 +161,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
         else:    
             return
-
-        self.listEntries.clear()
-        for ent in filtered:
-            self.listEntries.addItem(ent.asCategorizedStr())
+        self.set_list_model(filtered)
+        #self.listEntries.clear()
+        #for ent in filtered:
+            #self.listEntries.addItem(ent.asCategorizedStr())
 
     def new_calender_filter(self):
         self.calendar1.hide()
@@ -144,9 +173,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                           self.second_date), key=lambda ent: ent.asCategorizedStr())
             
-        self.listEntries.clear()
-        for ent in filtered:
-            self.listEntries.addItem(ent.asCategorizedStr())
+        self.set_list_model(filtered)
+        #self.listEntries.clear()
+        #for ent in filtered:
+            #self.listEntries.addItem(ent.asCategorizedStr())
 
         self.got_first_date = self.got_second_date = False
         
@@ -160,9 +190,15 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         else:
             filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
             
-        self.listEntries.clear()
-        for ent in filtered:
-            self.listEntries.addItem(ent.asCategorizedStr())
+        #self.listEntries.clear()
+        #for ent in filtered:
+        #    self.listEntries.addItem(ent.asCategorizedStr())
+        self.set_list_model(filtered)
+        #list_data = []
+        #for ent in filtered:
+            #list_data.append(ent.asCategorizedStr())
+        #lm = MyListModel(list_data, self.listEntries)
+        #self.listEntries.setModel(lm)        
         self.show()
         
     def new_date_filter(self):
@@ -207,9 +243,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 
                 filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                                     self.second_date), key=lambda ent: ent.date.isoformat())
-        self.listEntries.clear()
-        for ent in filtered:
-            self.listEntries.addItem(ent.asCategorizedStr())
+        self.set_list_model(filtered)
+        #self.listEntries.clear()
+        #for ent in filtered:
+            #self.listEntries.addItem(ent.asCategorizedStr())
                 
 
     def new_description_filter(self):
@@ -225,9 +262,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         else:    
             return
 
-        self.listEntries.clear()
-        for ent in filtered:
-            self.listEntries.addItem(ent.asCategorizedStr())
+        self.set_list_model(filtered)        
+        #self.listEntries.clear()
+        #for ent in filtered:
+            #self.listEntries.addItem(ent.asCategorizedStr())
         
     def new_group_by_filter(self):
         """Display totals, grouping in different ways. For now we'll do:
@@ -242,9 +280,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = self.db.get_cat_by_month()
         else:
             return
-        self.listEntries.clear()
-        for row in filtered:
-            self.listEntries.addItem(row[0]+'\t\t'+row[1]+'\t\t'+str(row[2]/100.0))
+        self.set_list_model(filtered)        
+        #self.listEntries.clear()
+        #for row in filtered:
+            #self.listEntries.addItem(row[0]+'\t\t'+row[1]+'\t\t'+str(row[2]/100.0))
         
     def new_search_filter(self):
         self.search_choice = self.cbSearchIn.currentText()
@@ -278,6 +317,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         if self.got_first_date and self.date_choice == 'Range':
             self.new_calender_filter()
             
+    def set_list_model(self, listOfEnts):
+        list_data = []
+        for ent in listOfEnts:
+            list_data.append(ent.asCategorizedStr())
+        lm = MyListModel(list_data, self.listEntries)
+        self.listEntries.setModel(lm)        
         
 def main():
     app = QApplication(sys.argv)
