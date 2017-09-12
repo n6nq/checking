@@ -15,6 +15,7 @@ from enum import Enum
 import mainwindow_auto
 from checkfiledialog import CheckFileDialog
 import readcheckfile_auto
+from entry import Entry
 
 # create class for Raspberry Pi GUI (currently Windows PC only)
 ########################################################################
@@ -320,7 +321,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def set_list_model(self, listOfEnts):
         list_data = []
         for ent in listOfEnts:
-            list_data.append(ent.asCategorizedStr())
+            if type(ent) is Entry:
+                list_data.append(ent.asCategorizedStr())
+            elif type(ent) is tuple:
+                list_data.append(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
         lm = MyListModel(list_data, self.listEntries)
         self.listEntries.setModel(lm)        
         

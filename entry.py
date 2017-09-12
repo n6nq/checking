@@ -122,13 +122,13 @@ class Entry(dbrow.DBRow):
 
     def asNotCatStr(self):
         if self.checknum == 0:
-            checknum_str = '    '
+            checknum_str = '{:<10} '.format('  ')
         else:
-            checknum_str = '{}'.format(self.checknum) 
+            checknum_str = '{:<10} '.format(self.checknum) 
 
-        retstr = self.date.strftime("%m/%d/%y") + ' ' + \
-            self.amount.as_str() + ' ' + \
-            checknum_str + ' ' + \
+        retstr = '{:<10} '.format(self.date.strftime("%m/%d/%y")) + \
+            '{:<10} '.format(self.amount.as_str()) + \
+            checknum_str + \
             self.desc
             #retstr = self.date.strftime("%m/%d/%y") + '\t' + \
             #    self.amount.as_str() + '\t' + \
@@ -141,7 +141,8 @@ class Entry(dbrow.DBRow):
             cat_str = 'None'
         else:
             cat_str = self.category
-        return cat_str + ' ' + self.asNotCatStr()
+            
+        return '{:<10} '.format(cat_str) + self.asNotCatStr()
     
     def get_category(self):
         return self.category
