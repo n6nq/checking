@@ -16,6 +16,7 @@ import mainwindow_auto
 from checkfiledialog import CheckFileDialog
 import readcheckfile_auto
 from entry import Entry
+from money import Money
 
 # create class for Raspberry Pi GUI (currently Windows PC only)
 ########################################################################
@@ -281,10 +282,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = self.db.get_cat_by_month()
         else:
             return
+        for i in range(len(filtered)):
+            row = filtered[i]
+            value = Money.from_number(row[2])
+            filtered[i] = (row[0], row[1], value.as_str())
         self.set_list_model(filtered)        
-        #self.listEntries.clear()
-        #for row in filtered:
-            #self.listEntries.addItem(row[0]+'\t\t'+row[1]+'\t\t'+str(row[2]/100.0))
         
     def new_search_filter(self):
         self.search_choice = self.cbSearchIn.currentText()

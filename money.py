@@ -21,7 +21,7 @@ class Money(object):
         return int(float(amount_str) * 100)
     
     def as_str(self):
-        return '{}'.format(float(self.value) / 100)
+        return '{:8.2f}'.format(float(self.value) / 100)
     
     def value(self):
         return self.value
