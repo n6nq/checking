@@ -62,7 +62,8 @@ class Database(object):
         self.num_entries = 0
         self.load_entries()
         self.conn.create_function('yrmo', 1, self.yrmo)
-        self.temp_entries = []
+        self.filtered_entries = []
+        self.ncf_entries = []
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
@@ -148,8 +149,8 @@ class Database(object):
             
             
         
-    def add_temp_entry(self, row):
-        self.temp_entries.append(row)
+    def add_filtered_entry(self, row):
+        self.filtered_entries.append(row)
         pass
     
     def add_trigger(self, trig, cat):
@@ -228,9 +229,12 @@ class Database(object):
                 
         #self.overrides = newd
 
-    def clear_temp(self):
-        self.temp_entries = []
-
+    def clear_fltered(self):
+        self.filtered_entries = []
+        
+    def clear_ncf_entries(self):
+        self.filtered_entries = []
+        
     def commit(self):
         self.conn.commit()
         
@@ -304,7 +308,7 @@ class Database(object):
                 if ent.category == cat and trig in ent.desc:
                     ent.category = category.Category.no_category()
                     
-            for ent in self.temp_entries:
+            for ent in self.filtered_entries:
                 if ent.category == cat and trig in ent.desc:
                     ent.category = category.Category.no_category()
                             
@@ -339,7 +343,7 @@ class Database(object):
                 if ent.category == cat and over in ent.desc:
                     ent.category = category.Category.no_category()
                     
-            for ent in self.temp_entries:
+            for ent in self.filtered_entries:
                 if ent.category == cat and over in ent.desc:
                     ent.category = category.Category.no_category()
                             
@@ -397,7 +401,7 @@ class Database(object):
             if entry.category == catstr and current_str in entry.desc:
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
-        for entry in self.temp_entries:
+        for entry in self.filtered_entries:
             if entry.category == catstr and current_str in entry.desc:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
@@ -411,7 +415,7 @@ class Database(object):
             if entry.category == catstr and over in entry.desc:
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
-        for entry in self.temp_entries:
+        for entry in self.filtered_entries:
             if entry.category == catstr and over in entry.desc:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
@@ -445,17 +449,17 @@ class Database(object):
     
     def get_all_entries(self, which):
         if which == 'All':
-            self.temp_entries = self.entries
+            self.filtered_entries = self.entries
             return self.entries
         elif which == 'Results':
-            return self.temp_entries
+            return self.filtered_entries
         
     def get_all_entries_meeting(self, which, op, value):
         requested = []
         if which == 'All':
             search_list = self.entries
         else:
-            search_list = self.temp_entries
+            search_list = self.filtered_entries
         
         for ent in search_list:
             if op == CompareOps.MONEY_LESS_THAN:
@@ -475,7 +479,7 @@ class Database(object):
                     requested.append(ent)
             else:
                 print('YIKES1')
-        self.temp_entries = requested
+        self.filtered_entries = requested
         return requested
     
     def get_all_entries_with_cat(self, which, cat):
@@ -483,12 +487,12 @@ class Database(object):
         if which == 'All':
             search_list = self.entries
         else:
-            search_list = self.temp_entries
+            search_list = self.filtered_entries
             
         for ent in search_list:
             if ent.category == cat:
                 requested.append(ent)
-        self.temp_entries = requested
+        self.filtered_entries = requested
         return requested
     
     
@@ -497,7 +501,7 @@ class Database(object):
         if which == 'All':
             search_list = self.entries
         else:
-            search_list = self.temp_entries
+            search_list = self.filtered_entries
         if date1 > date2:
             temp = date1
             date1 = date2
@@ -505,7 +509,7 @@ class Database(object):
         for ent in search_list:
             if ent.date >= date1 and ent.date <= date2:
                 requested.append(ent)
-        self.temp_entries = requested
+        self.filtered_entries = requested
         return requested
     
     def get_all_overrides(self):
@@ -609,9 +613,9 @@ class Database(object):
     def merge_temp_entries(self):
         #As entries grows in size, make the search smarter, more code but faster
         not_cats = []
-        self.temp_entries.reverse()
-        while len(self.temp_entries):
-            temp = self.temp_entries.pop()
+        self.filtered_entries.reverse()
+        while len(self.filtered_entries):
+            temp = self.filtered_entries.pop()
             if temp.category == None:
                 not_cats.append(temp)
             else:
@@ -622,7 +626,7 @@ class Database(object):
                         #continue
                 #self.add_entry(temp)
         if len(not_cats) > 0:
-            self.temp_entries = not_cats
+            self.filtered_entries = not_cats
     
     def name(self):
         return self.dbname
@@ -674,7 +678,7 @@ class Database(object):
                 if ent.category == cat and new_over not in ent.desc:
                     ent.category = category.Category.no_category()
                     
-            for ent in self.temp_entries:
+            for ent in self.filtered_entries:
                 if ent.category == cat and new_over not in ent.desc:
                     ent.category = category.Category.no_category()
             
@@ -702,7 +706,7 @@ class Database(object):
                 if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
                     
-            for ent in self.temp_entries:
+            for ent in self.filtered_entries:
                 if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
             
@@ -820,7 +824,7 @@ class Database(object):
     def update_entries_cats(self, curCat, newCat):
         """Updates all entries with a specific category to a new
         a category. Changes database and memory copies of records.
-        This function covers both the permanent entries and the temp_entries."""
+        This function covers both the permanent entries and the filtered_entries."""
         try:
             cur = self.conn.execute(self.updateEntryCatSQL, (newCat, curCat))
             self.commit()
@@ -828,7 +832,7 @@ class Database(object):
                 if ent.category == curCat:
                     ent.category = newCat
                     
-            for ent in self.temp_entries:
+            for ent in self.filtered_entries:
                 if ent.category == curCat:
                     ent.category = newCat
             return True

@@ -18,6 +18,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #self.db = accounts.Account('checking', db)
         #self.db.load()
         self.db = db
+        self.db.clear_ncf_entries()
         self.cf = check_file.CheckFile(self.db)
         
         # Set up the user interface from Designer.
@@ -55,8 +56,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     #---------- Event handlers ---------------------------
     def AcceptChanges(self):
         print('Accepted')
-        self.db.merge_temp_entries()
-        if len(self.db.temp_entries) > 0:
+        self.db.merge_ncf_entries()
+        if len(self.db.ncf_entries) > 0:
             self.listCategorized.clear()
             return
         self.close()
@@ -124,7 +125,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         current = set(self.db.entries)
         new_checks = []
         dupes = []
-        new_sorted = sorted(self.db.temp_entries, key=lambda ent: ent.date.isoformat())
+        new_sorted = sorted(self.db.get_ncf_entries(), key=lambda ent: ent.date.isoformat())
         for check in new_sorted:
             print(check.asNotCatStr())
             if check in current:
@@ -132,9 +133,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             else:
                 new_checks.append(check)
             
-        self.db.temp_entries = new_checks
+        self.db.set_ncf_entries(new_checks)
         #iterate remaining checks and load list widgets here
-        for check in self.db.temp_entries:
+        for check in self.db.get_ncf_entries():
             if check.category == None:
                 self.listUnCategorized.addItem('\t'+check.asNotCatStr())
             else:
@@ -166,7 +167,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #self.newCatStr = str
         #self.selectedEntry = self.cf.find(selectedEntryStr)        
         # repopulate
-        for check in self.db.temp_entries:
+        for check in self.db.get_ncf_entries():
             if check.category == None:
                 check.category = self.db.cat_from_desc(check.desc)
                 self.listUnCategorized.addItem('\t'+check.asNotCatStr())
@@ -190,7 +191,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate
-        for check in self.db.temp_entries:
+        for check in self.db.get_ncf_entries():
             if check.category == None:
                 check.category = self.db.cat_from_desc(check.desc)
             if check.category == None:
@@ -225,7 +226,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         
-        for check in self.db.temp_entries:
+        for check in self.db.get_ncf_entries():
             if check.category == None:
                 check.category = self.db.cat_from_desc(check.desc)
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr())

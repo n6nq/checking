@@ -39,7 +39,7 @@ class CheckFile(object):
         return cleared_str == '*'
     
     def find(self, line):
-        for anEntry in self.db.temp_entries:
+        for anEntry in self.db.get_ncf_entries():
             if anEntry.isMatch(line):
                 return anEntry
             
