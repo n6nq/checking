@@ -80,7 +80,7 @@ class Entry(dbrow.DBRow):
         self.amount = Money.from_number(row[3])
         self.cleared = row[5]
         self.checknum = row[4]
-        self.desc = row[6]
+        self.desc = row[6].replace('\n', '')
         if how_to_cat == Entry.categorize():
             self.category = self.db.cat_from_desc(self.desc)
             

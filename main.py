@@ -6,14 +6,18 @@ import PyQt5
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import * 
+from PyQt5.QtWidgets import *
+
 
 import database
 import datetime
 from enum import Enum
 # get the window
 import mainwindow_auto
+import chart_test_auto
 from checkfiledialog import CheckFileDialog
+from charttestdialog import ChartTestDialog
+
 import readcheckfile_auto
 from entry import Entry
 from money import Money
@@ -189,6 +193,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
         elif cat == 'Descend':
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
+            #filtered = sorted(filtered, key=lambda ent: ent.get_category())
         else:
             filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
             
@@ -293,8 +298,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def pressedOnButton(self):
         print ("Pressed On!")
-        for i in range(1, 11):
-            self.listCategorized.addItem("Number %d" % i)
+        ChartTestDialog()
         
     def pressedReadCheckFileButton(self):
         print ("Pressed ReadCheckFile")

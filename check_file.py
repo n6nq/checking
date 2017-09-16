@@ -19,6 +19,7 @@ class CheckFile(object):
         
         while len(line) > 1:
             line = line.replace('"', '')
+            line = line.replace('\n', '')
             prt = line.split(',')
             #                                   oid  cat                   datestr amtstr  clr*    chknum''  desc
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
