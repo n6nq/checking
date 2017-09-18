@@ -54,6 +54,7 @@ class Database(object):
         self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
         self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
         self.updateEntryCatForTrigSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
+        self.findEntryCatForTrigSQL = 'select * from Entries where category = ? and desc LIKE ?'
         self.updateEntryCatByOverOnlySQL = 'update Entries set category = ? where desc LIKE ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
         self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
@@ -300,6 +301,9 @@ class Database(object):
             return False
         try:
             cat = self.triggers[trig]
+            search = "'%" + trig + "%'"
+            for row in self.conn.execute(self.findEntryCatForTrigSQL, (cat, "'%"+trig+"%'")):
+                print(row)
             cur = self.conn.execute(self.updateEntryCatForTrigSQL, (category.Category.no_category(), cat, "'%"+trig+"%'"))
             self.commit()
             rowcount = cur.rowcount
@@ -401,7 +405,7 @@ class Database(object):
             if entry.category == catstr and current_str in entry.desc:
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
-        for entry in self.filtered_entries:
+        for entry in self.ncf_entries:
             if entry.category == catstr and current_str in entry.desc:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 

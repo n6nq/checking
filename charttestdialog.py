@@ -15,7 +15,7 @@ class ChartTestDialog(QDialog, Ui_ChartTestDialog):
         scene
         self.graphicsView.setScene(scene)
         self.graphicsView.scale(1, -1)
-        scene.addLine( QLineF( 0, 0, 3000, 3000 ))
+        scene.addLine( QLineF( 0, 0, 300, 300 ))
         
         self.exec_()
 
