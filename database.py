@@ -301,10 +301,10 @@ class Database(object):
             return False
         try:
             cat = self.triggers[trig]
-            search = "'%" + trig + "%'"
-            for row in self.conn.execute(self.findEntryCatForTrigSQL, (cat, "'%"+trig+"%'")):
-                print(row)
-            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (category.Category.no_category(), cat, "'%"+trig+"%'"))
+            search = "%" + trig + "%"
+            #for row in self.conn.execute(self.findEntryCatForTrigSQL, (cat, search)):
+            #    print(row)
+            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (category.Category.no_category(), cat, search))
             self.commit()
             rowcount = cur.rowcount
             
@@ -554,6 +554,8 @@ class Database(object):
         return requested
         
 
+    def get_ncf_entries(self):
+        return self.ncf_entries
     def get_recent_entries(self, limit):
         if self.num_entries <= limit:
             return self.get_all_entries(which)
@@ -614,7 +616,7 @@ class Database(object):
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Triggers table:\n', e.args[0])
                 
-    def merge_temp_entries(self):
+    def merge_ncf_entries(self):
         #As entries grows in size, make the search smarter, more code but faster
         not_cats = []
         self.filtered_entries.reverse()

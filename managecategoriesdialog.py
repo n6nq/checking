@@ -63,8 +63,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         selectedStr = self.listCategories.selectedItems()[0].text()
 
         self.trigs = self.db.triggers_for_cat(selectedStr)
-        for trig in self.trigs:
-            self.listTriggers.addItem(trig)
+        #for trig in self.trigs:
+        #    self.listTriggers.addItem(trig)
         self.listTriggers.setCurrentRow(0)
         
         self.overs = self.db.overs_for_cat(selectedStr)
@@ -111,8 +111,12 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             self.listOverrides.addItem(over)
         self.listOverrides.setCurrentRow(0)
         
+        # don't do this here, an initial selection set forces it to happen later, 
+        # don't need double entries
         for trig in self.trigs:
             self.listTriggers.addItem(trig)
+            
+        self.just_initialized = True
         self.listTriggers.setCurrentRow(0)
      
     def get_override_string_hndlr(self):
