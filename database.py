@@ -622,13 +622,14 @@ class Database(object):
     def merge_ncf_entries(self):
         #As entries grows in size, make the search smarter, more code but faster
         not_cats = []
+        entry_set = set(self.entries)
         self.ncf_entries.reverse()
         while len(self.ncf_entries):
             temp = self.ncf_entries.pop()
             if temp.category == None:
                 not_cats.append(temp)
             else:
-                if temp not in self.entries:
+                if temp not in entry_set:
                     self.add_entry(temp)
                 #for perm_entry in self.entries:
                     #if temp == perm_entry:
