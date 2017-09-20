@@ -150,10 +150,12 @@ class Database(object):
             
             
         
-    def add_filtered_entry(self, row):
-        self.filtered_entries.append(row)
-        pass
+    def add_filtered_entry(self, ent):
+        self.filtered_entries.append(ent)
     
+    def add_ncf_entry(self, ent):
+        self.ncf_entries.append(ent)
+        
     def add_trigger(self, trig, cat):
         try:
             if trig in self.triggers:
@@ -233,8 +235,9 @@ class Database(object):
     def clear_fltered(self):
         self.filtered_entries = []
         
+    
     def clear_ncf_entries(self):
-        self.filtered_entries = []
+        self.ncf_entries = []
         
     def commit(self):
         self.conn.commit()
@@ -619,9 +622,9 @@ class Database(object):
     def merge_ncf_entries(self):
         #As entries grows in size, make the search smarter, more code but faster
         not_cats = []
-        self.filtered_entries.reverse()
-        while len(self.filtered_entries):
-            temp = self.filtered_entries.pop()
+        self.ncf_entries.reverse()
+        while len(self.ncf_entries):
+            temp = self.ncf_entries.pop()
             if temp.category == None:
                 not_cats.append(temp)
             else:
@@ -632,7 +635,7 @@ class Database(object):
                         #continue
                 #self.add_entry(temp)
         if len(not_cats) > 0:
-            self.filtered_entries = not_cats
+            self.ncf_entries = not_cats
     
     def name(self):
         return self.dbname
@@ -819,6 +822,9 @@ class Database(object):
         
         return affected
 
+    def set_ncf_entries(self, new_checks):
+        self.ncf_entries = new_checks
+        
     def triggers_for_cat(self, lookFor):
         triggers = []
         for trig, cat in self.triggers.items():

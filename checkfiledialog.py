@@ -178,7 +178,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         
     def SetTriggerHndlr(self):
         """The Set Trigger button has been pushed. If a new trigger string
-        has been save in the dialog, then get the selected string and the
+        has been saved in the dialog, then get the selected string and the
         selected category from the category list and make a new Trigger."""
         trgStr = self.selectedTriggerStr
         if trgStr == '':
