@@ -194,7 +194,7 @@ class Database(object):
             if trig in desc:
                 return cat
         
-        return None
+        return 'None'
     
     #def change_cat_of_entries(self, current, new):
         #db_affected = self.update_entries_cats(current, new)

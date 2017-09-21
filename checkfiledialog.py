@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction, QListWidgetItem)
+from PyQt5.QtWidgets import (QDialog, QMessageBox, QFileDialog, QMenu, QAction, QListWidgetItem)
 import PyQt5.QtGui
 from readcheckfile_auto import Ui_ReadCheckFileDialog
 from managecategoriesdialog import ManageCategoriesDialog
@@ -42,6 +42,10 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
     
         for catStr in self.db.get_all_cats():
             self.listCategories.addItem(catStr)
+
+        self.db.set_ncf_entries(self.db.get_all_entries_with_cat('All', 'None'))
+        for ent in self.db.get_ncf_entries():
+            self.listUnCategorized.addItem(ent.asNotCatStr())
         # Setup popup menu actions
         self.CreatePopupActions()
         
@@ -152,7 +156,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #trgStr = self.selectedTriggerStr
         #if trgStr == '':
         #    raise EOFError
-        selectedCatStr = self.listCategories.currentItem().text()
+        selectedCat = self.listCategories.currentItem()  #.text()
+        if selectedCat == None:
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Can't do it!")
+            msgBox.setText('Please select a category!')
+            msgBox.exec_()            
+            return            
+        selectedCatStr = selectedCat.text()    
         #if self.db.add_trigger(trgStr, selectedCatStr) == False:
         #    raise EOFError
         selectedEntryStr =  self.listUnCategorized.currentItem().text()
@@ -182,8 +193,18 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         selected category from the category list and make a new Trigger."""
         trgStr = self.selectedTriggerStr
         if trgStr == '':
-            raise EOFError
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Can't do it!")
+            msgBox.setText('Please select a trigger string!')
+            msgBox.exec_()            
+            return
         selectedItems = self.listCategories.selectedItems()
+        if len(selectedItems) == 0:
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Can't do it!")
+            msgBox.setText('Please select a category!')
+            msgBox.exec_()            
+            return            
         selectedCatStr = selectedItems[0].text()
         if self.db.add_trigger(trgStr, selectedCatStr) == False:
             raise EOFError
@@ -192,9 +213,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.listUnCategorized.clear()
         # repopulate
         for check in self.db.get_ncf_entries():
-            if check.category == None:
+            if check.category == 'None':
                 check.category = self.db.cat_from_desc(check.desc)
-            if check.category == None:
+            if check.category == 'None':
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
