@@ -57,6 +57,7 @@ class Database(object):
         self.findEntryCatForTrigSQL = 'select * from Entries where category = ? and desc LIKE ?'
         self.updateEntryCatByOverOnlySQL = 'update Entries set category = ? where desc LIKE ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
+        self.updateEntryCatByOidSQL = 'update Entries set category = ? where oid = ?'
         self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
         self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by category, ym'
         self.entries = []
@@ -629,7 +630,9 @@ class Database(object):
             if temp.category == None:
                 not_cats.append(temp)
             else:
-                if temp not in entry_set:
+                if temp in entry_set:
+                    self.update_entry_cat_by_oid(temp.category, temp.oid)
+                else:
                     self.add_entry(temp)
                 #for perm_entry in self.entries:
                     #if temp == perm_entry:
@@ -853,6 +856,18 @@ class Database(object):
             self.error('Error updating categories in Entries table:\n', e.args[0])
             return False
     
+    def update_entry_cat_by_oid(self, cat, oid):
+        try:
+            cur = self.conn.execute(self.updateEntryCatByOidSQL, (cat, oid))
+            self.commit()
+            for ent in self.entries:
+                if ent.oid == oid:
+                    ent.category = cat
+            return True
+        except sqlite3.Error as e:
+            self.error('Error updating category of Entry with oid: {0}'.format(oid))
+            return False
+        
     def update_triggers_cats(self, curCat, newCat):
         """Changes all instances of triggers of a specific category to a new category.
         Changes database and memory records."""

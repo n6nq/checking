@@ -304,7 +304,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print ("Pressed ReadCheckFile")
         
         readIt = CheckFileDialog(self.db)
-        print(readIt.cf)
+        # refresh the lists
+        self.cbCategory.setCurrentText('Ascend')
+        self.new_category_filter()
+        
+        #print(readIt.cf)
         
     def select_first_date(self):
         qdate = self.calendar1.selectedDate()
