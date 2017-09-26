@@ -25,6 +25,6 @@ class ChartTestDialog(QDialog, Ui_predictions):
     def resizeGraph(self, size):
         width = size.width()
         height = size.height()
-        self.graph.resize(QSize(height-80, width-80))
+        self.graph.resize(QSize(width-40, height-40))
         rect = QRectF(0, 0, width, height)
         self.graph.fitInView(rect)
