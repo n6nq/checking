@@ -1,7 +1,8 @@
 
-from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction, QListWidgetItem, QGraphicsScene)
+from PyQt5.QtWidgets import (QDialog, QFileDialog, QMenu, QAction, QListWidgetItem, QGraphicsScene, QInputDialog)
 from PyQt5.QtCore import (QLineF, QSize, QRectF)
 from database import Database
+import datetime
 from chart_test_auto import Ui_predictions
 
 class ChartTestDialog(QDialog, Ui_predictions):
@@ -11,14 +12,13 @@ class ChartTestDialog(QDialog, Ui_predictions):
         self.db = db
         self.setupUi(self)
         
-        entries = self.db.get_last_three_months()
-        nEntries = len(entries)
-        entries = sorted(entries, key=lambda ent: ent.date.isoformat())        
-        reversed = entries.reverse()
-        balances = []
-        start_balance = 80000
-        balances.append
-        for ent in reversed:
+        today = datetime.date.today()
+        str = 'Please import bank data up to today, {} and then enter the current balance.\nBalance:'.format(today.isoformat())
+        values = QInputDialog.getText(self, 'Balance?', str)
+        if values[1] == False:
+            return
+        
+        self.get_chart_data(today, values[0])
             
         self.scene = QGraphicsScene()
         self.graph.setScene(self.scene)
@@ -37,3 +37,17 @@ class ChartTestDialog(QDialog, Ui_predictions):
         self.graph.resize(QSize(width-40, height-40))
         rect = QRectF(0, 0, width, height)
         self.graph.fitInView(rect)
+
+    def get_chart_data(self, today, starting_balance):
+        entries = self.db.get_last_three_months(today)
+        nEntries = len(entries)
+        reversed_entries = sorted(entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
+        self.balances = []
+        running = starting_balance
+        self.balances.append(running)
+
+        for ent in reversed_entries:
+            running += ent.amount
+            self.balances.append(running)
+        self.balances.reverse()
+        
