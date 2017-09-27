@@ -569,6 +569,15 @@ class Database(object):
             if ent.date > previous:
                 howmany += 1
         
+    def get_last_three_months(self):
+        entries = []
+        today = datetime.date.today()
+        start = today - datetime.timedelta(weeks=13)
+        for ent in self.entries:
+            if ent.date >= start and ent.date <= today:
+                entries.append(ent)
+        return entries
+        
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:

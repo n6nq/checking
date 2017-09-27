@@ -298,7 +298,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def pressedOnButton(self):
         print ("Pressed On!")
-        ChartTestDialog()
+        ChartTestDialog(self.db)
         
     def pressedReadCheckFileButton(self):
         print ("Pressed ReadCheckFile")
