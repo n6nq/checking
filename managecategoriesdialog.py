@@ -142,7 +142,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             "They will have their category changed to '"+cat+"'.", 
             affected)
         if dl.reply == True:
-            self.db.set_cat_for_all_with_override(cat, self.override_str)
+            self.db.set_cat_for_all_with_over(cat, self.override_str)
     
     def make_new_category(self):
         self.category_str = self.edtCategory.text()

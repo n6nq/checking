@@ -59,19 +59,7 @@ class Entries(object):
             self.db.addEntryList(self.entrylist)
         
 class Entry(dbrow.DBRow):
-    
-    @classmethod
-    def no_cat(cls):
-        return 0
-    
-    @classmethod
-    def categorize(cls):
-        return 1
-    
-    @classmethod
-    def only_none(cls):
-        return 2
-    
+    """Entry --- An entry in the check register"""
     def __init__(self, db, row, how_to_cat):
         self.db = db
         self.oid = row[0]
@@ -152,3 +140,17 @@ class Entry(dbrow.DBRow):
         if thisStr in line:
             return True
         return False
+    
+    @classmethod
+    def no_cat(cls):
+        return 0
+    
+    @classmethod
+    def categorize(cls):
+        return 1
+    
+    @classmethod
+    def only_none(cls):
+        return 2
+    
+    

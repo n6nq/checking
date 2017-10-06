@@ -24,7 +24,8 @@ class ChartTestDialog(QDialog, Ui_predictions):
         self.graph.setScene(self.scene)
         self.graph.scale(1, -1)
         #self.resizeEvent.connect(self.resizeGraph())
-        self.scene.addLine( QLineF( 0, 0, 300, 300 ))
+        for i in range(0, self.nEntries-1):
+            self.scene.addLine( QLineF( i * 4, self.balances[i]/400, (i+1) * 4, self.balances[i+1]/400 ))
         
         self.exec_()
     
@@ -40,14 +41,14 @@ class ChartTestDialog(QDialog, Ui_predictions):
 
     def get_chart_data(self, today, starting_balance):
         entries = self.db.get_last_three_months(today)
-        nEntries = len(entries)
+        self.nEntries = len(entries)
         reversed_entries = sorted(entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
         self.balances = []
-        running = starting_balance
+        running = int(float(starting_balance) * 100)
         self.balances.append(running)
 
         for ent in reversed_entries:
-            running += ent.amount
+            running -= ent.amount.value
             self.balances.append(running)
         self.balances.reverse()
         
