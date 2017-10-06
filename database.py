@@ -720,7 +720,7 @@ class Database(object):
                 return False
             
             for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
-                if new_trig not in ent.desc:
+                if new_trig not in ent[6]:
                     self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
                     self.commit()
             for ent in self.entries:
@@ -816,6 +816,24 @@ class Database(object):
             else:
                 print("Entry: "+ent.asCategorizedStr() + " No trig or over. BAD BAD.")
                 
+    def set_cat_for_all_with_over(self, cat, over):
+        try:
+            self.conn.execute(self.updateEntryCatByOverOnlySQL, (cat, over))
+            self.commit()
+            for entry in self.entries:
+                if over in entry.desc:
+                    entry.category = cat
+
+            #for entry in self.temp_entries:
+            #    if over in entry.desc:
+            #        entry.category = cat
+            return True
+        except sqlite3.Error as e:
+            self.error('Error updating categories by override in Entries table:\n', e.args[0])
+            return False
+        
+        return affected
+
     def set_cat_for_all_with_trigger(self, cat, trig):
         try:
             self.conn.execute(self.updateEntryCatByTrigOnlySQL, (cat, trig))
@@ -829,7 +847,7 @@ class Database(object):
             #        entry.category = cat
             return True
         except sqlite3.Error as e:
-            self.error('Error updating categories in Entries table:\n', e.args[0])
+            self.error('Error updating categories by trigger in Entries table:\n', e.args[0])
             return False
         
         return affected
