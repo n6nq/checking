@@ -75,3 +75,8 @@ class Trigger(dbrow.DBRow):
         self.db.addTrigger(trig, cat)
         return True
     
+
+    @classmethod
+    def no_trig_id(cls):
+        return 0
+    

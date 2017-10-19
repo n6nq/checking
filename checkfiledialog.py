@@ -180,7 +180,13 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.db.get_ncf_entries():
             if check.category == None:
-                check.category = self.db.cat_from_desc(check.desc)
+                cat_tuple = self.db.cat_from_desc(check.desc)
+                check.category = cat_tuple[1]
+                if cat_tuple[0] > 32000:    #TODO make it database constant
+                    check.cat_id = self.db.cat_to_id(cat_tuple[2])
+                    check.category = cat_tuple[2]
+                    check.trig_id = cat_tuple[0]
+                    check.trigger = cat_tuple[1]
                 self.listUnCategorized.addItem('\t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())

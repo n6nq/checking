@@ -47,33 +47,40 @@ class Database(object):
         self.accounts = []
         self.load_accounts()
         
-        self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
-        self.selectAllEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
-        self.insertEntrySQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
-        self.findCatInEntriesSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries where category = ?'
-        self.updateEntryCatSQL = 'update Entries set category = ? where category = ?'
-        self.updateEntryCatForOverSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
-        self.updateEntryCatForTrigSQL = 'update Entries set category = ? where category = ? and desc LIKE ?'
-        self.findEntryCatForTrigSQL = 'select * from Entries where category = ? and desc LIKE ?'
+        self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
+        self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
+        self.selectAllEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries'
+        self.insertEntrySQL = 'insert into Entries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        self.insertMigratedEntrySQL = 'insert into NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)' 
+        self.findCatInEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries where cat_id = ?'
+
+        self.updateEntryCatSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ?'
+        self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
+
+        self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?'
+        self.updateEntryCatForOverSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'
+        
+        self.updateEntryCatForTrigSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?'
+        self.updateEntryCatForTrigSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'
+
+        self.findEntryCatForTrigSQL = 'select * from Entries where cat_id = ? and trig_id = ?'
+        self.findEntryCatForTrigSQLOld = 'select * from Entries where category = ? and desc LIKE ?'
+
+        self.updateEntryCatByOverOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?'
         self.updateEntryCatByOverOnlySQL = 'update Entries set category = ? where desc LIKE ?'
+
+        self.updateEntryCatByTrigOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
-        self.updateEntryCatByOidSQL = 'update Entries set category = ? where oid = ?'
+
         self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
+
         self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by category, ym'
-        self.entries = []
-        self.num_entries = 0
-        self.load_entries()
-        self.conn.create_function('yrmo', 1, self.yrmo)
-        self.filtered_entries = []
-        self.ncf_entries = []
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
         self.insertCatSQL = 'insert into Categories(name, super) VALUES (?,?)'
         self.insertNoneCatSQL = 'insert or ignore into Categories(name, super) values (?, ?)'
         self.deleteCatSQL = 'delete from Categories where name = ?'
-        self.categories = set()
-        self.load_categories()
         
         self.createTrigsSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
         self.selectAllTrigsSQL = 'select oid, trigger, category from Triggers'
@@ -81,18 +88,26 @@ class Database(object):
         self.findCatInTriggersSQL = 'select oid, trigger, category from Triggers where category = ?'
         self.updateTriggersCatSQL = 'update Triggers set category = ? where category = ?'
         self.deleteTrigSQL = 'delete from Triggers where trigger = ? and category = ?'
-        
-        self.triggers = {}
-        self.load_triggers()
-        
+                
         self.createOversSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
         self.selectAllOversSQL = 'select oid, override, category from Overrides'
         self.insertOverrideSQL = 'insert into Overrides(override, category) values(?, ?)'
-        self.findCatInOverridesSQL = 'select oid, override, category from Overrides where category = ?'
+        self.findCatInOverridesSQL = 'select oid, override, category from Overrides where override = ? and category = ?'
         self.updateOverridesCatSQL = 'update Overrides set category = ? where category = ?'
         self.deleteOverSQL = 'delete from Overrides where override = ? and category = ?'
+
+        self.categories = set()
+        self.cat_to_oid = {}
+        self.filtered_entries = []
+        self.ncf_entries = []
+        self.entries = []
+        self.migrate_database()
         
-        self.overrides = {}
+        self.conn.create_function('yrmo', 1, self.yrmo)
+        self.num_entries = 0
+        self.load_entries()
+        self.load_categories()
+        self.load_triggers()
         self.load_overrides()
 
         self.sanity_check_db()  # todo remove after dev is done
@@ -143,7 +158,8 @@ class Database(object):
         try:
             self.conn.execute(self.insertOverrideSQL, (over, cat))
             self.commit()
-            self.overrides[over] = cat
+            for row in self.conn.execute(self.findCatInOverridesSQL):
+                self.overrides[over] = (row[0], cat)
             return True
         except sqlite3.Error as e:
             self.error('Could save overrides in Overrides table:\n', e.args[0])
@@ -187,13 +203,14 @@ class Database(object):
         self.overrides.save(STORE_PCKL)
 
     def cat_from_desc(self, desc):
-        for over, cat in self.overrides.items():
+        for over, values in self.overrides.items():
             if over in desc:
-                return cat
+                values[0] += 32000      #TODO make it a database constant
+                return values
             
-        for trig, cat in self.triggers.items():
+        for trig, values in self.triggers.items():
             if trig in desc:
-                return cat
+                return values
         
         return 'None'
     
@@ -388,11 +405,11 @@ class Database(object):
         affected = []
         
         for over, cat in self.overrides.items():
-            if cat == catstr:
+            if cat[1] == catstr:
                 affected.append('<Override>'+over)
 
         for trig, cat in self.triggers.items():
-            if cat == catstr:
+            if cat[1] == catstr:
                 affected.append('<Trigger>'+trig)
         
         for entry in self.entries:
@@ -592,41 +609,42 @@ class Database(object):
                 self.conn.execute(self.createCatsSQL)
                 self.conn.execute(self.insertNoneCatSQL, ('None', 'None'))
                 for row in self.conn.execute(self.selectAllCatsSQL):
-                    self.categories.add(category.Category(row).cat)
+                    self.categories.add(category.Category(row))
+                    self.cat_to_oid[row[1]] = row[0]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Categries table:\n', e.args[0])
                 
     def load_entries(self):
-        if len(self.entries) == 0:
-            try:
-                self.conn.execute(self.createEntriesSQL)
-                for row in self.conn.execute(self.selectAllEntriesSQL):
-                    ent = entry.Entry(self, row, entry.Entry.no_cat())
-                    self.entries.append(ent)
-                    self.num_entries += 1
-                    print(ent.date, self.start_date, self.end_date)
-                    self.start_date = min(self.start_date, ent.date)
-                    self.end_date = max(self.end_date, ent.date)
-            except sqlite3.Error as e:
-                self.error('Error loading memory from the Entries table:\n', e.args[0])
+        try:
+            self.conn.execute(self.createEntriesSQL)
+            for row in self.conn.execute(self.selectAllEntriesSQL):
+                ent = entry.Entry(self, row, entry.Entry.no_cat())
+                self.entries.append(ent)
+                self.num_entries += 1
+                print(ent.date, self.start_date, self.end_date)
+                self.start_date = min(self.start_date, ent.date)
+                self.end_date = max(self.end_date, ent.date)
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Entries table:\n', e.args[0])
                 
     def load_overrides(self):
+        self.overrides = {}
         if len(self.overrides) == 0:
             try:
                 self.conn.execute(self.createOversSQL)
                 for row in self.conn.execute(self.selectAllOversSQL):
-                    self.overrides[row[1]] = row[2]
+                    self.overrides[row[1]] = (row[0], row[2])
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Overrides table:\n', e.args[0])
                 
     def load_triggers(self):
-        if len(self.triggers) == 0:
-            try:
-                self.conn.execute(self.createTrigsSQL)
-                for row in self.conn.execute(self.selectAllTrigsSQL):
-                    self.triggers[row[1]] = row[2]
-            except sqlite3.Error as e:
-                self.error('Error loading memory from the Triggers table:\n', e.args[0])
+        self.triggers = {}        
+        try:
+            self.conn.execute(self.createTrigsSQL)
+            for row in self.conn.execute(self.selectAllTrigsSQL):
+                self.triggers[row[1]] = (row[0], row[2])
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Triggers table:\n', e.args[0])
                 
     def merge_ncf_entries(self):
         #As entries grows in size, make the search smarter, more code but faster
@@ -649,6 +667,82 @@ class Database(object):
         if len(not_cats) > 0:
             self.ncf_entries = not_cats
     
+    def migrate_database(self):
+        """Determine what version database we have, and migrate if necessary.
+        Migration 1 is verison None to version"""
+        try:
+            version = 0
+            self.conn.execute('create table if not exists Version(version_str varchar(30), version_int int)')
+            for row in self.conn.execute('select * from Version'):
+                version = row[1]
+            if version == 0:
+                self.migrate_entries(version)
+            return True
+        except sqlite3.Error as e:
+            self.error('What? ', e.args[0])
+            return False
+    
+    def make_cat_to_override_dict(self):
+        self.cat_to_overrides = {}
+        for over in self.overrides.keys():
+            overvalues = self.overrides[over]
+            oid = overvalues[0]
+            cat = overvalues[1]
+            if cat in self.cat_to_overrides:
+                self.cat_to_overrides[cat].append((oid, over))
+            else:
+                self.cat_to_overrides[cat] = [(oid, over)]
+
+    def make_cat_to_trigger_dict(self):
+        self.cat_to_triggers = {}
+        for trig in self.triggers.keys():
+            trigvalues = self.triggers[trig]
+            oid = trigvalues[0]
+            cat = trigvalues[1]
+            if cat in self.cat_to_triggers:
+                self.cat_to_triggers[cat].append((oid, trig))
+            else:
+                self.cat_to_triggers[cat] = [(oid, trig)]
+        
+    def migrate_entries(self, old_version):
+        try:
+            if old_version == 0:
+                self.load_categories()
+                self.load_overrides()
+                self.load_triggers()
+                self.make_cat_to_override_dict()
+                self.make_cat_to_trigger_dict()
+                self.conn.execute('drop table if exists NewEntries')
+                self.conn.execute(self.migrateEntriesTableSQL)
+                for row in self.conn.execute(self.selectAllEntriesSQL):
+                    if row[1] in self.cat_to_overrides:
+                        override_list = self.cat_to_overrides[row[1]]
+                        for override_tuple in override_list:
+                            if override_tuple[1] in row[6]:
+                                #NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                newRow = (row[1], self.cat_to_oid[row[1]], 0, override_tuple[0], row[2], row[3], row[4], row[5], row[6])
+                                self.conn.execute(self.insertMigratedEntrySQL, newRow)
+                                print (newRow)
+                                break
+                                
+                    if row[1] in self.cat_to_triggers:
+                        trigger_list = self.cat_to_triggers[row[1]]
+                        for trigger_tuple in trigger_list:
+                            if trigger_tuple[1] in row[6]:
+                                #NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                newRow = (row[1], self.cat_to_oid[row[1]], trigger_tuple[0], 0, row[2], row[3], row[4], row[5], row[6])
+                                self.conn.execute(self.insertMigratedEntrySQL, newRow)
+                                print (newRow)
+                                break
+                self.conn.execute('ALTER TABLE Entries RENAME TO OldEntries')
+                self.conn.execute('ALTER TABLE NewEntries RENAME TO Entries')
+                self.conn.execute('INSERT OR REPLACE INTO Version(version_str, version_int) VALUES ("V0.1", 1)')
+                self.commit()
+                return True
+        except sqlite3.Error as e:
+            self.error('Migration error 1: ', e.args[0])
+            return False
+        
     def name(self):
         return self.dbname
     
@@ -668,7 +762,7 @@ class Database(object):
     def overs_for_cat(self, lookFor):
         overs = []
         for over, cat in self.overrides.items():
-            if cat == lookFor:
+            if cat[1] == lookFor:
                 overs.append(over)
                 
         return overs
@@ -767,38 +861,38 @@ class Database(object):
     def sanity_check_db(self):
         # first check that every override refers to a category that exists
         for over, cat in self.overrides.items():
-            if cat in self.categories:
-                print('Override: '+over+' Category: '+cat+' is GOOD.')
+            if cat[1] in self.cat_to_oid:
+                print('Override: '+over+' Category: '+cat[1]+' is GOOD.')
             else:
-                print('Override: '+over+' Missing Cat: '+cat+' is BAD BAD.')      
+                print('Override: '+over+' Missing Cat: '+cat[1]+' is BAD BAD.')      
                 
         # check that all triggers refer to a category that exists
         for trig, cat in self.triggers.items():
-            if cat in self.categories:
-                print('Trigger: '+trig+' Category: '+cat+' is GOOD.')
+            if cat[1] in self.cat_to_oid:
+                print('Trigger: '+trig+' Category: '+cat[1]+' is GOOD.')
             else:
-                print('Trigger: '+trig+' Missing Cat: '+cat+' is BAD BAD.')      
+                print('Trigger: '+trig+' Missing Cat: '+cat[1]+' is BAD BAD.')      
             
-        # check that all categories have a least one category or overrides
+        # check that all categories have a least one trigger or overrides
         for cat in self.categories:
             trig_count = 0
             over_count = 0
             for over, ocat in self.overrides.items():
-                if cat == ocat:
+                if cat.cat == ocat[1]:
                     over_count += 1
-                    print ("Category: "+cat+" has over: "+over+" GOOD.")
+                    print ("Category: "+cat.cat+" has over: "+over+" GOOD.")
             for trig, tcat in self.triggers.items():
-                if cat == tcat:
+                if cat.cat == tcat[1]:
                     trig_count += 1
-                    print("Category: "+cat+" has trig: "+trig+" GOOD.")
+                    print("Category: "+cat.cat+" has trig: "+trig+" GOOD.")
             if trig_count == 0 and over_count == 0:
-                print("Category: "+cat+" has no triggers or overrides.  BAD BAD.")
+                print("Category: "+cat.cat+" has no triggers or overrides.  BAD BAD.")
                 
         # check that all entries have a category that exist and that their description contains a trigger
         # or override that belongs to that category. Remember, overrides first.
         for ent in self.entries:
             got_one = False
-            if ent.category not in self.categories:
+            if ent.category not in self.cat_to_oid:
                 print("Entry: "+ent.asCategorizedStr() + " No category. BAD BAD.")
                 continue
             for over in self.overrides:
@@ -858,7 +952,7 @@ class Database(object):
     def triggers_for_cat(self, lookFor):
         triggers = []
         for trig, cat in self.triggers.items():
-            if cat == lookFor:
+            if cat[1] == lookFor:
                 triggers.append(trig)
                 
         return triggers
@@ -901,7 +995,7 @@ class Database(object):
             self.conn.execute(self.updateTriggersCatSQL, (newCat, curCat))
             self.commit()
             for trig, cat in self.triggers.items():
-                if cat == curCat:
+                if cat[1] == curCat:
                     self.triggers[trig] = newCat
                     
             return True
@@ -914,7 +1008,7 @@ class Database(object):
             self.conn.execute(self.updateOverridesCatSQL, (newCat, curCat))
             self.commit()
             for over, cat in self.overrides.items():
-                if cat == curCat:
+                if cat[1] == curCat:
                     self.overrides[over] = newCat
                     
             return True

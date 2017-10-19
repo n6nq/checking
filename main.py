@@ -100,7 +100,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
-        for cat in sorted(self.db.categories):
+        for cat in sorted(self.db.cat_to_oid.keys()):
             self.cbCategory.addItem(cat)
         
         # Setup the Date combobox
@@ -175,10 +175,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def new_calender_filter(self):
         self.calendar1.hide()
         self.calendar2.hide()
-
+        #TODO: This sorted by date rather than by asStr of the ent.
         filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                           self.second_date), key=lambda ent: ent.asCategorizedStr())
-            
+        
         self.set_list_model(filtered)
         #self.listEntries.clear()
         #for ent in filtered:

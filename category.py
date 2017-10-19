@@ -63,5 +63,9 @@ class Category(dbrow.DBRow):
             self.cache = self.db.get_all_cats()
             
     @classmethod
-    def no_category(self):
+    def no_category(cls):
         return 'None'
+    
+    @classmethod
+    def no_cat_id(cls):
+        return 0

@@ -64,11 +64,14 @@ class Entry(dbrow.DBRow):
         self.db = db
         self.oid = row[0]
         self.category = row[1]
-        self.date = row[2]
-        self.amount = Money.from_number(row[3])
-        self.cleared = row[5]
-        self.checknum = row[4]
-        self.desc = row[6].replace('\n', '')
+        self.cat_id = row[2]
+        self.trig_id = row[3]
+        self.over_id = row[4]
+        self.date = row[5]
+        self.amount = Money.from_number(row[6])
+        self.cleared = row[7]
+        self.checknum = row[8]
+        self.desc = row[9].replace('\n', '')
         if how_to_cat == Entry.categorize():
             self.category = self.db.cat_from_desc(self.desc)
             
