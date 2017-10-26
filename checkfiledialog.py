@@ -40,8 +40,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
     
-        for catStr in self.db.get_all_cats():
-            self.listCategories.addItem(catStr)
+        for cat in self.db.get_all_cats():
+            self.listCategories.addItem(cat.cat)
 
         self.db.set_ncf_entries(self.db.get_all_entries_with_cat('All', 'None'))
         for ent in self.db.get_ncf_entries():

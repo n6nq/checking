@@ -82,20 +82,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         # Setup the entry list
         self.search_choice = 'All'
-        #lv = QListView()
-        #lv.setModel(lm)
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
-        # #model_data = []
-        # #for ent in list_data:
-        # #    model_data.append(ent.asCategorizedStr())
-        #for i in range(10000):
-        #    model_data.append(str(i) +'Hello')
-        #lm = MyListModel(list_data, self)
         self.set_list_model(list_data)
-        # #lm = MyListModel(model_data, self.listEntries)
-        # #self.listEntries.setModel(lm)
-        #for ent in sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr()):
-            #self.listEntries.addItem(ent.asCategorizedStr())
 
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())

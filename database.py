@@ -17,8 +17,10 @@ import category
 import trigger
 import override
 import datetime
+from bidict import bidict
 from enum import Enum
 from money import Money
+from PyQt5.QtWidgets import QMessageBox
 
 # storage defines
 EMPTY = 0
@@ -97,7 +99,14 @@ class Database(object):
         self.deleteOverSQL = 'delete from Overrides where override = ? and category = ?'
 
         self.categories = set()
-        self.cat_to_oid = {}
+        self.cat_to_oid = bidict()
+
+        self.overrides = {}
+        self.over_to_oid = bidict()
+        
+        self.triggers = {}
+        self.trig_to_oid = bidict()
+
         self.filtered_entries = []
         self.ncf_entries = []
         self.entries = []
@@ -124,11 +133,13 @@ class Database(object):
         
     def add_cat(self, catStr):
         try:
-            if catStr in self.categories:
+            if catStr in self.cat_to_oid:
+                self.error("Failed to add Category '{0}'".format(catStr), 'It already exists.')
                 return False
             else:
-                self.conn.execute(self.insertCatSQL, (catStr, None))
+                cur = self.conn.execute(self.insertCatSQL, (catStr, None))
                 self.commit()
+                last_id = cur.lastrowid
                 self.categories.add(catStr)
                 return True
         except sqlite3.Error as e:
@@ -175,7 +186,7 @@ class Database(object):
         
     def add_trigger(self, trig, cat):
         try:
-            if trig in self.triggers:
+            if trig in self.trig_to_oid:
                 return False
             self.conn.execute(self.insertTrigsSQL, (trig, cat))
             self.commit()
@@ -399,7 +410,16 @@ class Database(object):
         return False
     
     def error(self, msg, reason):
-        print (msg, reason)     #TODO make ui for error messages  
+        print (msg, reason)     #TODO make ui for error messages
+        msgBox = QMessageBox()
+        msgBox.setWindowTitle('Error!')
+        msgBox.setText(msg+'\n'+reason)
+        #msgBox.setDetailedText(reason)
+        #msgBox.addButton(QtGui.QPushButton('Accept'), QtGui.QMessageBox.YesRole)
+        #msgBox.addButton(QtGui.QPushButton('Reject'), QtGui.QMessageBox.NoRole)
+        #msgBox.addButton(QtGui.QPushButton('Cancel'), QtGui.QMessageBox.RejectRole)
+        self.retval = msgBox.exec_()
+        
     
     def find_all_related_to_cat(self, catstr):
         affected = []
@@ -628,7 +648,6 @@ class Database(object):
             self.error('Error loading memory from the Entries table:\n', e.args[0])
                 
     def load_overrides(self):
-        self.overrides = {}
         if len(self.overrides) == 0:
             try:
                 self.conn.execute(self.createOversSQL)
@@ -638,13 +657,14 @@ class Database(object):
                 self.error('Error loading memory from the Overrides table:\n', e.args[0])
                 
     def load_triggers(self):
-        self.triggers = {}        
-        try:
-            self.conn.execute(self.createTrigsSQL)
-            for row in self.conn.execute(self.selectAllTrigsSQL):
-                self.triggers[row[1]] = (row[0], row[2])
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Triggers table:\n', e.args[0])
+        if len(self.triggers) == 0:
+            try:
+                self.conn.execute(self.createTrigsSQL)
+                for row in self.conn.execute(self.selectAllTrigsSQL):
+                    self.triggers[row[1]] = (row[0], row[2])
+                    self.trig_to_oid[row[1]] = row[0]
+            except sqlite3.Error as e:
+                self.error('Error loading memory from the Triggers table:\n', e.args[0])
                 
     def merge_ncf_entries(self):
         #As entries grows in size, make the search smarter, more code but faster
@@ -746,7 +766,7 @@ class Database(object):
     def name(self):
         return self.dbname
     
-    def open(self, name):
+    def open(self, name, deprecated):
         self.dbname = name
         conn = sqlite3.connect(name+'.db')
         self.conn = conn

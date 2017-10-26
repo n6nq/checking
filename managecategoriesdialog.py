@@ -57,7 +57,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.btnDeleteTrigger.clicked.connect(lambda: self.delete_trigger())        
             
         for cat in self.db.categories:
-            self.listCategories.addItem(cat)
+            self.listCategories.addItem(cat.cat)
         
         self.listCategories.setCurrentRow(0)
         selectedStr = self.listCategories.selectedItems()[0].text()
@@ -148,27 +148,25 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.category_str = self.edtCategory.text()
         #cat_list = self.listCategories.selectedItems()
     
-        self.db.add_cat(self.category_str)
-        #self.db.overrides.add_over(self.override_str, cat_list[0].text())
-        i = QListWidgetItem(self.category_str)
-        self.listCategories.addItem(i)
-        self.listCategories.setCurrentItem(i)
-        #out = self.listCategories.find(over_str, Qt.MatchExactly)
-        pass
+        if self.db.add_cat(self.category_str):
+            i = QListWidgetItem(self.category_str)
+            self.listCategories.addItem(i)
+            self.listCategories.setCurrentItem(i)
     
     def make_new_trigger(self):
         self.trigger_str = self.edtTrigger.text()
         cat = self.listCategories.selectedItems()[0].text()
-        self.db.add_trigger(self.trigger_str, cat)
-        i = QListWidgetItem(self.trigger_str)
-        self.listTriggers.addItem(i)
-        self.listTriggers.setCurrentItem(i)
+        # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger(self.trigger_str)
         dl = WarningListDialog(
             "All entries listed below have the new trigger string '"+self.trigger_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
             affected)
         if dl.reply == True:
+            self.db.add_trigger(self.trigger_str, cat)
+            i = QListWidgetItem(self.trigger_str)
+            self.listTriggers.addItem(i)
+            self.listTriggers.setCurrentItem(i)
             self.db.set_cat_for_all_with_trigger(cat, self.trigger_str)
     
     def rename_override(self):
