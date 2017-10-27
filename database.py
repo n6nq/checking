@@ -56,7 +56,7 @@ class Database(object):
         self.insertMigratedEntrySQL = 'insert into NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)' 
         self.findCatInEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries where cat_id = ?'
 
-        self.updateEntryCatSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ?'
+        self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?'
         self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
 
         self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?'
@@ -991,20 +991,26 @@ class Database(object):
         a category. Changes database and memory copies of records.
         This function covers both the permanent entries and the filtered_entries."""
         try:
-            cur = self.conn.execute(self.updateEntryCatSQL, (newCat, curCat))
+            new_id = self.cat_to_oid[newCat]
+            cur_id = self.cat_to_oid[curCat]
+            cur = self.conn.execute(self.updateEntryCatSQL, (new_id, newCat, cur_id))
             self.commit()
             for ent in self.entries:
-                if ent.category == curCat:
+                if ent.cat_id == cur_id:
                     ent.category = newCat
+                    ent.cat_id = new_id
                     
             for ent in self.filtered_entries:
-                if ent.category == curCat:
-                    ent.category = newCat
+                if ent.cat_id == cur_id:
+                    ent.category = new_id
             return True
         except sqlite3.Error as e:
             self.error('Error updating categories in Entries table:\n', e.args[0])
             return False
-    
+        except KeyError as e:
+            self.error("Bug in update_entries_cats:\n", e.args[0])
+            return False
+        
     def update_entry_cat_by_oid(self, cat, oid):
         try:
             cur = self.conn.execute(self.updateEntryCatByOidSQL, (cat, oid))
