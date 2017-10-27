@@ -131,17 +131,16 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
     def make_new_override(self):
         self.override_str = self.edtOverride.text()
         cat = self.listCategories.selectedItems()[0].text()
-        
-        self.db.add_override(self.override_str, cat)
-        i = QListWidgetItem(self.override_str)
-        self.listOverrides.addItem(i)
-        self.listOverrides.setCurrentItem(i)
         affected = self.db.find_all_with_trigger(self.override_str)
         dl = WarningListDialog(
             "All entries listed below have the new override string '"+self.override_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
             affected)
         if dl.reply == True:
+            self.db.add_override(self.override_str, cat)
+            i = QListWidgetItem(self.override_str)
+            self.listOverrides.addItem(i)
+            self.listOverrides.setCurrentItem(i)
             self.db.set_cat_for_all_with_over(cat, self.override_str)
     
     def make_new_category(self):

@@ -44,12 +44,11 @@ class Overrides(object):
         
 class Override(dbrow.DBRow):
     
-    def __init__(self, db, storage):
-        pass
-#        self.strings = set()
-#        self.db = db
-#        self.load(storage)
-
+    def __init__(self, row):
+        self.oid = row[0]
+        self.over = row[1]
+        self.cat = row[2]
+        
     def del_cat(self, cat):
         pass
     

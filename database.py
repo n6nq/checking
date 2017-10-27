@@ -13,7 +13,7 @@
 import sqlite3
 import accounts
 import entry
-import category
+from category import Category
 import trigger
 import override
 import datetime
@@ -140,7 +140,8 @@ class Database(object):
                 cur = self.conn.execute(self.insertCatSQL, (catStr, None))
                 self.commit()
                 last_id = cur.lastrowid
-                self.categories.add(catStr)
+                self.categories.add(Category((last_id, catStr, None )))
+                self.cat_to_oid[catStr] = last_id                     
                 return True
         except sqlite3.Error as e:
             self.error('Could not save category in Category table:\n', e.args[0])
@@ -167,11 +168,16 @@ class Database(object):
             
     def add_override(self, over, cat):
         try:
-            self.conn.execute(self.insertOverrideSQL, (over, cat))
-            self.commit()
-            for row in self.conn.execute(self.findCatInOverridesSQL):
-                self.overrides[over] = (row[0], cat)
-            return True
+            if over in self.over_to_oid:
+                self.error("Failed to add Override '{0}'".format(over), 'It already exists.')
+                return False
+            else:
+                cur = self.conn.execute(self.insertOverrideSQL, (over, cat))
+                self.commit()
+                last_id = cur.lastrowid
+                self.overrides[over] = (last_id, cat)
+                self.over_to_oid[over] = last_id
+                return True
         except sqlite3.Error as e:
             self.error('Could save overrides in Overrides table:\n', e.args[0])
             return False
@@ -187,10 +193,13 @@ class Database(object):
     def add_trigger(self, trig, cat):
         try:
             if trig in self.trig_to_oid:
+                self.error("Failed to add Trigger '{0}'".format(catStr), 'It already exists.')                
                 return False
-            self.conn.execute(self.insertTrigsSQL, (trig, cat))
+            cur = self.conn.execute(self.insertTrigsSQL, (trig, cat))
             self.commit()
+            last_id = cur.lastrowid
             self.triggers[trig] = cat
+            self.trig_to_oid[trig] = last_id
             return True
         except sqlite3.Error as e:
             self.error('Could not save triggers in Triggers table:\n', e.args[0])
@@ -629,7 +638,7 @@ class Database(object):
                 self.conn.execute(self.createCatsSQL)
                 self.conn.execute(self.insertNoneCatSQL, ('None', 'None'))
                 for row in self.conn.execute(self.selectAllCatsSQL):
-                    self.categories.add(category.Category(row))
+                    self.categories.add(Category(row))
                     self.cat_to_oid[row[1]] = row[0]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Categries table:\n', e.args[0])
