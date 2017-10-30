@@ -54,7 +54,7 @@ class Database(object):
         self.selectAllEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries'
         self.insertEntrySQL = 'insert into Entries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.insertMigratedEntrySQL = 'insert into NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)' 
-        self.findCatInEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries where cat_id = ?'
+        self.findCatInEntriesSQL = 'select * from Entries where cat_id = ?'
 
         self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?'
         self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
@@ -447,18 +447,26 @@ class Database(object):
             
         return affected
     
-    def find_all_related_to_trig(self, current_str):
+    def find_all_related_to_trig(self, current_str, new_str):
         affected = []
+        #Are we trying to rename an existing trigger to another trigger that exists?
+        if new_str and new_str in self.trig_to_oid:
+            affected.append("<Trigger> '"+new_str+"' already exists. Datbase module will block this attempt.")
+            
         #first, get the category for this trigger
-        catstr = self.triggers[current_str]
+        trigtup = self.triggers[current_str]
+        trig_id = trigtup[0]
+        catstr = trigtup[1]
+        cat_id = self.cat_to_oid[catstr]
         for entry in self.entries:
-            if entry.category == catstr and current_str in entry.desc:
+            if entry.cat_id == cat_id and entry.trig_id == trig_id:
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
         for entry in self.ncf_entries:
-            if entry.category == catstr and current_str in entry.desc:
+            if entry.cat_id == cat_id and entry.trig_id in trig_id:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
+        Are there already categorized entries that have this trigger?
         return affected
         
     def find_all_related_to_over(self, over):
@@ -835,19 +843,29 @@ class Database(object):
             return False
 
     def rename_trigger_all(self, cur_trig, new_trig):
+        #We will nnot rename trig to another existing, too complicated, delete trigger
         if new_trig in self.triggers:
             return False
-        cat = self.triggers[cur_trig]
+        
+        trigtup = self.triggers[cur_trig]
+        trig_id = trigtup[0]
+        catstr = trigtup[1]
+        cat_id = self.cat_to_oid[catstr]
+        nonecat_id = self.cat_to_oid['None']
         try:
-            if self.add_trigger(new_trig, cat) == False:
-                return False
+            if self.add_trigger(new_trig, catstr) == False:
+                return False    #Can't add the trigger if it is already there.
             
-            for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
+            #All entries with old but not new trigger are set to None 
+            for ent in self.conn.execute(self.findEntryCatForTrigSQL, (cat_id, trig_id)):
                 if new_trig not in ent[6]:
-                    self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
+                    #cat_id and what trig_id
+                    self.conn.execute(self.updateEntryCatSQL, (cat, cat_id, category.Category.no_category()))
                     self.commit()
+                    
+            #Now get the cached entries
             for ent in self.entries:
-                if ent.category == cat and new_trig not in ent.desc:
+                if ent.cat_id == cat_id and ent.trig_id == trig_id and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
                     
             for ent in self.filtered_entries:

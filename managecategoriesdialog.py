@@ -220,7 +220,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_str = self.listTriggers.currentItem().text()
         new_str = self.edtTrigger.text()
 
-        affected_list = self.db.find_all_related_to_trig(current_str)
+        affected_list = self.db.find_all_related_to_trig(current_str, new_str)
         dl = WarningListDialog(
             "All entries listed below are categorized by trigger string '"+current_str+"'.\n" + \
             "If they have the new trigger string '"+new_str+"', they will keep their current category.\n"+ \
@@ -298,7 +298,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         if self.trigger_str == None:
             return False
         current = self.listTriggers.currentRow()
-        affected = self.db.find_all_related_to_trig(self.trigger_str)
+        affected = self.db.find_all_related_to_trig(self.trigger_str, None)
         cat = self.db.triggers[self.trigger_str]
         dl = WarningListDialog(
             'All Entries will have their category changed to None.', \
