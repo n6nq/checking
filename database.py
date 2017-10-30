@@ -458,6 +458,7 @@ class Database(object):
         trig_id = trigtup[0]
         catstr = trigtup[1]
         cat_id = self.cat_to_oid[catstr]
+        
         for entry in self.entries:
             if entry.cat_id == cat_id and entry.trig_id == trig_id:
                 affected.append('<Entry>'+entry.asCategorizedStr())
@@ -466,7 +467,11 @@ class Database(object):
             if entry.cat_id == cat_id and entry.trig_id in trig_id:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
-        Are there already categorized entries that have this trigger?
+        #Are there already categorized entries that have this new trigger?
+        for entry in self.entries:
+            if new_str in entry.desc:
+                affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
+ 
         return affected
         
     def find_all_related_to_over(self, over):

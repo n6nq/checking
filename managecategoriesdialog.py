@@ -222,9 +222,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
 
         affected_list = self.db.find_all_related_to_trig(current_str, new_str)
         dl = WarningListDialog(
-            "All entries listed below are categorized by trigger string '"+current_str+"'.\n" + \
+            "All <Entry> listed below are categorized by trigger string '"+current_str+"'.\n" + \
             "If they have the new trigger string '"+new_str+"', they will keep their current category.\n"+ \
-            "If they do not contain the new trigger string, their category will be set to None.", 
+            "If they do not contain the new trigger string, their category will be set to None.\n" + \
+            "If there are <Exising Entry> below,  they are already categorized, and you would create a " + \
+            "conflict by proceeding. Find another way.", 
             affected_list)
 
         if dl.reply == True:
