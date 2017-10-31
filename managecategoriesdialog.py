@@ -168,29 +168,6 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             self.listTriggers.setCurrentItem(i)
             self.db.set_cat_for_all_with_trigger(cat, self.trigger_str)
     
-    def rename_override(self):
-        row = self.listOverrides.currentRow()
-        current_str = self.listOverrides.currentItem().text()
-        new_str = self.edtOverride.text()
-        affected_list = self.db.find_all_related_to_over(current_str)
-        dl = WarningListDialog(
-            "All entries listed below are categorized by the override string '"+current_str+"'.\n" + \
-            "If they have the new override string '"+new_str+"', they will keep their current category.\n"+ \
-            "If they do not contain the new override string, their category will be set to None.", 
-            affected_list)
-        if dl.reply == True:
-            if self.db.rename_override_all(current_str, new_str) == False:
-                msgbox = Message('Rename of Override failed.')
-                return False
-        else:
-            return False
-
-        self.listOverrides.takeItem(row)
-        self.override_str = new_str
-        i = QListWidgetItem(new_str)
-        self.listOverrides.addItem(i)
-        self.listOverrides.setCurrentItem(i)        pass
-    
     def rename_category(self):
         current_cat = self.listCategories.currentItem().text()
         new_cat = self.edtCategory.text()
@@ -215,11 +192,36 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listCategories.addItem(i)
         self.listCategories.setCurrentItem(i)
     
+    def rename_override(self):
+        row = self.listOverrides.currentRow()
+        current_str = self.listOverrides.currentItem().text()
+        new_str = self.edtOverride.text()
+        affected_list = self.db.find_all_related_to_over(current_str, new_str)
+        dl = WarningListDialog(
+            "All entries listed below are categorized by the override string '"+current_str+"'.\n" + \
+            "If they have the new override string '"+new_str+"', they will keep their current category.\n"+ \
+            "If they do not contain the new override string, their category will be set to None.\n" + \
+            "If there are <Exising Entry> below,  they are already categorized, and you would create a " + \
+            "conflict by proceeding. Find another way.", 
+            affected_list)
+        if dl.reply == True:
+            if self.db.rename_override_all(current_str, new_str) == False:
+                msgbox = Message('Rename of Override failed.')
+                return False
+        else:
+            return False
+
+        self.listOverrides.takeItem(row)
+        self.override_str = new_str
+        i = QListWidgetItem(new_str)
+        self.listOverrides.addItem(i)
+        self.listOverrides.setCurrentItem(i)
+        pass
+    
     def rename_trigger(self):
         row = self.listTriggers.currentRow()
         current_str = self.listTriggers.currentItem().text()
         new_str = self.edtTrigger.text()
-
         affected_list = self.db.find_all_related_to_trig(current_str, new_str)
         dl = WarningListDialog(
             "All <Entry> listed below are categorized by trigger string '"+current_str+"'.\n" + \
@@ -249,7 +251,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             return False
         cat = self.db.overrides[self.override_str]
         current = self.listOverrides.currentRow()
-        affected = self.db.find_all_related_to_over(self.override_str)
+        affected = self.db.find_all_related_to_over(self.override_str, None)
         dl = WarningListDialog(
             'All Entries listed belowwill have their category changed to None.', \
             affected)

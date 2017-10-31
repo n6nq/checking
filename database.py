@@ -198,7 +198,7 @@ class Database(object):
             cur = self.conn.execute(self.insertTrigsSQL, (trig, cat))
             self.commit()
             last_id = cur.lastrowid
-            self.triggers[trig] = cat
+            self.triggers[trig] = (last_id, cat)
             self.trig_to_oid[trig] = last_id
             return True
         except sqlite3.Error as e:
@@ -447,14 +447,14 @@ class Database(object):
             
         return affected
     
-    def find_all_related_to_trig(self, current_str, new_str):
+    def find_all_related_to_trig(self, current_trig, new_trig):
         affected = []
         #Are we trying to rename an existing trigger to another trigger that exists?
-        if new_str and new_str in self.trig_to_oid:
-            affected.append("<Trigger> '"+new_str+"' already exists. Datbase module will block this attempt.")
+        if new_trig and new_trig in self.trig_to_oid:
+            affected.append("<Trigger> '"+new_trig+"' already exists. Datbase module will block this attempt.")
             
         #first, get the category for this trigger
-        trigtup = self.triggers[current_str]
+        trigtup = self.triggers[current_trig]
         trig_id = trigtup[0]
         catstr = trigtup[1]
         cat_id = self.cat_to_oid[catstr]
@@ -464,27 +464,40 @@ class Database(object):
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
         for entry in self.ncf_entries:
-            if entry.cat_id == cat_id and entry.trig_id in trig_id:
+            if entry.cat_id == cat_id and entry.trig_id == trig_id:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
         #Are there already categorized entries that have this new trigger?
         for entry in self.entries:
-            if new_str in entry.desc:
+            if new_trig in entry.desc:
                 affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
  
         return affected
         
-    def find_all_related_to_over(self, over):
+    def find_all_related_to_over(self, cur_over, new_over):
         affected = []
-        #first, get the category for this trigger
-        catstr = self.overrides[over]
+        #Are we trying to rename an existing override to another override that exists?
+        if new_over and new_over in self.over_to_oid:
+            affected.append("<Override> '"+new_over+"' already exists. Datbase module will block this attempt.")
+            
+        #first, get the category for this override
+        overtup = self.overrides[cur_over]
+        over_id = overtup[0]
+        catstr = overtup[1]
+        cat_id = self.cat_to_oid[catstr]
+        
         for entry in self.entries:
-            if entry.category == catstr and over in entry.desc:
+            if entry.cat_id == cat_id and entry.over_id == over_id:
                 affected.append('<Entry>'+entry.asCategorizedStr())
 
-        for entry in self.filtered_entries:
-            if entry.category == catstr and over in entry.desc:
+        for entry in self.ncf_entries:
+            if entry.cat_id == cat_id and entry.over_id == over_id:
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
+
+        #Are there already categorized entries that have this new override?
+        for entry in self.entries:
+            if new_over in entry.desc:
+                affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
 
         return affected
         
@@ -821,9 +834,17 @@ class Database(object):
             return True
         
     def rename_override_all(self, cur_over, new_over):
-        cat = self.overrides[cur_over]
+        #We will not rename override to another existing, too complicated, delete override
+        if new_over in self.overrides:
+            return False
+        
+        overtup = self.overrides[cur_over]
+        over_id = overtup[0]
+        catstr = overtup[1]
+        cat_id = self.cat_to_oid[catstr]
+        nonecat_id = self.cat_to_oid['None']
         try:
-            if self.add_override(new_over, cat) == False:
+            if self.add_override(new_over, catstr) == False:
                 return False
             
             for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
@@ -848,7 +869,7 @@ class Database(object):
             return False
 
     def rename_trigger_all(self, cur_trig, new_trig):
-        #We will nnot rename trig to another existing, too complicated, delete trigger
+        #We will not rename trig to another existing, too complicated, delete trigger
         if new_trig in self.triggers:
             return False
         
@@ -877,7 +898,7 @@ class Database(object):
                 if ent.category == cat and new_trig not in ent.desc:
                     ent.category = category.Category.no_category()
             
-            if self.delete_trigger_only(cur_trig, cat) == False:
+            if self.delete_trigger_only(cur_trig, catstr) == False:
                         return False
             self.commit()
             return True
