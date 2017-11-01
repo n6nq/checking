@@ -249,15 +249,15 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         affected = []
         if self.override_str == None:
             return False
-        cat = self.db.overrides[self.override_str]
+        cattup = self.db.overrides[self.override_str]
         current = self.listOverrides.currentRow()
         affected = self.db.find_all_related_to_over(self.override_str, None)
         dl = WarningListDialog(
-            'All Entries listed belowwill have their category changed to None.', \
+            'All Entries listed below will have their category changed to None.', \
             affected)
 
         if dl.reply == True:
-            if self.db.delete_override_all(self.override_str, cat) == False:
+            if self.db.delete_override_all(self.override_str, cattup[1]) == False:
                 msgbox = Message('Rename of Trigger failed.')
                 return False
         else:

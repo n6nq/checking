@@ -59,7 +59,7 @@ class Database(object):
         self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?'
         self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
 
-        self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?'
+        self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, over_id = ?, category = ? where cat_id = ? and over_id = ?'
         self.updateEntryCatForOverSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'
         
         self.updateEntryCatForTrigSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?'
@@ -96,7 +96,7 @@ class Database(object):
         self.insertOverrideSQL = 'insert into Overrides(override, category) values(?, ?)'
         self.findCatInOverridesSQL = 'select oid, override, category from Overrides where override = ? and category = ?'
         self.updateOverridesCatSQL = 'update Overrides set category = ? where category = ?'
-        self.deleteOverSQL = 'delete from Overrides where override = ? and category = ?'
+        self.deleteOverSQL = 'delete from Overrides where oid = ?'
 
         self.categories = set()
         self.cat_to_oid = bidict()
@@ -215,7 +215,7 @@ class Database(object):
         self.accts.save(STORE_PCKL)
         self.entries = entry.EntryList(self, STORE_DB)
         self.entries.save(STORE_PCKL)
-        self.categories = category.Category(self, STORE_DB)
+        self.categories = Category(self, STORE_DB)
         self.categories.save(STORE_PCKL)
         self.triggers = trigger.Trigger(self, STORE_DB)
         self.triggers.save(STORE_PCKL)
@@ -329,11 +329,11 @@ class Database(object):
         """Change all entries and temp_entries with this cat to None. Change the Category
         of all triggers and overrides with this cat to None. Finally remove this category."""
         #update affected entries to None 
-        self.update_entries_cats(cat, category.Category.no_category())
+        self.update_entries_cats(cat, Category.no_category())
         #update affected triggers to None
-        self.update_triggers_cats(cat, category.Category.no_category())
+        self.update_triggers_cats(cat, Category.no_category())
         #update affected overrides to None
-        self.update_overrides_cats(cat, category.Category.no_category())
+        self.update_overrides_cats(cat, Category.no_category())
         #remove category
         self.delete_category_only(cat)
 
@@ -345,17 +345,17 @@ class Database(object):
             search = "%" + trig + "%"
             #for row in self.conn.execute(self.findEntryCatForTrigSQL, (cat, search)):
             #    print(row)
-            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (category.Category.no_category(), cat, search))
+            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (Category.no_category(), cat, search))
             self.commit()
             rowcount = cur.rowcount
             
             for ent in self.entries:
                 if ent.category == cat and trig in ent.desc:
-                    ent.category = category.Category.no_category()
+                    ent.category = Category.no_category()
                     
             for ent in self.filtered_entries:
                 if ent.category == cat and trig in ent.desc:
-                    ent.category = category.Category.no_category()
+                    ent.category = Category.no_category()
                             
             self.conn.execute(self.deleteTrigSQL, (trig, cat))
             self.commit()
@@ -368,7 +368,7 @@ class Database(object):
         if over not in self.overrides:
             return False
         try:
-            self.conn.execute(self.deleteOverSQL, (over, cat))
+            self.conn.execute(self.deleteOverSQL, (self.overrides[over][0], self.categories[cat][0]))
             
             del self.overrides[over]
             self.commit()
@@ -376,29 +376,37 @@ class Database(object):
             self.error('Could not delete Override:')
             return False
 
-    def delete_override_all(self, over, cat):
+    def delete_override_all(self, over, catstr):
         if over not in self.overrides:
             return False
         try:
-            cat = self.overrides[over]
-            cur = self.conn.execute(self.updateEntryCatForOverSQL, (category.Category.no_category(), cat, "'%"+over+"%'"))
+            cat_id = self.cat_to_oid[catstr]
+            overtup = self.overrides[over]
+            none_id = self.cat_to_oid['None']
+            over_id = overtup[0]
+            cur = self.conn.execute(self.updateEntryCatForOverSQL, (none_id, 0, Category.no_category(), cat_id, over_id))
             rowcount = cur.rowcount
             
             for ent in self.entries:
-                if ent.category == cat and over in ent.desc:
-                    ent.category = category.Category.no_category()
+                if ent.cat_id == cat_id and ent.over_id == over_id:
+                    ent.category = Category.no_category()
+                    ent.cat_id = none_id
+                    ent.over_id = 0
                     
             for ent in self.filtered_entries:
-                if ent.category == cat and over in ent.desc:
-                    ent.category = category.Category.no_category()
+                if ent.category == cattup[1] and over in ent.desc:
+                    ent.category = Category.no_category()
+                    ent.cat_id = none_id
+                    ent.over_id = 0
                             
-            self.conn.execute(self.deleteOverSQL, (over, cat))
+            self.conn.execute(self.deleteOverSQL, (over_id, ))
             self.commit()
             
             del self.overrides[over]
         except sqlite3.Error as e:
             self.error('Could not delete Override:')
             return False
+        
     def delete_trigger_only(self, trig, cat):
         if trig not in self.triggers:
             return False
@@ -496,7 +504,7 @@ class Database(object):
 
         #Are there already categorized entries that have this new override?
         for entry in self.entries:
-            if new_over in entry.desc:
+            if new_over and new_over in entry.desc:
                 affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
 
         return affected
@@ -807,7 +815,7 @@ class Database(object):
         self.conn = conn
         self.accts = accounts.AccountList(self)
         self.entries = entry.EntryList(self)
-        self.categories = category.Category(self)
+        self.categories = Category(self)
         self.triggers = trigger.Trigger(self)
         self.overrides = override.Override(self)
         #self.createTables()
@@ -847,20 +855,20 @@ class Database(object):
             if self.add_override(new_over, catstr) == False:
                 return False
             
-            for ent in self.conn.execute(self.findCatInEntriesSQL, (cat, )):
-                if new_over not in ent.desc:
-                    self.conn.execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
+            for ent in self.conn.execute(self.findCatInEntriesSQL, (cat_id, )):
+                if new_over not in ent[6]:
+                    self.conn.execute(self.updateEntryCatSQL, (cat, cat_id, Category.no_category()))
                     self.commit()
 
             for ent in self.entries:
-                if ent.category == cat and new_over not in ent.desc:
-                    ent.category = category.Category.no_category()
-                    
+                if ent.cat_id == cat_id and ent.over_id == over_id and new_over not in ent.desc:
+                    ent.category = Category.no_category()
+                    ent.cat_id = nonecat_id
             for ent in self.filtered_entries:
-                if ent.category == cat and new_over not in ent.desc:
-                    ent.category = category.Category.no_category()
-            
-            if self.delete_override_only(cur_over, cat) == False:
+                if ent.cat_id == cat_id and new_over not in ent.desc:
+                    ent.category = Category.no_category()
+                    ent.cat_id = nonecat_id
+            if self.delete_override_only(cur_over, catstr) == False:
                 return False
             self.commit()
             return True
@@ -886,18 +894,18 @@ class Database(object):
             for ent in self.conn.execute(self.findEntryCatForTrigSQL, (cat_id, trig_id)):
                 if new_trig not in ent[6]:
                     #cat_id and what trig_id
-                    self.conn.execute(self.updateEntryCatSQL, (cat, cat_id, category.Category.no_category()))
+                    self.conn.execute(self.updateEntryCatSQL, (cat, cat_id, Category.no_category()))
                     self.commit()
                     
             #Now get the cached entries
             for ent in self.entries:
                 if ent.cat_id == cat_id and ent.trig_id == trig_id and new_trig not in ent.desc:
-                    ent.category = category.Category.no_category()
-                    
+                    ent.category = Category.no_category()
+                    ent.cat_id = nonecat_id
             for ent in self.filtered_entries:
                 if ent.category == cat and new_trig not in ent.desc:
-                    ent.category = category.Category.no_category()
-            
+                    ent.category = Category.no_category()
+                    ent.cat_id = nonecat_id
             if self.delete_trigger_only(cur_trig, catstr) == False:
                         return False
             self.commit()
@@ -915,7 +923,7 @@ class Database(object):
         self.accts.save(STORE_DB)
         self.entries = entry.EntryList(self, STORE_PCKL)
         self.entries.save(STORE_DB)
-        self.categories = category.Category(self, STORE_PCKL)
+        self.categories = Category(self, STORE_PCKL)
         self.categories.save(STORE_DB)
         self.triggers = trigger.Trigger(self, STORE_PCKL)
         self.triggers.save(STORE_DB)
