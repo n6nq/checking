@@ -98,7 +98,7 @@ class Database(object):
         self.updateOverridesCatSQL = 'update Overrides set category = ? where category = ?'
         self.deleteOverSQL = 'delete from Overrides where oid = ?'
 
-        self.categories = set()
+        self.categories = {}
         self.cat_to_oid = bidict()
 
         self.overrides = {}
@@ -140,7 +140,7 @@ class Database(object):
                 cur = self.conn.execute(self.insertCatSQL, (catStr, None))
                 self.commit()
                 last_id = cur.lastrowid
-                self.categories.add(Category((last_id, catStr, None )))
+                self.categories[catStr] = Category((last_id, catStr, None ))
                 self.cat_to_oid[catStr] = last_id                     
                 return True
         except sqlite3.Error as e:
@@ -206,7 +206,7 @@ class Database(object):
             return False
             
         
-    def backup(self, name):
+    def backup(self, name):  #deprecated
         self.dbname = name
         #todo: develop strategy for managing backup and restore naming
         conn = sqlite3.connect(name+'.db')
@@ -280,7 +280,7 @@ class Database(object):
     def commit(self):
         self.conn.commit()
         
-    def convert_pickles_to_DB(self):
+    def convert_pickles_to_DB(self):  #deprecated
         self.categories.load(STORE_PCKL)
         self.categories.save(STORE_DB)
         self.triggers.load(STORE_PCKL)
@@ -319,7 +319,7 @@ class Database(object):
         try:
             self.conn.execute(self.deleteCatSQL, (lose_cat, ))
             self.commit()
-            self.categories.discard(lose_cat)
+            del self.categories[lose_cat]
             return True
         except sqlite3.Error as e:
             self.error('Could not delete Category:')
