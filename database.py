@@ -89,7 +89,7 @@ class Database(object):
         self.insertTrigsSQL = 'insert into Triggers(trigger, category) values(?, ?)'
         self.findCatInTriggersSQL = 'select oid, trigger, category from Triggers where category = ?'
         self.updateTriggersCatSQL = 'update Triggers set category = ? where category = ?'
-        self.deleteTrigSQL = 'delete from Triggers where trigger = ? and category = ?'
+        self.deleteTrigSQL = 'delete from Triggers where oid = ?'
                 
         self.createOversSQL = 'create table if not exists Overrides(oid INTEGER PRIMARY KEY ASC, override varchar(30) unique, category varchar(20))'
         self.selectAllOversSQL = 'select oid, override, category from Overrides'
@@ -337,33 +337,38 @@ class Database(object):
         #remove category
         self.delete_category_only(cat)
 
-    def delete_trigger_all(self, trig, cat):
+    def delete_trigger_all(self, trig, catstr):
         if trig not in self.triggers:
             return False
         try:
-            cat = self.triggers[trig]
-            search = "%" + trig + "%"
-            #for row in self.conn.execute(self.findEntryCatForTrigSQL, (cat, search)):
-            #    print(row)
-            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (Category.no_category(), cat, search))
+            cat_id = self.cat_to_oid[catstr]
+            trigtup = self.triggers[trig]
+            none_id = self.cat_to_oid['None']
+            trig_id = trigtup[0]
+            cur = self.conn.execute(self.updateEntryCatForTrigSQL, (none_id, 0, Category.no_category(), cat_id, trig_id))
             self.commit()
             rowcount = cur.rowcount
             
             for ent in self.entries:
-                if ent.category == cat and trig in ent.desc:
+                if ent.cat_id == cat_id and ent.trig_id == trig_id:
                     ent.category = Category.no_category()
+                    ent.cat_id = none_id
+                    ent.trig_id = 0
                     
             for ent in self.filtered_entries:
-                if ent.category == cat and trig in ent.desc:
+                if ent.category == trigup[1] and trig in ent.desc:
                     ent.category = Category.no_category()
+                    ent.cat_id = none_id
+                    ent.trig_id = 0
                             
-            self.conn.execute(self.deleteTrigSQL, (trig, cat))
+            self.conn.execute(self.deleteTrigSQL, (trig_id, ))
             self.commit()
             
             del self.triggers[trig]
         except sqlite3.Error as e:
             self.error('Could not delete Trigger:')
             return False
+        
     def delete_override_only(self, over, cat):
         if over not in self.overrides:
             return False
@@ -385,6 +390,7 @@ class Database(object):
             none_id = self.cat_to_oid['None']
             over_id = overtup[0]
             cur = self.conn.execute(self.updateEntryCatForOverSQL, (none_id, 0, Category.no_category(), cat_id, over_id))
+            self.commit()
             rowcount = cur.rowcount
             
             for ent in self.entries:
@@ -394,7 +400,7 @@ class Database(object):
                     ent.over_id = 0
                     
             for ent in self.filtered_entries:
-                if ent.category == cattup[1] and over in ent.desc:
+                if ent.category == overtup[1] and over in ent.desc:
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
                     ent.over_id = 0
@@ -411,7 +417,7 @@ class Database(object):
         if trig not in self.triggers:
             return False
         try:
-            self.conn.execute(self.deleteTrigSQL, (trig, cat))
+            self.conn.execute(self.deleteTrigSQL, (self.triggers[trig][0], cat))
             
             del self.triggers[trig]
             self.commit()
@@ -476,9 +482,10 @@ class Database(object):
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
         #Are there already categorized entries that have this new trigger?
-        for entry in self.entries:
-            if new_trig in entry.desc:
-                affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
+        if new_trig:
+            for entry in self.entries:
+                if new_trig in entry.desc:
+                    affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
  
         return affected
         
@@ -503,9 +510,10 @@ class Database(object):
                 affected.append('<NewEntry>'+entry.asCategorizedStr())
 
         #Are there already categorized entries that have this new override?
-        for entry in self.entries:
-            if new_over and new_over in entry.desc:
-                affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
+        if new_over:
+            for entry in self.entries:
+                if new_over in entry.desc:
+                    affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
 
         return affected
         
