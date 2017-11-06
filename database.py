@@ -198,7 +198,7 @@ class Database(object):
             cur = self.conn.execute(self.insertTrigsSQL, (trig, cat))
             self.commit()
             last_id = cur.lastrowid
-            self.triggers[trig] = (last_id, cat)
+            self.triggers[trig] = Trigger((last_id, trig, cat))
             self.trig_to_oid[trig] = last_id
             return True
         except sqlite3.Error as e:
@@ -223,14 +223,13 @@ class Database(object):
         self.overrides.save(STORE_PCKL)
 
     def cat_from_desc(self, desc):
-        for over, values in self.overrides.items():
-            if over in desc:
-                values[0] += 32000      #TODO make it a database constant
-                return values
+        for override in self.overrides:
+            if override.over in desc:
+                return (override.cat, self.cat_to_oid[override.cat], 0, self.over_to_oid[override.over])
             
-        for trig, values in self.triggers.items():
-            if trig in desc:
-                return values
+        for trigger in self.triggers:
+            if trigger.cat in desc:
+                return (trigger.cat, self.cat_to_oid[trigger.cat], self.trig_to_oid[trigger.trig], 0)
         
         return 'None'
     
@@ -342,9 +341,9 @@ class Database(object):
             return False
         try:
             cat_id = self.cat_to_oid[catstr]
-            trigtup = self.triggers[trig]
+            trigger = self.triggers[trig]
             none_id = self.cat_to_oid['None']
-            trig_id = trigtup[0]
+            trig_id = trigger.oid
             cur = self.conn.execute(self.updateEntryCatForTrigSQL, (none_id, 0, Category.no_category(), cat_id, trig_id))
             self.commit()
             rowcount = cur.rowcount
@@ -369,11 +368,11 @@ class Database(object):
             self.error('Could not delete Trigger:')
             return False
         
-    def delete_override_only(self, over, cat):
+    def delete_override_only(self, overstr, catstr):
         if over not in self.overrides:
             return False
         try:
-            self.conn.execute(self.deleteOverSQL, (self.overrides[over][0], self.categories[cat][0]))
+            self.conn.execute(self.deleteOverSQL, (self.over_to_oid[overstr], self.cat_to_oid[catstr]))
             
             del self.overrides[over]
             self.commit()
@@ -417,7 +416,7 @@ class Database(object):
         if trig not in self.triggers:
             return False
         try:
-            self.conn.execute(self.deleteTrigSQL, (self.triggers[trig][0], cat))
+            self.conn.execute(self.deleteTrigSQL, (self.triggers[trig].oid, ))
             
             del self.triggers[trig]
             self.commit()
@@ -447,13 +446,13 @@ class Database(object):
     def find_all_related_to_cat(self, catstr):
         affected = []
         
-        for over, cat in self.overrides.items():
-            if cat[1] == catstr:
-                affected.append('<Override>'+over)
+        for override in self.overrides:
+            if override.cat == catstr:
+                affected.append('<Override>'+override.over)
 
-        for trig, cat in self.triggers.items():
-            if cat[1] == catstr:
-                affected.append('<Trigger>'+trig)
+        for trigger in self.triggers:
+            if trigger.cat == catstr:
+                affected.append('<Trigger>'+trigger.trig)
         
         for entry in self.entries:
             if entry.category == catstr:
@@ -609,7 +608,7 @@ class Database(object):
         return requested
     
     def get_all_overrides(self):
-        if self.overrides.cache_loaded():
+        if self.overrides.cache_loaded():  #todo: is thiany more?
             return self.overrides.get_cache()
         overrides = {}
         try:
@@ -680,7 +679,7 @@ class Database(object):
                 self.conn.execute(self.createCatsSQL)
                 self.conn.execute(self.insertNoneCatSQL, ('None', 'None'))
                 for row in self.conn.execute(self.selectAllCatsSQL):
-                    self.categories.add(Category(row))
+                    self.categories[row[1]] = Category(row)
                     self.cat_to_oid[row[1]] = row[0]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Categries table:\n', e.args[0])
@@ -712,7 +711,7 @@ class Database(object):
             try:
                 self.conn.execute(self.createTrigsSQL)
                 for row in self.conn.execute(self.selectAllTrigsSQL):
-                    self.triggers[row[1]] = (row[0], row[2])
+                    self.triggers[row[1]] = trigger(row)
                     self.trig_to_oid[row[1]] = row[0]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Triggers table:\n', e.args[0])
@@ -817,7 +816,7 @@ class Database(object):
     def name(self):
         return self.dbname
     
-    def open(self, name, deprecated):
+    def open(self, name, deprecated):  #deprecated
         self.dbname = name
         conn = sqlite3.connect(name+'.db')
         self.conn = conn
@@ -922,7 +921,7 @@ class Database(object):
             self.error('Error updating triggers in Entries table:\n', e.args[0])
             return False
     
-    def restore(self, name):
+    def restore(self, name):  #deprecated
         self.dbname = name
         #todo: develop strategy for managing backup and restore naming
         conn = sqlite3.connect(name+'.db')

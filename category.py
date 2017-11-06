@@ -14,30 +14,6 @@ class Category(dbrow.DBRow):
         self.cat = row[1]
         self.super_cat = row[2]
         
-        #self.cache = set()
-        #self.db = db
-        #self.createSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
-        #self.selectAllSQL = 'select oid, name, super from Categories'
-        #self.insertSQL = 'insert into Categories(name, super) VALUES (?,?)'
-        #db.create_table(self.createSQL, 'Categories')
-        #self.load(storage)  load after they are created
-
-    #def removeCat(self, catStr):
-    #    newSet = set()
-    #    for cat in self.cache:
-    #        if cat != catStr:
-    #            newSet.add(cat)
-    #    self.cache = newSet
-
-
-
-#   def addToDB(self, catStr):
-#        try:
-#            self.db.conn.execute(self.insertSQL, (catStr, None))
-#            self.db.commit()
-#        except sqlite3.Error as e:
-#            self.db.error('Could not save category in Category table:\n', e.args[0])
-     
         
     def save(self, storage):
         if storage == database.STORE_PCKL:

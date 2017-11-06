@@ -14,27 +14,11 @@ import pickle
 
 class Trigger(dbrow.DBRow):
     
-    def __init__(self, db):
-        self.cache = {}
-        self.db = db
-        self.createSQL = 'create table if not exists Triggers(oid INTEGER PRIMARY KEY ASC, trigger varchar(30) unique, category varchar(20))'
-        self.selectAllSQL = 'select oid, trigger, category from Triggers'
-        self.insertSQL = 'insert into Triggers(trigger, category) values(?, ?)'
-        self.deleteCatSQL = 'delete from Triggers where category = ?'
-        db.create_table(self.createSQL, 'Triggers')
-        #self.load(storage)  load after they are created
+    def __init__(self, row):
+        self.oid = row[0]
+        self.trig = row[1]
+        self.cat = row[2]
 
-    #def del_cat(self, lose_cat):
-    #    newd = {}
-    #    for trig, cat in self.cache.items():
-    #        if cat != lose_cat:
-    #            newd[trig] = cat
-    #    self.cache = newd
-        
-        #try:
-        #    cur = self.db.conn.execute(self.deleteCatSQL)
-        #pass
-    
     def save(self, storage):
         if storage == database.STORE_PCKL:
             f = open(self.db.name()+'_triggers.pckl', 'wb')
