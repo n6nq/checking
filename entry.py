@@ -73,7 +73,11 @@ class Entry(dbrow.DBRow):
         self.checknum = row[8]
         self.desc = row[9].replace('\n', '')
         if how_to_cat == Entry.categorize():
-            self.category = self.db.cat_from_desc(self.desc)
+            cat_tuple = self.db.cat_from_desc(self.desc)
+            self.category = cat_tuple[0]
+            self.cat_id = cat_tuple[1]
+            self.trig_id = cat_tuple[2]
+            self.over.id = cat_tuple[3]
             
 #oid  cat  datestr amtstr  clr*    chknum''  desc
 #    def __init__(self, db, date, amount, cleared, checknum, desc):

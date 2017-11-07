@@ -68,8 +68,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listTriggers.setCurrentRow(0)
         
         self.overs = self.db.overs_for_cat(selectedStr)
-        for over in self.overs:
-            self.listOverrides.addItem(over)
+        for override in self.overs:
+            self.listOverrides.addItem(override.over)
         self.listOverrides.setCurrentRow(0)
         
         self.exec_()
@@ -107,8 +107,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.overs = self.db.overs_for_cat(selected_str)
         self.edtCategory.setText(selected_str)
 
-        for over in self.overs:
-            self.listOverrides.addItem(over)
+        for override in self.overs:
+            self.listOverrides.addItem(override.over)
         self.listOverrides.setCurrentRow(0)
         
         # don't do this here, an initial selection set forces it to happen later, 
@@ -249,7 +249,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         affected = []
         if self.override_str == None:
             return False
-        cattup = self.db.overrides[self.override_str]
+        override = self.db.overrides[self.override_str]
         current = self.listOverrides.currentRow()
         affected = self.db.find_all_related_to_over(self.override_str, None)
         dl = WarningListDialog(
@@ -257,7 +257,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             affected)
 
         if dl.reply == True:
-            if self.db.delete_override_all(self.override_str, cattup[1]) == False:
+            if self.db.delete_override_all(self.override_str, override.cat) == False:
                 msgbox = Message('Delete of Override failed.')
                 return False
         else:

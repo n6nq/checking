@@ -700,7 +700,7 @@ class Database(object):
             try:
                 self.conn.execute(self.createOversSQL)
                 for row in self.conn.execute(self.selectAllOversSQL):
-                    self.overrides[row[1]] = (row[0], row[2])
+                    self.overrides[row[1]] = Override(row[0], row[1], row[2])
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Overrides table:\n', e.args[0])
                 
@@ -752,14 +752,14 @@ class Database(object):
     
     def make_cat_to_override_dict(self):
         self.cat_to_overrides = {}
-        for over in self.overrides.keys():
-            overvalues = self.overrides[over]
-            oid = overvalues[0]
-            cat = overvalues[1]
+        for override in self.overrides:
+            #override = self.overrides[over]
+            oid = override.oid
+            cat = override.cat
             if cat in self.cat_to_overrides:
-                self.cat_to_overrides[cat].append((oid, over))
+                self.cat_to_overrides[cat].append(override)
             else:
-                self.cat_to_overrides[cat] = [(oid, over)]
+                self.cat_to_overrides[cat] = [override]
 
     def make_cat_to_trigger_dict(self):
         self.cat_to_triggers = {}
@@ -828,9 +828,9 @@ class Database(object):
         
     def overs_for_cat(self, lookFor):
         overs = []
-        for over, cat in self.overrides.items():
-            if cat[1] == lookFor:
-                overs.append(over)
+        for override in self.overrides:
+            if override.cat == lookFor:
+                overs.append(override)
                 
         return overs
 
@@ -850,9 +850,9 @@ class Database(object):
         if new_over in self.overrides:
             return False
         
-        overtup = self.overrides[cur_over]
-        over_id = overtup[0]
-        catstr = overtup[1]
+        override = self.overrides[cur_over]
+        over_id = override.oid
+        catstr = override.cat
         cat_id = self.cat_to_oid[catstr]
         nonecat_id = self.cat_to_oid['None']
         try:
@@ -945,11 +945,11 @@ class Database(object):
 
     def sanity_check_db(self):
         # first check that every override refers to a category that exists
-        for over, cat in self.overrides.items():
-            if cat[1] in self.cat_to_oid:
-                print('Override: '+over+' Category: '+cat[1]+' is GOOD.')
+        for override in self.overrides:
+            if override.cat in self.cat_to_oid:
+                print('Override: '+override.over+' Category: '+override.cat+' is GOOD.')
             else:
-                print('Override: '+over+' Missing Cat: '+cat[1]+' is BAD BAD.')      
+                print('Override: '+override.over+' Missing Cat: '+override.cat+' is BAD BAD.')      
                 
         # check that all triggers refer to a category that exists
         for trigger in self.triggers:
@@ -962,10 +962,10 @@ class Database(object):
         for cat in self.categories:
             trig_count = 0
             over_count = 0
-            for over, ocat in self.overrides.items():
-                if cat.cat == ocat[1]:
+            for override in self.overrides:
+                if cat.cat == override.cat:
                     over_count += 1
-                    print ("Category: "+cat.cat+" has over: "+over+" GOOD.")
+                    print ("Category: "+cat.cat+" has over: "+override.over+" GOOD.")
             for trigger in self.triggers:
                 if cat.cat == trigger.cat:
                     trig_count += 1
@@ -980,8 +980,8 @@ class Database(object):
             if ent.category not in self.cat_to_oid:
                 print("Entry: "+ent.asCategorizedStr() + " No category. BAD BAD.")
                 continue
-            for over in self.overrides:
-                if over in ent.desc:
+            for override in self.overrides:
+                if override.over in ent.desc:
                     got_one = True
                     break
             if got_one:
@@ -1096,11 +1096,13 @@ class Database(object):
         
     def update_overrides_cats(self, curCat, newCat):
         try:
-            self.conn.execute(self.updateOverridesCatSQL, (newCat, curCat))
+            cur = self.conn.execute(self.updateOverridesCatSQL, (newCat, curCat))
             self.commit()
-            for over, cat in self.overrides.items():
-                if cat[1] == curCat:
-                    self.overrides[over] = newCat
+            last_id = cur.lastrowid
+            for override in self.overrides:
+                if override.cat == curCat:
+                    override.cat = newCat
+                    #self.overrides[over] = newCat
                     
             return True
         except sqlite3.Error as e:
