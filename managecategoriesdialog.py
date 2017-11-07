@@ -300,7 +300,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         affected = []
         if self.trigger_str == None:
             return False
-        trigtup = self.db.triggers[self.trigger_str]
+        trigger = self.db.triggers[self.trigger_str]
         current = self.listTriggers.currentRow()
         affected = self.db.find_all_related_to_trig(self.trigger_str, None)
         dl = WarningListDialog(
@@ -308,7 +308,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             affected)
         
         if dl.reply == True:
-            if self.db.delete_trigger_all(self.trigger_str, trigtup[1]) == False:
+            if self.db.delete_trigger_all(self.trigger_str, trigger.cat) == False:
                 msgbox = Message('Delete of Category failed.')
                 return False
         else:

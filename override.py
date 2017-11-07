@@ -23,15 +23,15 @@ class Overrides(object):
         db.create_table(self.createSQL, 'Overrides')
 
     def load(self, storage):
-        if storage == database.STORE_PCKL:
-            try:
-                f = open(self.db.name()+'_overrides.pckl', 'rb')
-                self.cache = pickle.load(f)
-                f.close()
-            except FileNotFoundError:
-                print('No overrides.pckl file.')
-        elif storage == database.STORE_DB:
-            self.cache = self.db.get_all_overrides()
+        #if storage == database.STORE_PCKL:
+            #try:
+                #f = open(self.db.name()+'_overrides.pckl', 'rb')
+                #self.cache = pickle.load(f)
+                #f.close()
+            #except FileNotFoundError:
+                #print('No overrides.pckl file.')
+        #elif storage == database.STORE_DB:
+            #self.cache = self.db.get_all_overrides()
 
     def save(self, storage):
         if storage == database.STORE_PCKL:

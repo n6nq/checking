@@ -175,15 +175,13 @@ class Database(object):
                 cur = self.conn.execute(self.insertOverrideSQL, (over, cat))
                 self.commit()
                 last_id = cur.lastrowid
-                self.overrides[over] = (last_id, cat)
+                self.overrides[over] = Override(last_id, over, cat)
                 self.over_to_oid[over] = last_id
                 return True
         except sqlite3.Error as e:
             self.error('Could save overrides in Overrides table:\n', e.args[0])
             return False
             
-            
-        
     def add_filtered_entry(self, ent):
         self.filtered_entries.append(ent)
     
@@ -279,15 +277,15 @@ class Database(object):
     def commit(self):
         self.conn.commit()
         
-    def convert_pickles_to_DB(self):  #deprecated
-        self.categories.load(STORE_PCKL)
-        self.categories.save(STORE_DB)
-        self.triggers.load(STORE_PCKL)
-        self.triggers.save(STORE_DB)
-        self.overrides.load(STORE_PCKL)
-        self.overrides.save(STORE_DB)
-        self.entries.load(STORE_PCKL)
-        self.entries.save(STORE_DB)
+    #def convert_pickles_to_DB(self):  #deprecated
+        #self.categories.load(STORE_PCKL)
+        #self.categories.save(STORE_DB)
+        #self.triggers.load(STORE_PCKL)
+        #self.triggers.save(STORE_DB)
+        #self.overrides.load(STORE_PCKL)
+        #self.overrides.save(STORE_DB)
+        #self.entries.load(STORE_PCKL)
+        #self.entries.save(STORE_DB)
 
     def create_table(self, sql, tableName):  #move
         try:
@@ -467,9 +465,9 @@ class Database(object):
             affected.append("<Trigger> '"+new_trig+"' already exists. Datbase module will block this attempt.")
             
         #first, get the category for this trigger
-        trigtup = self.triggers[current_trig]
-        trig_id = trigtup[0]
-        catstr = trigtup[1]
+        trigger = self.triggers[current_trig]
+        trig_id = trigger.oid
+        catstr = trigger.cat
         cat_id = self.cat_to_oid[catstr]
         
         for entry in self.entries:
@@ -495,9 +493,9 @@ class Database(object):
             affected.append("<Override> '"+new_over+"' already exists. Datbase module will block this attempt.")
             
         #first, get the category for this override
-        overtup = self.overrides[cur_over]
-        over_id = overtup[0]
-        catstr = overtup[1]
+        override = self.overrides[cur_over]
+        over_id = override.oid
+        catstr = override.cat
         cat_id = self.cat_to_oid[catstr]
         
         for entry in self.entries:
@@ -607,25 +605,25 @@ class Database(object):
         self.filtered_entries = requested
         return requested
     
-    def get_all_overrides(self):
-        if self.overrides.cache_loaded():  #todo: is thiany more?
-            return self.overrides.get_cache()
-        overrides = {}
-        try:
-            for row in self.ceonn.execute(self.overrides.selectAllSQL):
-                overrides[row[1]] = row[2]
-        except sqlite3.Error as e:
-            self.error('Error loading memory from the Overrides table:\n', e.args[0])
-        return overrides
+    #def get_all_overrides(self):
+        #if self.overrides.cache_loaded():  #todo: is this used any more?
+            #return self.overrides.get_cache()
+        #overrides = {}
+        #try:
+            #for row in self.ceonn.execute(self.overrides.selectAllSQL):
+                #overrides[row[1]] = row[2]
+        #except sqlite3.Error as e:
+            #self.error('Error loading memory from the Overrides table:\n', e.args[0])
+        #return overrides
     
     def get_all_triggers(self):
-        trigs = {}
+        triggers = {}
         try:
-            for row in self.conn.execute(self.triggers.selectAllSQL):
-                trigs[row[1]] = row[2]
+            for row in self.conn.execute(self.triggers.selectAllTrigSQL):
+                triggers[row[1]] = trigger(row[0], row[1], row[2])
         except sqlite3.Error as e:
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
-        return trigs
+        return triggers
         
     def yrmo(self, d):
         return d[:7]
@@ -765,14 +763,13 @@ class Database(object):
 
     def make_cat_to_trigger_dict(self):
         self.cat_to_triggers = {}
-        for trig in self.triggers.keys():
-            trigvalues = self.triggers[trig]
-            oid = trigvalues[0]
-            cat = trigvalues[1]
+        for trigger in self.triggers:
+            oid = trigger.oid
+            cat = trigger.cat
             if cat in self.cat_to_triggers:
-                self.cat_to_triggers[cat].append((oid, trig))
+                self.cat_to_triggers[cat].append((oid, trigger.trig))
             else:
-                self.cat_to_triggers[cat] = [(oid, trig)]
+                self.cat_to_triggers[cat] = [(oid, trigger.trig)]
         
     def migrate_entries(self, old_version):
         try:
@@ -888,9 +885,9 @@ class Database(object):
         if new_trig in self.triggers:
             return False
         
-        trigtup = self.triggers[cur_trig]
-        trig_id = trigtup[0]
-        catstr = trigtup[1]
+        trigger = self.triggers[cur_trig]
+        trig_id = trigger.oid
+        catstr = trigger.cat
         cat_id = self.cat_to_oid[catstr]
         nonecat_id = self.cat_to_oid['None']
         try:
@@ -955,11 +952,11 @@ class Database(object):
                 print('Override: '+over+' Missing Cat: '+cat[1]+' is BAD BAD.')      
                 
         # check that all triggers refer to a category that exists
-        for trig, cat in self.triggers.items():
-            if cat[1] in self.cat_to_oid:
-                print('Trigger: '+trig+' Category: '+cat[1]+' is GOOD.')
+        for trigger in self.triggers:
+            if trigger.cat in self.cat_to_oid:
+                print('Trigger: '+trigger.trig+' Category: '+trigger.cat+' is GOOD.')
             else:
-                print('Trigger: '+trig+' Missing Cat: '+cat[1]+' is BAD BAD.')      
+                print('Trigger: '+trigger.trig+' Missing Cat: '+trigger.cat+' is BAD BAD.')      
             
         # check that all categories have a least one trigger or overrides
         for cat in self.categories:
@@ -969,10 +966,10 @@ class Database(object):
                 if cat.cat == ocat[1]:
                     over_count += 1
                     print ("Category: "+cat.cat+" has over: "+over+" GOOD.")
-            for trig, tcat in self.triggers.items():
-                if cat.cat == tcat[1]:
+            for trigger in self.triggers:
+                if cat.cat == trigger.cat:
                     trig_count += 1
-                    print("Category: "+cat.cat+" has trig: "+trig+" GOOD.")
+                    print("Category: "+cat.cat+" has trig: "+trigger.trig+" GOOD.")
             if trig_count == 0 and over_count == 0:
                 print("Category: "+cat.cat+" has no triggers or overrides.  BAD BAD.")
                 
@@ -989,8 +986,8 @@ class Database(object):
                     break
             if got_one:
                 continue
-            for trig in self.triggers:
-                if trig in ent.desc:
+            for trigger in self.triggers:
+                if trigger.trig in ent.desc:
                     got_one = True
                     break
             if got_one:
@@ -1038,12 +1035,12 @@ class Database(object):
         self.ncf_entries = new_checks
         
     def triggers_for_cat(self, lookFor):
-        triggers = []
-        for trig, cat in self.triggers.items():
-            if cat[1] == lookFor:
-                triggers.append(trig)
+        trig_list = []
+        for trigger in self.triggers:
+            if trigger.cat == lookFor:
+                trig_list.append(trigger.trig)
                 
-        return triggers
+        return trig_list
     
     def update_entries_cats(self, curCat, newCat):
         """Updates all entries with a specific category to a new
@@ -1088,9 +1085,9 @@ class Database(object):
         try:
             self.conn.execute(self.updateTriggersCatSQL, (newCat, curCat))
             self.commit()
-            for trig, cat in self.triggers.items():
-                if cat[1] == curCat:
-                    self.triggers[trig] = newCat
+            for trigger in self.triggers:
+                if trigger.cat == curCat:
+                    trigger.cat = newCat
                     
             return True
         except sqlite3.Error as e:
