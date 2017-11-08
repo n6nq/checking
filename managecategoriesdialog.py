@@ -56,8 +56,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.btnDeleteCategory.clicked.connect(lambda: self.delete_category())
         self.btnDeleteTrigger.clicked.connect(lambda: self.delete_trigger())        
             
-        for cat in self.db.categories:
-            self.listCategories.addItem(cat.cat)
+        for cat in self.db.categories.keys():
+            self.listCategories.addItem(cat)
         
         self.listCategories.setCurrentRow(0)
         selectedStr = self.listCategories.selectedItems()[0].text()

@@ -22,7 +22,7 @@ class Overrides(object):
         self.insertSQL = 'insert into Overrides(override, category) values(?, ?)'
         db.create_table(self.createSQL, 'Overrides')
 
-    def load(self, storage):
+    #def load(self, storage):
         #if storage == database.STORE_PCKL:
             #try:
                 #f = open(self.db.name()+'_overrides.pckl', 'rb')
