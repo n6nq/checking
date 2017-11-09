@@ -59,4 +59,6 @@ class Override(dbrow.DBRow):
             return False
         self.strings[over_str] = cat
         
-    
+    @classmethod
+    def no_over_id(cls):
+        return 0

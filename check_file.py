@@ -5,6 +5,7 @@ from entry import Entry
 from entry import Entries
 from category import Category
 from trigger import Trigger
+from override import Override
 import database
 
 class CheckFile(object):
@@ -24,7 +25,7 @@ class CheckFile(object):
             prt = line.split(',')
             #     oid  cat_id trig_id  cat datestr amtstr  clr*    chknum''  desc
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
-            row = (0, Category.no_cat_id, Trigger.no_trig_id, Category.no_category, trans_date, Money.str_to_num(prt[1]),
+            row = (0, 'None', Category.no_cat_id(), Trigger.no_trig_id(), Override.no_over_id(), trans_date, Money.str_to_num(prt[1]),
                    self.cleared(prt[2]), self.check_num(prt[3]), prt[4])
             self.db.add_ncf_entry(Entry(self.db, row, Entry.categorize()))
             #self.db.temp_entries.entrylist.append(Entry(self.db, row, Entry.categorize()))

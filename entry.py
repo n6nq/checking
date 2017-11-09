@@ -77,7 +77,7 @@ class Entry(dbrow.DBRow):
             self.category = cat_tuple[0]
             self.cat_id = cat_tuple[1]
             self.trig_id = cat_tuple[2]
-            self.over.id = cat_tuple[3]
+            self.over_id = cat_tuple[3]
             
 #oid  cat  datestr amtstr  clr*    chknum''  desc
 #    def __init__(self, db, date, amount, cleared, checknum, desc):

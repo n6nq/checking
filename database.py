@@ -221,15 +221,15 @@ class Database(object):
         self.overrides.save(STORE_PCKL)
 
     def cat_from_desc(self, desc):
-        for override in self.overrides:
-            if override.over in desc:
+        for over, override in self.overrides.items():
+            if over in desc:
                 return (override.cat, self.cat_to_oid[override.cat], 0, self.over_to_oid[override.over])
             
-        for trigger in self.triggers:
-            if trigger.cat in desc:
+        for trig, trigger in self.triggers.items():
+            if trig in desc:
                 return (trigger.cat, self.cat_to_oid[trigger.cat], self.trig_to_oid[trigger.trig], 0)
         
-        return 'None'
+        return ('None', 0, 0, 0)
     
     #def change_cat_of_entries(self, current, new):
         #db_affected = self.update_entries_cats(current, new)
@@ -430,7 +430,6 @@ class Database(object):
         return False
     
     def error(self, msg, reason):
-        print (msg, reason)     #TODO make ui for error messages
         msgBox = QMessageBox()
         msgBox.setWindowTitle('Error!')
         msgBox.setText(msg+'\n'+reason)
@@ -605,16 +604,6 @@ class Database(object):
         self.filtered_entries = requested
         return requested
     
-    #def get_all_overrides(self):
-        #if self.overrides.cache_loaded():  #todo: is this used any more?
-            #return self.overrides.get_cache()
-        #overrides = {}
-        #try:
-            #for row in self.ceonn.execute(self.overrides.selectAllSQL):
-                #overrides[row[1]] = row[2]
-        #except sqlite3.Error as e:
-            #self.error('Error loading memory from the Overrides table:\n', e.args[0])
-        #return overrides
     
     def get_all_triggers(self):
         triggers = {}
@@ -701,6 +690,7 @@ class Database(object):
                 self.conn.execute(self.createOversSQL)
                 for row in self.conn.execute(self.selectAllOversSQL):
                     self.overrides[row[1]] = Override(row)
+                    self.over_to_oid[row[1]] = row[0]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Overrides table:\n', e.args[0])
                 
