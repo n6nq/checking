@@ -140,7 +140,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.db.set_ncf_entries(new_checks)
         #iterate remaining checks and load list widgets here
         for check in self.db.get_ncf_entries():
-            if check.category == None:
+            if check.cat_id == 0 and check.category == 'None':
                 self.listUnCategorized.addItem('\t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())
@@ -222,7 +222,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
-                check.over.id = cat_tuple[3]
+                check.over_id = cat_tuple[3]
                 
             if check.category == 'None':
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr())

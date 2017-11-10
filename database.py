@@ -150,7 +150,7 @@ class Database(object):
         
     def add_entry(self, ent):
         try:
-            self.conn.execute(self.insertEntrySQL, (ent.category, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
+            self.conn.execute(self.insertEntrySQL, (ent.category, ent.cat_id, ent.trig_id, ent.over_id, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
             self.commit()
             self.entries.append(ent)
             return True
