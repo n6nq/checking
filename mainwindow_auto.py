@@ -44,6 +44,7 @@ class Ui_MainWindow(object):
         font.setFamily("Courier New")
         font.setPointSize(9)
         self.listEntries.setFont(font)
+        self.listEntries.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.listEntries.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.listEntries.setResizeMode(QtWidgets.QListView.Adjust)
         self.listEntries.setLayoutMode(QtWidgets.QListView.Batched)

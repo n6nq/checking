@@ -84,7 +84,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.search_choice = 'All'
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
         self.set_list_model(list_data)
-
+        self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenu(self.listEntries))
+        
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
         self.cbCategory.addItems(['Ascend', 'Descend'])
@@ -116,7 +117,29 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbGroupBy.activated.connect(lambda: self.new_group_by_filter())
         self.cbGroupBy.addItems(('None', 'MonthByCat', 'CatByMonth'))
         self.show()
+
+    def entryPopUpMenu(self, entryList):
+        menu = QMenu(self)
+        indexes = entryList.selectionModel().selectedIndexes()
+        self.list_data
+        if len(newCatList) == 0:
+            str = 'None'
+        else:
+            str = newCatList[0].text()
         
+        self.NewCatAct.setText(str)
+        menu.addAction(self.NewCatAct)
+        menu.addAction(self.NoneCatAct)
+        selectedEntryStr = whichList.currentItem().text()
+        self.newCatStr = str
+        self.selectedEntry = self.cf.find(selectedEntryStr)
+        #menu.addAction(copyAct)
+        #menu.addAction(pasteAct)
+        menu.show()
+        what = menu.exec_(PyQt5.QtGui.QCursor.pos())
+        if (what):
+            what.trigger()
+
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
         if choice == 'Ascend':

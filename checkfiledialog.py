@@ -34,7 +34,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnUnCat.clicked.connect(lambda: self.UnCatHndlr())
         self.btnAddCat.clicked.connect(lambda: self.AddCategoryHndlr())
         self.listCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listCategorized))
-        self.listUnCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listUnCategorized))     #self.connect(self.customContextMenuRequested, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.CategorizedPopUp)
+        self.listUnCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listUnCategorized))
         self.btnAccept.clicked.connect(lambda: self.AcceptChanges())
         self.btnCancel.clicked.connect(lambda: self.RejectChanges())
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
@@ -94,6 +94,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.NewCatAct.setText(str)
         menu.addAction(self.NewCatAct)
         menu.addAction(self.NoneCatAct)
+        if whichList.currentItem() == None:
+            return
         selectedEntryStr = whichList.currentItem().text()
         self.newCatStr = str
         self.selectedEntry = self.cf.find(selectedEntryStr)
