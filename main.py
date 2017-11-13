@@ -120,14 +120,15 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def entryPopUpMenu(self, entryList):
         menu = QMenu(self)
-        indexes = entryList.selectionModel().selectedIndexes()
-        self.list_data
-        if len(newCatList) == 0:
-            str = 'None'
-        else:
-            str = newCatList[0].text()
+
+        index = entryList.currentIndex().row()
+        #self.list_data
+        #if len(newCatList) == 0:
+        #    str = 'None'
+        #else:
+        #    str = newCatList[0].text()
         
-        self.NewCatAct.setText(str)
+        #self.NewCatAct.setText(str)
         menu.addAction(self.NewCatAct)
         menu.addAction(self.NoneCatAct)
         selectedEntryStr = whichList.currentItem().text()
