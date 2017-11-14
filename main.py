@@ -84,7 +84,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.search_choice = 'All'
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
         self.set_list_model(list_data)
-        self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenu(self.listEntries))
+        self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
+        
+        self.createPopUpActions()
         
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
@@ -118,10 +120,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbGroupBy.addItems(('None', 'MonthByCat', 'CatByMonth'))
         self.show()
 
-    def entryPopUpMenu(self, entryList):
+    def entryPopUpMenuHndlr(self, entryList):
         menu = QMenu(self)
 
-        index = entryList.currentIndex().row()
+        selectedIndex = entryList.currentIndex().row()
         #self.list_data
         #if len(newCatList) == 0:
         #    str = 'None'
@@ -129,7 +131,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #    str = newCatList[0].text()
         
         #self.NewCatAct.setText(str)
-        menu.addAction(self.NewCatAct)
+        cat_menu = menu.addMenu('NewCat')
+        cat_menu.addAction(self.NewCatAction)
         menu.addAction(self.NoneCatAct)
         selectedEntryStr = whichList.currentItem().text()
         self.newCatStr = str
@@ -140,7 +143,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         what = menu.exec_(PyQt5.QtGui.QCursor.pos())
         if (what):
             what.trigger()
-
+    
+    def createPopUpActions(self):
+        pass
+    
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
         if choice == 'Ascend':
@@ -349,7 +355,15 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 list_data.append(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
         lm = MyListModel(list_data, self.listEntries)
         self.listEntries.setModel(lm)        
+    def NewCatAction(self):
+        self.selectedEntry.category = self.newCatStr
+        self.ResortList()
         
+    def NoneCatAction(self):
+        self.selectedEntry.category = None
+        self.ResortList()
+        
+       
 def main():
     app = QApplication(sys.argv)
     form = MainWindow()
