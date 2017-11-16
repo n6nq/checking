@@ -120,6 +120,9 @@
     <property name="contextMenuPolicy">
      <enum>Qt::CustomContextMenu</enum>
     </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+    </property>
     <property name="selectionMode">
      <enum>QAbstractItemView::MultiSelection</enum>
     </property>

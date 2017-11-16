@@ -280,14 +280,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #newAct->setShortcuts(QKeySequence::New);
         self.NewCatAct.setStatusTip("Set entry's to this category");
         self.NoneCatAct.setStatusTip("Set entry's category to None")
-        self.NewCatAct.triggered.connect(self.NewCatAction)
-        self.NoneCatAct.triggered.connect(self.NoneCatAction)
+        self.NewCatAct.triggered.connect(self.NewCatActionFunc)
+        self.NoneCatAct.triggered.connect(self.NoneCatActionFunc)
         
-    def NewCatAction(self):
+    def NewCatActionFunc(self):
         self.selectedEntry.category = self.newCatStr
         self.ResortList()
         
-    def NoneCatAction(self):
+    def NoneCatActionFunc(self):
         self.selectedEntry.category = None
         self.ResortList()
         

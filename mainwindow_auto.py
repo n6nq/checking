@@ -45,6 +45,7 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.listEntries.setFont(font)
         self.listEntries.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.listEntries.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed|QtWidgets.QAbstractItemView.SelectedClicked)
         self.listEntries.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.listEntries.setResizeMode(QtWidgets.QListView.Adjust)
         self.listEntries.setLayoutMode(QtWidgets.QListView.Batched)

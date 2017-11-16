@@ -39,9 +39,13 @@ class MyListModel(QAbstractListModel):
     def rowCount(self, parent=QModelIndex()): 
         return len(self.listdata) 
  
-    def data(self, index, role): 
-        if index.isValid() and role == Qt.DisplayRole:
-            return QVariant(self.listdata[index.row()])
+    def data(self, modelindex, role): 
+        if modelindex.isValid() and role == Qt.DisplayRole:
+            ent = self.listdata[modelindex.row()]
+            if type(ent) is Entry:
+                return QVariant(ent.asCategorizedStr())
+            elif type(ent) is tuple:
+                return QVariant(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
         else: 
             return QVariant()
 
@@ -122,7 +126,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def entryPopUpMenuHndlr(self, entryList):
         menu = QMenu(self)
-
+        cat_menu = QMenu(menu)
+        cat_menu.setTitle('NewCat')
+        
         selectedIndex = entryList.currentIndex().row()
         #self.list_data
         #if len(newCatList) == 0:
@@ -131,12 +137,26 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #    str = newCatList[0].text()
         
         #self.NewCatAct.setText(str)
-        cat_menu = menu.addMenu('NewCat')
-        cat_menu.addAction(self.NewCatAction)
+        menu.addMenu(cat_menu)
         menu.addAction(self.NoneCatAct)
-        selectedEntryStr = whichList.currentItem().text()
-        self.newCatStr = str
-        self.selectedEntry = self.cf.find(selectedEntryStr)
+        for cat in sorted(self.db.get_all_cats()):
+            newAct = QAction(cat)
+            #newAct.setShortcut()
+            newAct.setStatusTip('Change entries category to {}'.format(cat));
+            newAct.triggered.connect(self.NewCatActionFunc)
+            cat_menu.addAction(newAct)
+
+        for modelindex in entryList.selectedIndexes():
+            index = modelindex.row()
+            selectedEnt = self.list_model.listdata[index]
+        
+        #QStringList list;
+        #foreach(const QModelIndex &index, 
+        #        ui->listView->selectionModel()->selectedIndexes())
+        #    list.append(model->itemFromIndex(index)->text());        
+        #selectedEntryStr = entryList.currentItem().text()
+        #self.newCatStr = str
+        #self.selectedEntry = self.cf.find(selectedEntryStr)
         #menu.addAction(copyAct)
         #menu.addAction(pasteAct)
         menu.show()
@@ -145,7 +165,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             what.trigger()
     
     def createPopUpActions(self):
-        pass
+        self.NewCatAct = QAction("New&Cat")
+        self.NoneCatAct = QAction("&None")
+        #newAct->setShortcuts(QKeySequence::New);
+        self.NewCatAct.setStatusTip("Set entry to this category");
+        self.NoneCatAct.setStatusTip("Set entry category to None")
+        self.NewCatAct.triggered.connect(self.NewCatActionFunc)
+        self.NoneCatAct.triggered.connect(self.NoneCatActionFunc)
     
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
@@ -347,19 +373,22 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.new_calender_filter()
             
     def set_list_model(self, listOfEnts):
-        list_data = []
-        for ent in listOfEnts:
-            if type(ent) is Entry:
-                list_data.append(ent.asCategorizedStr())
-            elif type(ent) is tuple:
-                list_data.append(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
-        lm = MyListModel(list_data, self.listEntries)
-        self.listEntries.setModel(lm)        
-    def NewCatAction(self):
+        self.list_model = MyListModel(listOfEnts, self.listEntries)
+        self.listEntries.setModel(self.list_model)
+        #list_data = []
+        #for ent in listOfEnts:
+            #if type(ent) is Entry:
+                #list_data.append(ent.asCategorizedStr())
+            #elif type(ent) is tuple:
+                #list_data.append(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
+        #self.list_model = MyListModel(list_data, self.listEntries)
+        #self.listEntries.setModel(self.list_model)
+        
+    def NewCatActionFunc(self):
         self.selectedEntry.category = self.newCatStr
         self.ResortList()
         
-    def NoneCatAction(self):
+    def NoneCatActionFunc(self):
         self.selectedEntry.category = None
         self.ResortList()
         
