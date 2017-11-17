@@ -58,7 +58,7 @@ class Database(object):
 
         self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?'
         self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
-
+        self.updateEntryCatByOidSQL = 'update Entries set category = ?, cat_id = ? where oid = ?'
         self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, over_id = ?, category = ? where cat_id = ? and over_id = ?'
         self.updateEntryCatForOverSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'
         
@@ -715,7 +715,7 @@ class Database(object):
                 not_cats.append(temp)
             else:
                 if temp in entry_set:
-                    self.update_entry_cat_by_oid(temp.category, temp.oid)
+                    self.update_entry_cat_by_oid(temp.category, temp.cat_id, temp.oid)
                 else:
                     self.add_entry(temp)
                 #for perm_entry in self.entries:
@@ -1057,13 +1057,14 @@ class Database(object):
             self.error("Bug in update_entries_cats:\n", e.args[0])
             return False
         
-    def update_entry_cat_by_oid(self, cat, oid):
+    def update_entry_cat_by_oid(self, cat, cat_id, oid):
         try:
-            cur = self.conn.execute(self.updateEntryCatByOidSQL, (cat, oid))
+            cur = self.conn.execute(self.updateEntryCatByOidSQL, (cat, cat_id, oid))
             self.commit()
             for ent in self.entries:
                 if ent.oid == oid:
                     ent.category = cat
+                    ent.cat_id = cat_id
             return True
         except sqlite3.Error as e:
             self.error('Error updating category of Entry with oid: {0}'.format(oid))

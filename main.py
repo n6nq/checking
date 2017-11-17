@@ -49,7 +49,9 @@ class MyListModel(QAbstractListModel):
         else: 
             return QVariant()
 
-
+    def entryAt(self, modelindex):
+        return self.listdata[modelindex.row()]
+    
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     """"""
 
@@ -89,7 +91,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
         self.set_list_model(list_data)
         self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
-        
+        self.listEntries.pressed.connect(lambda index:  self.mousePressed(index))
         self.createPopUpActions()
         
         # Setup the Category combobox
@@ -124,6 +126,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbGroupBy.addItems(('None', 'MonthByCat', 'CatByMonth'))
         self.show()
 
+    def mousePressed(self, modelindex):
+        self.selectedRow = modelindex.row()
+        self.selectedEntry = self.list_model.entryAt(modelindex)
+        
     def entryPopUpMenuHndlr(self, entryList):
         menu = QMenu(self)
         cat_menu = QMenu(menu)
@@ -137,15 +143,19 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #    str = newCatList[0].text()
         
         #self.NewCatAct.setText(str)
-        menu.addMenu(cat_menu)
-        menu.addAction(self.NoneCatAct)
+        actions = []
         for cat in sorted(self.db.get_all_cats()):
             newAct = QAction(cat)
+            #newAct.triggered.connect(self.NewCatActionFunc)
+            actions.append(QAction(cat))
             #newAct.setShortcut()
-            newAct.setStatusTip('Change entries category to {}'.format(cat));
-            newAct.triggered.connect(self.NewCatActionFunc)
-            cat_menu.addAction(newAct)
-
+            #newAct.setStatusTip('Change entries category to {}'.format(cat));
+        
+        cat_menu.addActions(actions)
+        cat_menu.triggered.connect(self.NewCatActionFunc)
+        menu.addMenu(cat_menu)
+        menu.addAction(self.NoneCatAct)
+        
         for modelindex in entryList.selectedIndexes():
             index = modelindex.row()
             selectedEnt = self.list_model.listdata[index]
@@ -170,7 +180,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #newAct->setShortcuts(QKeySequence::New);
         self.NewCatAct.setStatusTip("Set entry to this category");
         self.NoneCatAct.setStatusTip("Set entry category to None")
-        self.NewCatAct.triggered.connect(self.NewCatActionFunc)
+        self.NewCatAct.triggered.connect(lambda act: self.NewCatActionFunc(act))
         self.NoneCatAct.triggered.connect(self.NoneCatActionFunc)
     
     def new_amount_filter(self):
@@ -384,8 +394,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #self.list_model = MyListModel(list_data, self.listEntries)
         #self.listEntries.setModel(self.list_model)
         
-    def NewCatActionFunc(self):
-        self.selectedEntry.category = self.newCatStr
+    def NewCatActionFunc(self, action):
+        cat = action.text()
+        cat_id = self.db.cat_to_oid[cat]
+        self.selectedEntry.category = cat
+        self.selectedEntry.cat_id = cat_id
+        self.db.update_entry_cat_by_oid(cat, cat_id, self.selectedEntry.oid)
         self.ResortList()
         
     def NoneCatActionFunc(self):
