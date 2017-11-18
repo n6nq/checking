@@ -242,24 +242,16 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def new_category_filter(self):
         cat = self.cbCategory.currentText()
-
+        self.set_search_filter('All')
         if cat == 'Ascend':
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
         elif cat == 'Descend':
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
-            #filtered = sorted(filtered, key=lambda ent: ent.get_category())
         else:
             filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
             
-        #self.listEntries.clear()
-        #for ent in filtered:
-        #    self.listEntries.addItem(ent.asCategorizedStr())
         self.set_list_model(filtered)
-        #list_data = []
-        #for ent in filtered:
-            #list_data.append(ent.asCategorizedStr())
-        #lm = MyListModel(list_data, self.listEntries)
-        #self.listEntries.setModel(lm)        
+        self.set_search_filter('Results')
         self.show()
         
     def new_date_filter(self):
@@ -349,7 +341,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def new_search_filter(self):
         self.search_choice = self.cbSearchIn.currentText()
-        
+
+    def set_search_filter(self, choice):
+        self.cbSearchIn.setCurrentText(choice)
+        self.search_choice = choice
+
     def pressedOnButton(self):
         print ("Pressed On!")
         ChartTestDialog(self.db)
@@ -400,7 +396,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.selectedEntry.category = cat
         self.selectedEntry.cat_id = cat_id
         self.db.update_entry_cat_by_oid(cat, cat_id, self.selectedEntry.oid)
-        self.ResortList()
+        #self.ResortList()
         
     def NoneCatActionFunc(self):
         self.selectedEntry.category = None
