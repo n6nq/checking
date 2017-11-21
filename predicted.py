@@ -18,5 +18,10 @@ class Predicted(object):
         self.cat = cat
         self.trig = trig
         self.over = over
-        
-        pass
+        self.cat_id = cat_id
+        self.trig_id = trig_id
+        self.over_id = over_id
+        self.p_type = p_type
+        self.cycle = cycle
+        self.date = date
+        self.comment = comment
