@@ -359,6 +359,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.new_category_filter()
         
         #print(readIt.cf)
+    
+    def pressedManagePredictionsButton(self):
+        okay = PredictionsDalog(self.db)
         
     def select_first_date(self):
         qdate = self.calendar1.selectedDate()
