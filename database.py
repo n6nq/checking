@@ -49,6 +49,9 @@ class Database(object):
         self.accounts = []
         self.load_accounts()
         
+        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, name varchar(20), cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, p_type int, cycle int, pdate date, comment varchar(128))'
+        self.selectAllPredictionsSQL = 'select oid, ame, cat, trig, over, cat_id, trig_id, over_id, p_type, cycle, pdate, comment from Predictions'
+        
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.selectAllEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries'
@@ -110,6 +113,8 @@ class Database(object):
         self.filtered_entries = []
         self.ncf_entries = []
         self.entries = []
+
+        self.predictions = []
         self.migrate_database()
         
         self.conn.create_function('yrmo', 1, self.yrmo)
@@ -118,7 +123,8 @@ class Database(object):
         self.load_categories()
         self.load_triggers()
         self.load_overrides()
-
+        self.load_predictions()
+        
         self.sanity_check_db()  # todo remove after dev is done
         
     def add_account(self, name):
@@ -683,6 +689,16 @@ class Database(object):
                 self.end_date = max(self.end_date, ent.date)
         except sqlite3.Error as e:
             self.error('Error loading memory from the Entries table:\n', e.args[0])
+                
+    def load_predictions(self):
+        try:
+            self.conn.execute(self.createPredictionsSQL)
+            for row in self.conn.execute(self.selectAllPredictionsSQL):
+                pred = Prediction(self, row)
+                self.predictions.append(pred)
+                self.num_predictions += 1
+        except sqlite3.Error as e:
+            self.error('Error loading memory from the Predictions table:\n', e.args[0])
                 
     def load_overrides(self):
         if len(self.overrides) == 0:
