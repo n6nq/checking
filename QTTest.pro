@@ -32,4 +32,5 @@ FORMS    += mainwindow.ui \
     readcheckfile.ui \
     categories.ui \
     warninglistdlg.ui \
-    chart_test.ui
+    chart_test.ui \
+    manageepredictions.ui

@@ -83,9 +83,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.db = database.Database(curr+'\\checking')
 
         # Setup the buttons
-        self.btnOn.clicked.connect(lambda: self.pressedOnButton())
+        self.btnChart.clicked.connect(lambda: self.pressedOnButton())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
-        
+        self.btnMngPredict.clicked.connect(lambda: self.preesedMngPredict())
         # Setup the entry list
         self.search_choice = 'All'
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())

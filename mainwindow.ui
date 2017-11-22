@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="btnOn">
+   <widget class="QPushButton" name="btnChart">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>ON</string>
+     <string>Predicted</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnReadFile">
@@ -215,8 +215,21 @@
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="btnMngPredict">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>550</y>
+      <width>111</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Manage Predictions</string>
+    </property>
+   </widget>
    <zorder>listEntries</zorder>
-   <zorder>btnOn</zorder>
+   <zorder>btnChart</zorder>
    <zorder>btnReadFile</zorder>
    <zorder>cbCategory</zorder>
    <zorder>cbDate</zorder>
@@ -229,6 +242,7 @@
    <zorder>label</zorder>
    <zorder>cbGroupBy</zorder>
    <zorder>calendar2</zorder>
+   <zorder>btnMngPredict</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

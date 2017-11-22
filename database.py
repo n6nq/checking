@@ -50,7 +50,7 @@ class Database(object):
         self.load_accounts()
         
         self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, name varchar(20), cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, p_type int, cycle int, pdate date, comment varchar(128))'
-        self.selectAllPredictionsSQL = 'select oid, ame, cat, trig, over, cat_id, trig_id, over_id, p_type, cycle, pdate, comment from Predictions'
+        self.selectAllPredictionsSQL = 'select oid, name, cat, trig, over, cat_id, trig_id, over_id, p_type, cycle, pdate, comment from Predictions'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
