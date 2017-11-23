@@ -17,6 +17,7 @@ import mainwindow_auto
 import chart_test_auto
 from checkfiledialog import CheckFileDialog
 from charttestdialog import ChartTestDialog
+from managepredictionsdialog import ManagePredictionsDialog
 
 import readcheckfile_auto
 from entry import Entry
@@ -85,7 +86,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Setup the buttons
         self.btnChart.clicked.connect(lambda: self.pressedOnButton())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
-        self.btnMngPredict.clicked.connect(lambda: self.preesedMngPredict())
+        self.btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton())
         # Setup the entry list
         self.search_choice = 'All'
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
@@ -361,7 +362,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #print(readIt.cf)
     
     def pressedManagePredictionsButton(self):
-        okay = PredictionsDalog(self.db)
+        okay = ManagePredictionsDialog(self.db)
         
     def select_first_date(self):
         qdate = self.calendar1.selectedDate()
@@ -384,14 +385,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def set_list_model(self, listOfEnts):
         self.list_model = MyListModel(listOfEnts, self.listEntries)
         self.listEntries.setModel(self.list_model)
-        #list_data = []
-        #for ent in listOfEnts:
-            #if type(ent) is Entry:
-                #list_data.append(ent.asCategorizedStr())
-            #elif type(ent) is tuple:
-                #list_data.append(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
-        #self.list_model = MyListModel(list_data, self.listEntries)
-        #self.listEntries.setModel(self.list_model)
         
     def NewCatActionFunc(self, action):
         cat = action.text()

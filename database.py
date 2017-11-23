@@ -611,6 +611,9 @@ class Database(object):
         return requested
     
     
+    def get_all_predictions(self):
+        return self.predictions
+    
     def get_all_triggers(self):
         triggers = {}
         try:
