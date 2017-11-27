@@ -115,6 +115,7 @@ class Database(object):
         self.entries = []
 
         self.predictions = []
+        
         self.migrate_database()
         
         self.conn.create_function('yrmo', 1, self.yrmo)
@@ -643,6 +644,11 @@ class Database(object):
 
     def get_ncf_entries(self):
         return self.ncf_entries
+
+    def get_predictions_column_count(self):
+        #oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
+        return 11
+    
     def get_recent_entries(self, limit):
         if self.num_entries <= limit:
             return self.get_all_entries(which)
