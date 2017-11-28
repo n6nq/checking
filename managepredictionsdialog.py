@@ -50,6 +50,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.name)
         self.set_list_model(list_data)
         self.predictionsView
+        form = QDataWidgetMapper()
+        form.addMapping(self.edtName, 0)
         self.exec_()
     
     def set_list_model(self, listOfPredictions):
