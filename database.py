@@ -13,6 +13,7 @@
 import sqlite3
 import accounts
 import entry
+from predicted import Predicted
 from category import Category
 from trigger import Trigger
 from override import Override
@@ -614,6 +615,15 @@ class Database(object):
     
     def get_all_predictions(self):
         return self.predictions
+    
+    def get_all_predictions_no_ids(self):
+        requested = []
+        apred = Predicted(db, name, cat, trig=None, over=None, cat_id=0, 
+                         trig_id=0, over_id=0, 
+                         p_type=None, cycle=None, 
+                         date=None, comment=None)
+        for pred in self.predictions:
+            requested.append((pred.name, pred.ca))
     
     def get_all_predictions_with_cat(self, cat):
         requested = []

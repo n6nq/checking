@@ -47,7 +47,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.setupUi(self)
 
         # add all the ui init
-        list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.name)
+        list_data = sorted(self.db.get_all_predictions_no_ids(), key=lambda pred: pred.name)
         self.set_list_model(list_data)
 
         # Setup sort combos#oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
@@ -77,8 +77,13 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
         self.sortComment.addItems(['Ascend', 'Descend'])
 
-        form = QDataWidgetMapper()
+        form = QDataWidgetMapper(self)
         form.addMapping(self.editName, 0)
+        #mapper = new QDataWidgetMapper(this);
+        #mapper->setModel(model);
+        #mapper->addMapping(nameEdit, 0);
+        #mapper->addMapping(addressEdit, 1);
+        #mapper->addMapping(ageSpinBox, 2);
         self.exec_()
         
     def  new_category_filter(self):
