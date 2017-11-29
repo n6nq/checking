@@ -615,6 +615,14 @@ class Database(object):
     def get_all_predictions(self):
         return self.predictions
     
+    def get_all_predictions_with_cat(self, cat):
+        requested = []
+            
+        for pred in self.predictions:
+            if pred.category == cat:
+                requested.append(pred)
+        return requested
+        
     def get_all_triggers(self):
         triggers = {}
         try:
