@@ -12,7 +12,7 @@ class MyTableModel(QAbstractTableModel):
         QAbstractTableModel.__init__(self, parent) 
         self.listdata = datain
         self.db = args[0]
-        self.headers = ['Name', 'Category', 'Trigger', 'Override', 'cat_id', 'trig_id', 'over_id', 'Type', 'Cycle', 'Date', 'Comment']
+        self.headers = ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Comment']
         
     def columnCount(self, arg0=None):
         return self.db.get_predictions_column_count()
@@ -58,6 +58,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.sortCategory.addItems(['Ascend', 'Descend'])
         for cat in sorted(self.db.cat_to_oid.keys()):
             self.sortCategory.addItem(cat)
+            self.comboCat.addItem(cat)
 
         self.sortTrigger.activated.connect(lambda: self.new_trigger_filter())
         self.sortTrigger.addItems(['Ascend', 'Descend'])
@@ -67,23 +68,33 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         self.sortType.activated.connect(lambda: self.new_type_filter())
         self.sortType.addItems(['Ascend', 'Descend'])
-
+        self.sortType.addItems(['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective'])
+        self.comboType.addItems(['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective'])
+            
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
+        self.comboCycle.activated.connect(lambda: self.set_date_items())
         self.sortCycle.addItems(['Ascend', 'Descend'])
+        self.sortCycle.addItems(['Monthly', 'Weekly', 'Quarterly', 'Annual', 'Bi-weekly', 'Adhoc'])
+        self.comboCycle.addItems(['Monthly', 'Weekly', 'Quarterly', 'Annual', 'Bi-weekly', 'Adhoc'])
 
         self.sortDate.activated.connect(lambda: self.new_date_filter())
         self.sortDate.addItems(['Ascend', 'Descend'])
+        #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
+        #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
 
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
-        self.sortComment.addItems(['Ascend', 'Descend'])
+        self.sortComment.addItems(['Ascend', 'Descend', 'Find'])
 
-        form = QDataWidgetMapper(self)
-        form.addMapping(self.editName, 0)
-        #mapper = new QDataWidgetMapper(this);
-        #mapper->setModel(model);
-        #mapper->addMapping(nameEdit, 0);
-        #mapper->addMapping(addressEdit, 1);
-        #mapper->addMapping(ageSpinBox, 2);
+        mapper = QDataWidgetMapper(self)
+
+        mapper.addMapping(self.editName, 0)
+        mapper.addMapping(self.comboCat, 1)
+        mapper.addMapping(self.editTrig, 2)
+        mapper.addMapping(self.editOver, 3)
+        mapper.addMapping(self.comboType, 4)
+        mapper.addMapping(self.comboCycle, 5)
+        mapper.addMapping(self.editDate, 6)
+        mapper.addMapping(self.editComment, 7)
         self.exec_()
         
     def  new_category_filter(self):
@@ -119,6 +130,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def  new_type_filter(self):
         pass
     
+    def set_date_items(self):
+        pass
     def set_list_model(self, listOfPredictions):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)

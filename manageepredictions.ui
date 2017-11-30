@@ -219,7 +219,7 @@
     </font>
    </property>
   </widget>
-  <widget class="QComboBox" name="combCyle">
+  <widget class="QComboBox" name="comboCycle">
    <property name="geometry">
     <rect>
      <x>590</x>
@@ -318,8 +318,8 @@
     <rect>
      <x>680</x>
      <y>450</y>
-     <width>47</width>
-     <height>13</height>
+     <width>61</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="font">
@@ -437,7 +437,7 @@
     <string>Update</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="buttonClear">
+  <widget class="QPushButton" name="buttonDelete">
    <property name="geometry">
     <rect>
      <x>250</x>
@@ -447,7 +447,35 @@
     </rect>
    </property>
    <property name="text">
+    <string>Delete</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonClear">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>510</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
     <string>Clear</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboDate">
+   <property name="geometry">
+    <rect>
+     <x>680</x>
+     <y>500</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
   </widget>
  </widget>

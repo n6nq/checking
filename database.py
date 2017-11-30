@@ -618,12 +618,9 @@ class Database(object):
     
     def get_all_predictions_no_ids(self):
         requested = []
-        apred = Predicted(db, name, cat, trig=None, over=None, cat_id=0, 
-                         trig_id=0, over_id=0, 
-                         p_type=None, cycle=None, 
-                         date=None, comment=None)
         for pred in self.predictions:
-            requested.append((pred.name, pred.ca))
+            requested.append((pred.name, pred.cat, pred.trig, pred.over, pred.p_type, pred.cycle, pred.date, pred.comment))
+        return requested
     
     def get_all_predictions_with_cat(self, cat):
         requested = []
@@ -665,7 +662,7 @@ class Database(object):
 
     def get_predictions_column_count(self):
         #oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
-        return 11
+        return 8
     
     def get_recent_entries(self, limit):
         if self.num_entries <= limit:
