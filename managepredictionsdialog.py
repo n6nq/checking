@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
+from datetime import date
 
 class MyTableModel(QAbstractTableModel):
     
@@ -88,7 +89,14 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
         self.sortComment.addItems(ascendDescendList)
         self.sortComment.addItem('Find')
-
+        
+        # Action button setups
+        self.buttonAdd.clicked.connect(lambda: self.add_prediction())
+        self.buttonUpdate.clicked.connect(lambda: self.update_prediction())
+        self.buttonDelete.clicked.connect(lambda: self.delete_prediction())
+        self.buttonClear.clicked.connect(lambda: self.clear_edit_fields())
+        
+        # setup the mapper
         self.mapper = QDataWidgetMapper(self)
 
         self.mapper.addMapping(self.editName, 0)
@@ -135,24 +143,46 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         pass
     
     def set_date_items(self):
+        self.editDate.hide()
+        self.editDate.setDate(date.today())
+        self.comboDate.hide()
+        self.comboDate.clear()
         cycle_choice = self.comboCycle.currentText()
         if cycle_choice == 'Monthly':
-            day_list = [x for x in range(1, 32)]
+            day_list = [str(x) for x in range(1, 32)]
+            self.comboDate.addItems(day_list)
+            self.comboDate.show()
+            return
         elif cycle_choice == 'Weekly':
-            pass
+            day_list = ['Sun', 'Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat']
+            self.comboDate.addItems(day_list)
+            self.comboDate.show()
+            return
         elif cycle_choice == 'Quarterly':
-            pass
+            self.editDate.show()
+            return
         elif cycle_choice == 'Annual':
-            pass
+            self.editDate.show()
+            return
         elif cycle_choice == 'Bi-weekly':
-            pass
+            self.editDate.show()
+            return
         elif cycle_choice == 'Adhoc':
-            pass
+            self.editDate.show()
+            return
         else:
-            pass
+            print('What is '+cycle_choice+'?')
             # do something bad choice
         
     def set_list_model(self, listOfPredictions):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)
+    def add_prediction(self):
+        pass
+    def update_prediction(self):
+        pass
+    def delete_prediction(self):
+        pass
+    def clear_edit_fields(self):
+        pass
     
