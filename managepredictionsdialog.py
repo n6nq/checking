@@ -52,52 +52,56 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         # Setup sort combos#oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
         self.sortName.activated.connect(lambda: self.new_name_filter())
-        self.sortName.addItems(['Ascend', 'Descend'])
+        ascendDescendList = ['Ascend', 'Descend']
+        self.sortName.addItems(ascendDescendList)
 
         self.sortCategory.activated.connect(lambda: self.new_category_filter())
-        self.sortCategory.addItems(['Ascend', 'Descend'])
+        self.sortCategory.addItems(ascendDescendList)
         for cat in sorted(self.db.cat_to_oid.keys()):
             self.sortCategory.addItem(cat)
             self.comboCat.addItem(cat)
 
         self.sortTrigger.activated.connect(lambda: self.new_trigger_filter())
-        self.sortTrigger.addItems(['Ascend', 'Descend'])
+        self.sortTrigger.addItems(ascendDescendList)
 
         self.sortOverride.activated.connect(lambda: self.new_override_filter())
-        self.sortOverride.addItems(['Ascend', 'Descend'])
+        self.sortOverride.addItems(ascendDescendList)
 
         self.sortType.activated.connect(lambda: self.new_type_filter())
-        self.sortType.addItems(['Ascend', 'Descend'])
-        self.sortType.addItems(['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective'])
-        self.comboType.addItems(['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective'])
+        self.sortType.addItems(ascendDescendList)
+        typeList = ['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective']
+        self.sortType.addItems(typeList)
+        self.comboType.addItems(typeList)
             
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
         self.comboCycle.activated.connect(lambda: self.set_date_items())
-        self.sortCycle.addItems(['Ascend', 'Descend'])
-        self.sortCycle.addItems(['Monthly', 'Weekly', 'Quarterly', 'Annual', 'Bi-weekly', 'Adhoc'])
-        self.comboCycle.addItems(['Monthly', 'Weekly', 'Quarterly', 'Annual', 'Bi-weekly', 'Adhoc'])
+        self.sortCycle.addItems(ascendDescendList)
+        self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'Bi-weekly', 'Adhoc']
+        self.sortCycle.addItems(self.cycleList)
+        self.comboCycle.addItems(self.cycleList)
 
         self.sortDate.activated.connect(lambda: self.new_date_filter())
-        self.sortDate.addItems(['Ascend', 'Descend'])
+        self.sortDate.addItems(ascendDescendList)
         #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
         #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
 
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
-        self.sortComment.addItems(['Ascend', 'Descend', 'Find'])
+        self.sortComment.addItems(ascendDescendList)
+        self.sortComment.addItem('Find')
 
-        mapper = QDataWidgetMapper(self)
+        self.mapper = QDataWidgetMapper(self)
 
-        mapper.addMapping(self.editName, 0)
-        mapper.addMapping(self.comboCat, 1)
-        mapper.addMapping(self.editTrig, 2)
-        mapper.addMapping(self.editOver, 3)
-        mapper.addMapping(self.comboType, 4)
-        mapper.addMapping(self.comboCycle, 5)
-        mapper.addMapping(self.editDate, 6)
-        mapper.addMapping(self.editComment, 7)
+        self.mapper.addMapping(self.editName, 0)
+        self.mapper.addMapping(self.comboCat, 1)
+        self.mapper.addMapping(self.editTrig, 2)
+        self.mapper.addMapping(self.editOver, 3)
+        self.mapper.addMapping(self.comboType, 4)
+        self.mapper.addMapping(self.comboCycle, 5)
+        self.mapper.addMapping(self.editDate, 6)
+        self.mapper.addMapping(self.editComment, 7)
         self.exec_()
         
-    def  new_category_filter(self):
+    def new_category_filter(self):
         cat = self.sortCategory.currentText()
         if cat == 'Ascend':
             filtered = sorted(self.db.get_all_predictions(), key=lambda ent: ent.get_category())
@@ -109,29 +113,45 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.set_list_model(filtered)
         self.show()
     
-    def  new_comment_filter(self):
+    def new_comment_filter(self):
         pass
     
-    def  new_cycle_filter(self):
+    def new_cycle_filter(self):
         pass
     
-    def  new_date_filter(self):
+    def new_date_filter(self):
         pass
         
     def new_name_filter(self):
         pass
     
-    def  new_override_filter(self):
+    def new_override_filter(self):
         pass
     
-    def  new_trigger_filter(self):
+    def new_trigger_filter(self):
         pass
     
-    def  new_type_filter(self):
+    def new_type_filter(self):
         pass
     
     def set_date_items(self):
-        pass
+        cycle_choice = self.comboCycle.currentText()
+        if cycle_choice == 'Monthly':
+            day_list = [x for x in range(1, 32)]
+        elif cycle_choice == 'Weekly':
+            pass
+        elif cycle_choice == 'Quarterly':
+            pass
+        elif cycle_choice == 'Annual':
+            pass
+        elif cycle_choice == 'Bi-weekly':
+            pass
+        elif cycle_choice == 'Adhoc':
+            pass
+        else:
+            pass
+            # do something bad choice
+        
     def set_list_model(self, listOfPredictions):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)
