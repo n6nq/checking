@@ -45,24 +45,6 @@
     <bool>true</bool>
    </attribute>
   </widget>
-  <widget class="QTextEdit" name="editName">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>470</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="inputMethodHints">
-    <set>Qt::ImhNone</set>
-   </property>
-  </widget>
   <widget class="QLabel" name="labelName">
    <property name="geometry">
     <rect>
@@ -132,24 +114,6 @@
     <string>Trig</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="editTrig">
-   <property name="geometry">
-    <rect>
-     <x>250</x>
-     <y>470</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="inputMethodHints">
-    <set>Qt::ImhNone</set>
-   </property>
-  </widget>
   <widget class="QLabel" name="labelOver">
    <property name="geometry">
     <rect>
@@ -166,24 +130,6 @@
    </property>
    <property name="text">
     <string>Over</string>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="editOver">
-   <property name="geometry">
-    <rect>
-     <x>370</x>
-     <y>470</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="inputMethodHints">
-    <set>Qt::ImhNone</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelType">
@@ -275,24 +221,6 @@
      <month>11</month>
      <day>21</day>
     </date>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="editComment">
-   <property name="geometry">
-    <rect>
-     <x>800</x>
-     <y>470</y>
-     <width>431</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="inputMethodHints">
-    <set>Qt::ImhNone</set>
    </property>
   </widget>
   <widget class="QLabel" name="labelComment">
@@ -476,6 +404,46 @@
     <font>
      <pointsize>10</pointsize>
     </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editName">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>470</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editTrig">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>470</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editOver">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>470</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="editComment">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>470</y>
+     <width>431</width>
+     <height>31</height>
+    </rect>
    </property>
   </widget>
  </widget>

@@ -178,6 +178,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)
     def add_prediction(self):
+        name = self.editName.text()
+        cat = self.comboCat.currentText()
+        trig = self.editTrig.text()
+        over = self.editOver.text()
+        ptype = self.comboType.currentText()
+        cycle = self.comboCycle.currentText()
+        ddate = self.editDate.date()
+        vdate = self.comboDate.currentText()
+        comment = self.editComment.text()
+        record = (name, cat, trig, over, )  
         pass
     def update_prediction(self):
         pass
