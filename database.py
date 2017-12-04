@@ -526,13 +526,20 @@ class Database(object):
         for entry in self.entries:
             if trig in entry.desc:
                 affected.append('<Entry>'+entry.asCategorizedStr())
-
-        #for entry in self.temp_entries:
-        #    if trig in entry.desc:
-        #        affected.append('<NewEntry>'+entry.asCategorizedStr())
-
         return affected
 
+    def find_all_with_trigger_or_override(self, trigger, override):
+        affected = []
+        
+        if override:
+            for entry in self.entries:
+                if override in entry.desc:
+                    affected.append('<Entry>'+entry.asCategorizedStr())
+        if trigger:
+            affected.append(self.find_all_with_trigger(trigger))
+        
+        return affected
+        
     def get_all_accounts(self):
         acct_list = []
         try:

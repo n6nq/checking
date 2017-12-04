@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
+from warninglistdialog import WarningListDialog
 from datetime import date
 
 class MyTableModel(QAbstractTableModel):
@@ -187,8 +188,21 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         ddate = self.editDate.date()
         vdate = self.comboDate.currentText()
         comment = self.editComment.text()
-        record = (name, cat, trig, over, )  
-        pass
+        record = (name, cat, trig, over, cycle, ddate, vdate, comment)
+
+        # check current entries for effect of new trigger
+        affected = self.db.find_all_with_trigger_or_override(trig, over)
+        dl = WarningListDialog(
+            "All entries listed below have the trigger string '"+trig+"' or the override string '"+over+"'.\n" + \
+            "Similar entries will be potential matches to predictions when when new check files are read.", 
+            affected)
+        if dl.reply == True:
+            self.db.add_prediction(record)
+            self.new_category_filter()
+            #i = QListWidgetItem(self.trigger_str)
+            #self.listTriggers.addItem(i)
+            #self.listTriggers.setCurrentItem(i)
+        
     def update_prediction(self):
         pass
     def delete_prediction(self):
