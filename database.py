@@ -190,6 +190,16 @@ class Database(object):
             self.error('Could save overrides in Overrides table:\n', e.args[0])
             return False
             
+    def add_prediction(self, pred):
+        try:
+            self.conn.execute(self.insertPredictionSQL, (ent.category, ent.cat_id, ent.trig_id, ent.over_id, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
+            self.commit()
+            self.entries.append(ent)
+            return True
+        except sqlite3.Error as e:
+            self.error('Could not save entries in Entries table:\n', e.args[0])
+            return False
+       
     def add_filtered_entry(self, ent):
         self.filtered_entries.append(ent)
     
@@ -536,7 +546,7 @@ class Database(object):
                 if override in entry.desc:
                     affected.append('<Entry>'+entry.asCategorizedStr())
         if trigger:
-            affected.append(self.find_all_with_trigger(trigger))
+            affected.extend(self.find_all_with_trigger(trigger))
         
         return affected
         

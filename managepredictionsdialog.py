@@ -188,7 +188,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         ddate = self.editDate.date()
         vdate = self.comboDate.currentText()
         comment = self.editComment.text()
-        record = (name, cat, trig, over, cycle, ddate, vdate, comment)
+        pred = Prediction(db)
+        pred.set_without_ids(name, cat, trig, over, cycle, ddate, vdate, comment)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
@@ -197,7 +198,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             "Similar entries will be potential matches to predictions when when new check files are read.", 
             affected)
         if dl.reply == True:
-            self.db.add_prediction(record)
+            self.db.add_prediction(pred)
             self.new_category_filter()
             #i = QListWidgetItem(self.trigger_str)
             #self.listTriggers.addItem(i)
