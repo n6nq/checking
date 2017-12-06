@@ -14,8 +14,7 @@ class Prediction(object):
     
     def __init__(self, db):
         self.db = db
-        
-    def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, date=None, comment=None):
+    def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
         self.cat = cat
         self.trig = trig
@@ -25,10 +24,11 @@ class Prediction(object):
         self.over_id = 0
         self.p_type = p_type
         self.cycle = cycle
-        self.date = date
-        self.comment = comment
+        self.ddate = ddate
+        self.vdate = vdate
+        self.desc = desc
 
-    def set_with_ids(self, name, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, date=None, comment=None):
+    def set_with_ids(self, name, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
         self.cat = cat
         self.trig = trig

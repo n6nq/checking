@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
+from predicted import Prediction
 
 class MyTableModel(QAbstractTableModel):
     
@@ -187,9 +188,9 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         cycle = self.comboCycle.currentText()
         ddate = self.editDate.date()
         vdate = self.comboDate.currentText()
-        comment = self.editComment.text()
-        pred = Prediction(db)
-        pred.set_without_ids(name, cat, trig, over, cycle, ddate, vdate, comment)
+        desc = self.editComment.text()
+        pred = Prediction(self.db)
+        pred.set_without_ids(name, cat, trig, over, ptype, cycle, ddate, vdate, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)

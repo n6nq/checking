@@ -13,7 +13,7 @@
 import sqlite3
 import accounts
 import entry
-from predicted import Predicted
+from predicted import Prediction
 from category import Category
 from trigger import Trigger
 from override import Override
@@ -50,8 +50,9 @@ class Database(object):
         self.accounts = []
         self.load_accounts()
         
-        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, name varchar(20), cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, p_type int, cycle int, pdate date, comment varchar(128))'
-        self.selectAllPredictionsSQL = 'select oid, name, cat, trig, over, cat_id, trig_id, over_id, p_type, cycle, pdate, comment from Predictions'
+        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, name varchar(20), cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype varchar(20), cycle varchar(20), ddate date, vdate int, desc varchar(128))'
+        self.selectAllPredictionsSQL = 'select oid, name, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
+        self.insertPredictionSQL = 'insert into Predictions(name, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
@@ -192,7 +193,7 @@ class Database(object):
             
     def add_prediction(self, pred):
         try:
-            self.conn.execute(self.insertPredictionSQL, (ent.category, ent.cat_id, ent.trig_id, ent.over_id, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
+            self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc))
             self.commit()
             self.entries.append(ent)
             return True
