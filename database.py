@@ -122,6 +122,7 @@ class Database(object):
         
         self.conn.create_function('yrmo', 1, self.yrmo)
         self.num_entries = 0
+        self.num_predictions = 0
         self.load_entries()
         self.load_categories()
         self.load_triggers()
@@ -195,10 +196,10 @@ class Database(object):
         try:
             self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc))
             self.commit()
-            self.entries.append(ent)
+            self.predictions.append(ent)
             return True
         except sqlite3.Error as e:
-            self.error('Could not save entries in Entries table:\n', e.args[0])
+            self.error('Could not save prediction in Predictions table:\n', e.args[0])
             return False
        
     def add_filtered_entry(self, ent):
@@ -736,7 +737,8 @@ class Database(object):
         try:
             self.conn.execute(self.createPredictionsSQL)
             for row in self.conn.execute(self.selectAllPredictionsSQL):
-                pred = Prediction(self, row)
+                pred = Prediction(self)
+                pred.set_with_row(row)
                 self.predictions.append(pred)
                 self.num_predictions += 1
         except sqlite3.Error as e:
