@@ -18,18 +18,17 @@ class MyTableModel(QAbstractTableModel):
         self.headers = ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Comment']
         
     def columnCount(self, arg0=None):
-        return self.db.get_predictions_column_count()
+        return len(self.headers)
         
     def rowCount(self, parent=QModelIndex()): 
         return len(self.listdata) 
     
     def data(self, modelindex, role): 
         if modelindex.isValid() and role == Qt.DisplayRole:
-            ent = self.listdata[modelindex.row()]
-            if type(ent) is Entry:
-                return QVariant(ent.asCategorizedStr())
-            elif type(ent) is tuple:
-                return QVariant(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
+            pred = self.listdata[modelindex.row()]
+            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.p_type, pred.cycle, str(pred.date), pred.comment]
+            index = modelindex.column()
+            return strings[index]
         else: 
             return QVariant()
 
@@ -50,7 +49,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.setupUi(self)
 
         # add all the ui init
-        list_data = sorted(self.db.get_all_predictions_no_ids(), key=lambda pred: pred.name)
+        list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.name)
         self.set_list_model(list_data)
 
         # Setup sort combos#oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment

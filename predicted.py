@@ -40,7 +40,8 @@ class Prediction(object):
         self.over_id = over_id
         self.p_type = p_type
         self.cycle = cycle
-        self.date = date
+        self.date = ddate
+        self.vdate = vdate
         self.comment = comment
 
     def set_with_row(self, row):
@@ -55,4 +56,5 @@ class Prediction(object):
         self.p_type = row[8]
         self.cycle = row[9]
         self.date = row[10]
-        self.comment = row[11]
+        self.vdate = row[11]
+        self.comment = row[12]
