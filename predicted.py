@@ -9,7 +9,32 @@ type bill, prediction, subscription, monthly, elective
 cycle monthly, weekly, quarterly, annual, bi-weekly, ad-hoc
 date day-of-month, day-of-week, day/month, adhoc
 """
+from enum import Enum
 
+class Type(Enum):
+    BILL = 1
+    PRED = 2
+    SUBSCR = 3
+    MONTH = 4
+    ELECT = 5
+    
+class Cycle(Eum):
+    MONTHLY = 1
+    WEEKLY = 2
+    QUARTERLY = 3
+    ANNUAL = 4
+    BIWEEKLY = 5
+    ADHOC = 6
+    
+class DayOfWeek(Enum):
+    MON = 1
+    TUE = 2
+    WED = 3
+    THU = 4
+    FRI = 5
+    SAT = 6
+    SUN = 7
+    
 class Prediction(object):
     
     def __init__(self, db):
