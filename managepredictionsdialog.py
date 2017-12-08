@@ -188,12 +188,13 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         cyclestr = self.comboCycle.currentText()
         qdate = self.editDate.date()
         ddate = date(qdate.year(), qdate.month(), qdate.day())
-        vdate = self.comboDate.currentText()
+        vdatestr = self.comboDate.currentText()
         desc = self.editComment.text()
         pred = Prediction(self.db)
         ptype = pred.get_ptype_from_str(ptypestr)
         cycle = pred.get_cycle_from_str(cyclestr)
-        if cycle in [Cycle.]
+        vdate = pred.get_vdate_from_str(cycle, vdatestr)
+            
         pred.set_without_ids(name, cat, trig, over, ptype, cycle, ddate, vdate, desc)
 
         # check current entries for effect of new trigger

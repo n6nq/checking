@@ -10,6 +10,7 @@ cycle monthly, weekly, quarterly, annual, bi-weekly, ad-hoc
 date day-of-month, day-of-week, day/month, adhoc
 """
 from enum import Enum
+from bidict import bidict
 
 class Type(Enum):
     BILL = 1
@@ -17,8 +18,7 @@ class Type(Enum):
     SUBSCR = 3
     MONTH = 4
     ELECT = 5
-
-TypeToStr = ['None', 'Bill', 'Predction', 'Subcription', 'Monthly', 'Elective']
+Types = bidict({'Bill': Type.BILL, 'Prediction': Type.PRED, 'Subscription': Type.SUBSCR, 'Monthly': Type.MONTH, 'Elective': Type.ELECT})
 
 class Cycle(Enum):
     MONTHLY = 1
@@ -27,7 +27,9 @@ class Cycle(Enum):
     ANNUAL = 4
     BIWEEKLY = 5
     ADHOC = 6
-    
+
+Cycles = bidict({'Monthly': Cycle.MONTHLY, 'Weekly': Cycle.WEEKLY, 'Quarterly': Cycle.QUARTERLY, 'Annual': Cycle.ANNUAL, 'BiWeekly': Cycle.BIWEEKLY, 'Adhoc': Cycle.ADHOC})
+
 class DayOfWeek(Enum):
     MON = 1
     TUE = 2
@@ -36,7 +38,9 @@ class DayOfWeek(Enum):
     FRI = 5
     SAT = 6
     SUN = 7
-    
+
+DaysOfWeek = bidict({'Monday': DayOfWeek.MON, 'Tuesday': DayOfWeek.TUE, 'Wednesday': DayOfWeek.WED, 'Thursday': DayOfWeek.THU, 'Friday': DayOfWeek.FRI, 'Saturday': DayOfWeek.SAT, 'Sunday': DayOfWeek.SUN})]
+
 class Prediction(object):
     
     def __init__(self, db):
