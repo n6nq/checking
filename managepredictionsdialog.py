@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
-from predicted import Prediction
+from predicted import Prediction, Cycle
 
 class MyTableModel(QAbstractTableModel):
     
@@ -15,7 +15,7 @@ class MyTableModel(QAbstractTableModel):
         QAbstractTableModel.__init__(self, parent) 
         self.listdata = datain
         self.db = args[0]
-        self.headers = ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Comment']
+        self.headers = Prediction.headers()
         
     def columnCount(self, arg0=None):
         return len(self.headers)
@@ -26,7 +26,8 @@ class MyTableModel(QAbstractTableModel):
     def data(self, modelindex, role): 
         if modelindex.isValid() and role == Qt.DisplayRole:
             pred = self.listdata[modelindex.row()]
-            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.p_type, pred.cycle, str(pred.date), pred.comment]
+
+            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.get_cyclestr(), pred.get_datestr(), pred.comment]
             index = modelindex.column()
             return strings[index]
         else: 
@@ -183,13 +184,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         cat = self.comboCat.currentText()
         trig = self.editTrig.text()
         over = self.editOver.text()
-        ptype = self.comboType.currentText()
-        cycle = self.comboCycle.currentText()
+        ptypestr = self.comboType.currentText()
+        cyclestr = self.comboCycle.currentText()
         qdate = self.editDate.date()
         ddate = date(qdate.year(), qdate.month(), qdate.day())
         vdate = self.comboDate.currentText()
         desc = self.editComment.text()
         pred = Prediction(self.db)
+        ptype = pred.get_ptype_from_str(ptypestr)
+        cycle = pred.get_cycle_from_str(cyclestr)
+        if cycle in [Cycle.]
         pred.set_without_ids(name, cat, trig, over, ptype, cycle, ddate, vdate, desc)
 
         # check current entries for effect of new trigger

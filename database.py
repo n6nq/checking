@@ -50,7 +50,7 @@ class Database(object):
         self.accounts = []
         self.load_accounts()
         
-        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, name varchar(20), cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype varchar(20), cycle varchar(20), ddate date, vdate int, desc varchar(128))'
+        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, name varchar(20), cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype int, cycle int, ddate date, vdate int, desc varchar(128))'
         self.selectAllPredictionsSQL = 'select oid, name, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
         self.insertPredictionSQL = 'insert into Predictions(name, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         

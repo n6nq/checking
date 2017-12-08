@@ -17,8 +17,10 @@ class Type(Enum):
     SUBSCR = 3
     MONTH = 4
     ELECT = 5
-    
-class Cycle(Eum):
+
+TypeToStr = ['None', 'Bill', 'Predction', 'Subcription', 'Monthly', 'Elective']
+
+class Cycle(Enum):
     MONTHLY = 1
     WEEKLY = 2
     QUARTERLY = 3
@@ -39,7 +41,10 @@ class Prediction(object):
     
     def __init__(self, db):
         self.db = db
-        
+    
+    def get_typestr(self):
+        return TypeToStr[self.p_type]
+    
     def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
         self.cat = cat
@@ -65,7 +70,7 @@ class Prediction(object):
         self.over_id = over_id
         self.p_type = p_type
         self.cycle = cycle
-        self.date = ddate
+        self.ddate = ddate
         self.vdate = vdate
         self.comment = comment
 
@@ -80,6 +85,10 @@ class Prediction(object):
         self.over_id = row[7]
         self.p_type = row[8]
         self.cycle = row[9]
-        self.date = row[10]
+        self.ddate = row[10]
         self.vdate = row[11]
         self.comment = row[12]
+
+    @classmethod
+    def headers(cls):
+        return ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Comment']
