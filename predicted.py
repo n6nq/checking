@@ -12,13 +12,13 @@ date day-of-month, day-of-week, day/month, adhoc
 from enum import Enum
 from bidict import bidict
 
-class Type(Enum):
+class PType(Enum):
     BILL = 1
     PRED = 2
     SUBSCR = 3
     MONTH = 4
     ELECT = 5
-Types = bidict({'Bill': Type.BILL, 'Prediction': Type.PRED, 'Subscription': Type.SUBSCR, 'Monthly': Type.MONTH, 'Elective': Type.ELECT})
+Types = bidict({'Bill': PType.BILL, 'Prediction': PType.PRED, 'Subscription': PType.SUBSCR, 'Monthly': PType.MONTH, 'Elective': PType.ELECT})
 
 class Cycle(Enum):
     MONTHLY = 1
@@ -39,7 +39,7 @@ class DayOfWeek(Enum):
     SAT = 6
     SUN = 7
 
-DaysOfWeek = bidict({'Monday': DayOfWeek.MON, 'Tuesday': DayOfWeek.TUE, 'Wednesday': DayOfWeek.WED, 'Thursday': DayOfWeek.THU, 'Friday': DayOfWeek.FRI, 'Saturday': DayOfWeek.SAT, 'Sunday': DayOfWeek.SUN})]
+DaysOfWeek = bidict({'Mon': DayOfWeek.MON, 'Tue': DayOfWeek.TUE, 'Wed': DayOfWeek.WED, 'Thu': DayOfWeek.THU, 'Fri': DayOfWeek.FRI, 'Sat': DayOfWeek.SAT, 'Sun': DayOfWeek.SUN})
 
 class Prediction(object):
     
@@ -47,8 +47,24 @@ class Prediction(object):
         self.db = db
     
     def get_typestr(self):
-        return TypeToStr[self.p_type]
+        return Types.inv(self.p_type)
+
+    def get_cycle_from_str(self, str):
+        self.cycle = Cycles[str]
+        return self.cycle
     
+    def get_ptype_from_str(self, str):
+        self.p_type = Types[str]
+        return self.p_type
+    def get_vdate_from_str(self, cycle, str):
+        if cycle == Cycle.WEEKLY:
+            self.vdate = DaysOfWeek[str]
+            return self.vdate
+        elif cycle == Cycle.MONTHLY:
+            self.vdate = int(str)
+        else:
+            self.vdate = -1
+        return self.vdate
     def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
         self.cat = cat

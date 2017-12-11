@@ -194,9 +194,13 @@ class Database(object):
             
     def add_prediction(self, pred):
         try:
-            self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc))
+            mems = [pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc]
+            for mem in mems:
+                print (type(mem))
+                print (mem)
+            self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type.value, pred.cycle.value, pred.ddate, pred.vdate, pred.desc))
             self.commit()
-            self.predictions.append(ent)
+            self.predictions.append(pred)
             return True
         except sqlite3.Error as e:
             self.error('Could not save prediction in Predictions table:\n', e.args[0])
