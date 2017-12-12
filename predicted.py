@@ -47,7 +47,7 @@ class Prediction(object):
         self.db = db
     
     def get_typestr(self):
-        return Types.inv(self.p_type)
+        return Types.inv[PType(self.p_type)]
 
     def get_cycle_from_str(self, str):
         self.cycle = Cycles[str]
