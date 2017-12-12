@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
-from predicted import Prediction, Cycle
+from predicted import Prediction, Cycle, DaysOfWeek, DayOfWeek
 
 class MyTableModel(QAbstractTableModel):
     
@@ -114,9 +114,9 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def new_category_filter(self):
         cat = self.sortCategory.currentText()
         if cat == 'Ascend':
-            filtered = sorted(self.db.get_all_predictions(), key=lambda ent: ent.get_category())
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.cat)
         elif cat == 'Descend':
-            filtered = sorted(self.db.get_all_predictions(), key=lambda ent: ent.get_category(), reverse=True)
+            filtered = sorted(self.db.get_all_predictions(), key=lambda ent: pred.cat, reverse=True)
         else:
             filtered = sorted(self.db.get_all_predictions_with_cat(cat), key=lambda ent: ent.asCategorizedStr())
             
@@ -156,7 +156,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.comboDate.show()
             return
         elif cycle_choice == 'Weekly':
-            day_list = ['Sun', 'Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat']
+            day_list = [DaysOfWeek.inv[DayOfWeek.SUN], DaysOfWeek.inv[DayOfWeek.MON], DaysOfWeek.inv[DayOfWeek.TUE], DaysOfWeek.inv[DayOfWeek.WED], DaysOfWeek.inv[DayOfWeek.THU], DaysOfWeek.inv[DayOfWeek.FRI], DaysOfWeek.inv[DayOfWeek.SAT]]
             self.comboDate.addItems(day_list)
             self.comboDate.show()
             return

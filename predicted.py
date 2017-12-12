@@ -31,6 +31,7 @@ class Cycle(Enum):
 Cycles = bidict({'Monthly': Cycle.MONTHLY, 'Weekly': Cycle.WEEKLY, 'Quarterly': Cycle.QUARTERLY, 'Annual': Cycle.ANNUAL, 'BiWeekly': Cycle.BIWEEKLY, 'Adhoc': Cycle.ADHOC})
 
 class DayOfWeek(Enum):
+    NONE = 0
     MON = 1
     TUE = 2
     WED = 3
@@ -39,7 +40,7 @@ class DayOfWeek(Enum):
     SAT = 6
     SUN = 7
 
-DaysOfWeek = bidict({'Mon': DayOfWeek.MON, 'Tue': DayOfWeek.TUE, 'Wed': DayOfWeek.WED, 'Thu': DayOfWeek.THU, 'Fri': DayOfWeek.FRI, 'Sat': DayOfWeek.SAT, 'Sun': DayOfWeek.SUN})
+DaysOfWeek = bidict({'None': DayOfWeek.NONE,'Mon': DayOfWeek.MON, 'Tue': DayOfWeek.TUE, 'Wed': DayOfWeek.WED, 'Thu': DayOfWeek.THU, 'Fri': DayOfWeek.FRI, 'Sat': DayOfWeek.SAT, 'Sun': DayOfWeek.SUN})
 
 class Prediction(object):
     
@@ -49,6 +50,17 @@ class Prediction(object):
     def get_typestr(self):
         return Types.inv[PType(self.p_type)]
 
+    def get_cyclestr(self):
+        return Cycles.inv[Cycle(self.cycle)]
+    
+    def get_datestr(self):
+        if Cycle(self.cycle) == Cycle.WEEKLY:
+            return DaysOfWeek.inv[DayOfWeek(self.vdate)]
+        elif Cycle(self.cycle) == Cycle.MONTHLY:
+            return str(self.vdate)
+        else:
+            return str(self.ddate)
+        
     def get_cycle_from_str(self, str):
         self.cycle = Cycles[str]
         return self.cycle
@@ -63,7 +75,7 @@ class Prediction(object):
         elif cycle == Cycle.MONTHLY:
             self.vdate = int(str)
         else:
-            self.vdate = -1
+            self.vdate = DayOfWeek.NONE
         return self.vdate
     def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
