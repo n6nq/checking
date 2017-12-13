@@ -12,35 +12,36 @@ date day-of-month, day-of-week, day/month, adhoc
 from enum import Enum
 from bidict import bidict
 
-class PType(Enum):
-    BILL = 1
-    PRED = 2
-    SUBSCR = 3
-    MONTH = 4
-    ELECT = 5
-Types = bidict({'Bill': PType.BILL, 'Prediction': PType.PRED, 'Subscription': PType.SUBSCR, 'Monthly': PType.MONTH, 'Elective': PType.ELECT})
+#class PType(Enum):
+#    BILL = 1
+#    PRED = 2
+#    SUBSCR = 3
+#    MONTH = 4
+#    ELECT = 5
+Types = bidict({'None': 0,'Bill': 1, 'Prediction': 2, 'Subscription': 3, 'Monthly': 4, 'Elective': 5})
 
-class Cycle(Enum):
-    MONTHLY = 1
-    WEEKLY = 2
-    QUARTERLY = 3
-    ANNUAL = 4
-    BIWEEKLY = 5
-    ADHOC = 6
+#class Cycle(Enum):
+#    MONTHLY = 1
+#    WEEKLY = 2
+#    QUARTERLY = 3
+#    ANNUAL = 4
+#    BIWEEKLY = 5
+#    ADHOC = 6
 
-Cycles = bidict({'Monthly': Cycle.MONTHLY, 'Weekly': Cycle.WEEKLY, 'Quarterly': Cycle.QUARTERLY, 'Annual': Cycle.ANNUAL, 'BiWeekly': Cycle.BIWEEKLY, 'Adhoc': Cycle.ADHOC})
+Cycles = bidict({'None': 0,'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
 
-class DayOfWeek(Enum):
-    NONE = 0
-    MON = 1
-    TUE = 2
-    WED = 3
-    THU = 4
-    FRI = 5
-    SAT = 6
-    SUN = 7
+#class DayOfWeek(Enum):
+#    NONE = 0
+#    MON = 1
+#    TUE = 2
+#    WED = 3
+#    THU = 4
+#    FRI = 5
+#    SAT = 6
+#    SUN = 7
 
-DaysOfWeek = bidict({'None': DayOfWeek.NONE,'Mon': DayOfWeek.MON, 'Tue': DayOfWeek.TUE, 'Wed': DayOfWeek.WED, 'Thu': DayOfWeek.THU, 'Fri': DayOfWeek.FRI, 'Sat': DayOfWeek.SAT, 'Sun': DayOfWeek.SUN})
+DaysOfWeek = bidict({'None': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 7})
+#DaysOfWeek = bidict({'None': DayOfWeek.NONE,'Mon': DayOfWeek.MON, 'Tue': DayOfWeek.TUE, 'Wed': DayOfWeek.WED, 'Thu': DayOfWeek.THU, 'Fri': DayOfWeek.FRI, 'Sat': DayOfWeek.SAT, 'Sun': DayOfWeek.SUN})
 
 class Prediction(object):
     
@@ -48,15 +49,15 @@ class Prediction(object):
         self.db = db
     
     def get_typestr(self):
-        return Types.inv[PType(self.p_type)]
+        return Types.inv[self.p_type]
 
     def get_cyclestr(self):
-        return Cycles.inv[Cycle(self.cycle)]
+        return Cycles.inv[self.cycle]
     
     def get_datestr(self):
-        if Cycle(self.cycle) == Cycle.WEEKLY:
-            return DaysOfWeek.inv[DayOfWeek(self.vdate)]
-        elif Cycle(self.cycle) == Cycle.MONTHLY:
+        if self.cycle == Cycles['Weekly']:
+            return DaysOfWeek.inv[self.vdate]
+        elif self.cycle == Cycles['Monthly']:
             return str(self.vdate)
         else:
             return str(self.ddate)
@@ -69,13 +70,13 @@ class Prediction(object):
         self.p_type = Types[str]
         return self.p_type
     def get_vdate_from_str(self, cycle, str):
-        if cycle == Cycle.WEEKLY:
+        if cycle == Cycles['Weekly']:
             self.vdate = DaysOfWeek[str]
             return self.vdate
-        elif cycle == Cycle.MONTHLY:
+        elif cycle == Cycles['Monthly']:
             self.vdate = int(str)
         else:
-            self.vdate = DayOfWeek.NONE
+            self.vdate = 0      # equals none
         return self.vdate
     def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
@@ -104,7 +105,7 @@ class Prediction(object):
         self.cycle = cycle
         self.ddate = ddate
         self.vdate = vdate
-        self.comment = comment
+        self.desc = desc
 
     def set_with_row(self, row):
         self.oid = row[0]
@@ -119,8 +120,8 @@ class Prediction(object):
         self.cycle = row[9]
         self.ddate = row[10]
         self.vdate = row[11]
-        self.comment = row[12]
+        self.desc = row[12]
 
     @classmethod
     def headers(cls):
-        return ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Comment']
+        return ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']

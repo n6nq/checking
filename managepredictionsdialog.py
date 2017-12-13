@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
-from predicted import Prediction, Cycle, DaysOfWeek, DayOfWeek
+from predicted import Prediction, Cycles, DaysOfWeek  #, DayOfWeek
 
 class MyTableModel(QAbstractTableModel):
     
@@ -27,7 +27,7 @@ class MyTableModel(QAbstractTableModel):
         if modelindex.isValid() and role == Qt.DisplayRole:
             pred = self.listdata[modelindex.row()]
 
-            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.get_cyclestr(), pred.get_datestr(), pred.comment]
+            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.get_cyclestr(), pred.get_datestr(), pred.desc]
             index = modelindex.column()
             return strings[index]
         else: 
@@ -79,7 +79,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
         self.comboCycle.activated.connect(lambda: self.set_date_items())
         self.sortCycle.addItems(ascendDescendList)
-        self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'Bi-weekly', 'Adhoc']
+        self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'BiWeekly', 'Adhoc']
         self.sortCycle.addItems(self.cycleList)
         self.comboCycle.addItems(self.cycleList)
 
@@ -156,7 +156,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.comboDate.show()
             return
         elif cycle_choice == 'Weekly':
-            day_list = [DaysOfWeek.inv[DayOfWeek.SUN], DaysOfWeek.inv[DayOfWeek.MON], DaysOfWeek.inv[DayOfWeek.TUE], DaysOfWeek.inv[DayOfWeek.WED], DaysOfWeek.inv[DayOfWeek.THU], DaysOfWeek.inv[DayOfWeek.FRI], DaysOfWeek.inv[DayOfWeek.SAT]]
+            day_list = [DaysOfWeek.inv[1], DaysOfWeek.inv[2], DaysOfWeek.inv[3], DaysOfWeek.inv[4], DaysOfWeek.inv[5], DaysOfWeek.inv[6], DaysOfWeek.inv[7]]
             self.comboDate.addItems(day_list)
             self.comboDate.show()
             return

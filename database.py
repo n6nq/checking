@@ -198,7 +198,7 @@ class Database(object):
             for mem in mems:
                 print (type(mem))
                 print (mem)
-            self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type.value, pred.cycle.value, pred.ddate, pred.vdate, pred.desc))
+            self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc))
             self.commit()
             self.predictions.append(pred)
             return True
