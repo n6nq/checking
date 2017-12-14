@@ -98,6 +98,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.buttonDelete.clicked.connect(lambda: self.delete_prediction())
         self.buttonClear.clicked.connect(lambda: self.clear_edit_fields())
         
+        self.predictionsView.clicked.connect(lambda: self.select_prediction())
+        
         # setup the mapper
         self.mapper = QDataWidgetMapper(self)
 
@@ -215,5 +217,54 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def delete_prediction(self):
         pass
     def clear_edit_fields(self):
-        pass
+        self.editName.setText("")
+        self.comboCat.setEditText("")
+        self.editTrig.setText("")
+        self.editOver.setText("")
+        self.comboType.setEditText("")
+        self.comboCycle.setEditText("")
+        self.comboDate.setEditText("")
+        self.editDate.setDate(date.today())
+        self.editComment.setText("")
+        self.update()
+
+    def select_prediction(self):
+        selection = self.predictionsView.selectionModel()
+        indexes = selection.selectedIndexes()
+        mi = indexes[0]
+        self.clear_edit_fields()
+        for col in range(0, self.table_model.columnCount()):
+            new_mi = self.table_model.index(mi.row(), col)
+            string = self.table_model.data(new_mi, Qt.DisplayRole)
+            self.set_field(col, string)
     
+    def set_field(self, col, string):
+        if col == 0:
+            self.editName.setText(string)
+            return
+        elif col == 1:
+            self.comboCat.setCurrentText(string)
+            return
+        elif col == 2:
+            self.editTrig.setText(string)
+            return
+        elif col == 3:
+            self.editOver.setText(string)
+            return
+        elif col == 4:
+            self.comboType.setCurrentText(string)
+            return
+        elif col == 5:
+            self.comboCycle.setCurrentText(string)
+            return
+        elif col == 6:
+            #self.editDate.setDate(string)
+            return
+        elif col == 7:
+            self.comboDate.setCurrentText(string)
+        elif col == 8:
+            self.editComment.setText(string)
+            return
+        else:
+            print('Bad column')
+            return
