@@ -744,7 +744,7 @@ class Database(object):
                 pred = Prediction(self)
                 pred.set_with_row(row)
                 self.predictions.append(pred)
-                self.num_predictions += 1
+                  self.num_predictions += 1
         except sqlite3.Error as e:
             self.error('Error loading memory from the Predictions table:\n', e.args[0])
                 

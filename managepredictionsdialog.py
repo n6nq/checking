@@ -235,35 +235,43 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.clear_edit_fields()
         for col in range(0, self.table_model.columnCount()):
             new_mi = self.table_model.index(mi.row(), col)
-            string = self.table_model.data(new_mi, Qt.DisplayRole)
-            self.set_field(col, string)
+            value = self.table_model.data(new_mi, Qt.DisplayRole)
+            self.set_field(col, value)
     
-    def set_field(self, col, string):
+    def set_field(self, col, value):
         if col == 0:
-            self.editName.setText(string)
+            self.editName.setText(value)
             return
         elif col == 1:
-            self.comboCat.setCurrentText(string)
+            self.comboCat.setCurrentText(value)
             return
         elif col == 2:
-            self.editTrig.setText(string)
+            self.editTrig.setText(value)
             return
         elif col == 3:
-            self.editOver.setText(string)
+            self.editOver.setText(value)
             return
         elif col == 4:
-            self.comboType.setCurrentText(string)
+            self.comboType.setCurrentText(value)
             return
         elif col == 5:
-            self.comboCycle.setCurrentText(string)
+            self.comboCycle.setCurrentText(value)
             return
         elif col == 6:
-            #self.editDate.setDate(string)
-            return
+            mytype = type(value)
+            if type(value) == date:
+                self.editDate.setDate(value)
+                self.editDate.show()
+                self.comboDate.hide()
+                return
+            else:
+                self.set_date_items()
+                self.comboDate.setCurrentText(value)
+                self.editDate.show()
+                self.comboDate.hide()
+                return
         elif col == 7:
-            self.comboDate.setCurrentText(string)
-        elif col == 8:
-            self.editComment.setText(string)
+            self.editComment.setText(value)
             return
         else:
             print('Bad column')
