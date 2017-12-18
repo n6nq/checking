@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
-from predicted import Prediction, Cycles, DaysOfWeek  #, DayOfWeek
+from predicted import Prediction
 
 class MyTableModel(QAbstractTableModel):
     
@@ -27,7 +27,7 @@ class MyTableModel(QAbstractTableModel):
         if modelindex.isValid() and role == Qt.DisplayRole:
             pred = self.listdata[modelindex.row()]
 
-            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.get_cyclestr(), pred.get_datestr(), pred.desc]
+            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.get_datestr(), pred.desc]
             index = modelindex.column()
             return strings[index]
         else: 
@@ -187,17 +187,20 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         trig = self.editTrig.text()
         over = self.editOver.text()
         ptypestr = self.comboType.currentText()
+        ptype = pred.get_ptype_from_str(ptypestr)
+
         cyclestr = self.comboCycle.currentText()
         qdate = self.editDate.date()
         ddate = date(qdate.year(), qdate.month(), qdate.day())
         vdatestr = self.comboDate.currentText()
+        #depr cycle = pred.get_cycle_from_str(cyclestr)
+        #depr vdate = pred.get_vdate_from_str(cycle, vdatestr)
+        cycle = PCycle(cyclestr, ddate, vdatestr)
+        
         desc = self.editComment.text()
+        
         pred = Prediction(self.db)
-        ptype = pred.get_ptype_from_str(ptypestr)
-        cycle = pred.get_cycle_from_str(cyclestr)
-        vdate = pred.get_vdate_from_str(cycle, vdatestr)
-            
-        pred.set_without_ids(name, cat, trig, over, ptype, cycle, ddate, vdate, desc)
+        pred.set_without_ids(name, cat, trig, over, ptype, cycle, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
@@ -259,7 +262,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             return
         elif col == 6:
             mytype = type(value)
-            if type(value) == date:
+            if '-' in value:
                 self.editDate.setDate(value)
                 self.editDate.show()
                 self.comboDate.hide()

@@ -194,11 +194,11 @@ class Database(object):
             
     def add_prediction(self, pred):
         try:
-            mems = [pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc]
-            for mem in mems:
+            row = (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc)
+            for mem in row:
                 print (type(mem))
                 print (mem)
-            self.conn.execute(self.insertPredictionSQL, (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc))
+            self.conn.execute(self.insertPredictionSQL, row)
             self.commit()
             self.predictions.append(pred)
             return True
@@ -639,12 +639,6 @@ class Database(object):
     def get_all_predictions(self):
         return self.predictions
     
-    def get_all_predictions_no_ids(self):
-        requested = []
-        for pred in self.predictions:
-            requested.append((pred.name, pred.cat, pred.trig, pred.over, pred.p_type, pred.cycle, pred.date, pred.comment))
-        return requested
-    
     def get_all_predictions_with_cat(self, cat):
         requested = []
             
@@ -744,7 +738,7 @@ class Database(object):
                 pred = Prediction(self)
                 pred.set_with_row(row)
                 self.predictions.append(pred)
-                  self.num_predictions += 1
+                self.num_predictions += 1
         except sqlite3.Error as e:
             self.error('Error loading memory from the Predictions table:\n', e.args[0])
                 
