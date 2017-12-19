@@ -25,6 +25,7 @@ class Prediction(object):
     
     def __init__(self, db):
         self.db = db
+        self.cycle = None
     
     def get_typestr(self):
         return Types.inv[self.p_type]
@@ -66,9 +67,7 @@ class Prediction(object):
         self.trig_id = 0
         self.over_id = 0
         self.p_type = p_type
-        self.cycle = cycle should be a cycle
-        self.ddate = ddate
-        self.vdate = vdate
+        self.cycle = PCycle(cycle, ddate, vdate)
         self.desc = desc
 
     def set_with_ids(self, oid, name, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
@@ -81,9 +80,7 @@ class Prediction(object):
         self.trig_id = trig_id
         self.over_id = over_id
         self.p_type = p_type
-        self.cycle = cycle should be and cycle
-        self.ddate = ddate
-        self.vdate = vdate
+        self.cycle = PCycle(cycle, ddate, vdate)
         self.desc = desc
 
     def set_with_row(self, row):
@@ -96,9 +93,7 @@ class Prediction(object):
         self.trig_id = row[6]
         self.over_id = row[7]
         self.p_type = row[8]
-        self.cycle = row[9] should be and cycle
-        self.ddate = row[10]
-        self.vdate = row[11]
+        self.cycle = PCycle(row[9], row[10], row[11])
         self.desc = row[12]
 
     @classmethod

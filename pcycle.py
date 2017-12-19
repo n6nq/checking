@@ -63,17 +63,58 @@ DaysOfWeek = bidict({'None': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5
 
 class PCycle(object):
     
-    def __init__(self, typestr=None, datestr=None, vdatestr=None):
+    def __init__(self, ptype=None, ddate=None, vdate=None):
         
-        if typestr and typestr in Cycles:
-            self.type = Cycles[typestr]
-            if datestr:
-                self.ddate = datetime.strptime(datestr, "%m-%d-%Y")
-            if vdatestr:
-                if vdatestr in DaysOfWeek:
-                    self.vdate = DaysOfWeek[vdatestr]
+        if ptype == None or ddate == None or vdate == None:
+            assert(False)
+        
+        if type(ptype) == str:
+            if ptype in Cycles:
+                self.ptype = Cycles[ptype]
+            else:
+                assert(False)
+        elif type(ptype) == int:
+            if ptype in Cycles.inv:
+                self.ptype = ptype
+            else:
+                assert(False)
+        else:
+            assert(False)
+            
+        if type(ddate) == str:
+            self.ddate = datetime.strptime(ddate, "%m-%d-%Y")
+        elif type(ddate) == date:
+            self.ddate = ddate
+        else:
+            assert(False)
+        if vdate:
+            if type(vdate) == str:
+                if vdate in DaysOfWeek:
+                    self.vdate = DaysOfWeek[vdate]
+                elif int(vdate) in DaysOfWeek.inv:
+                    self.vdate = int(vdate)
                 else:
-                    self.vdate = int(vdatestr)
-
+                    assert(False)
+            elif type(vdate) == int:
+                if vdate in DaysOfWeek:
+                    self.vdate = vdate
+                elif vdate in range(1, 32):
+                    self.vdate = vdate
+                else:
+                    assert(False)
+            else:
+                assert(False)
+                
     def get_type_str(self):
-        return Cycles.inv[self.type]
+        return Cycles.inv[self.ptype]
+    
+    def get_date_str(self):
+        if Cycles.inv[self.ptype] == 'Monthly':
+            return str(self.vdate)
+        elif Cycles.inv[self.ptype] == 'Weekly':
+            return DaysOfWeek.inv[self.vdate]
+        elif self.ptype in Cycles.inv:
+            return str(self.ddate)
+        else:
+            assert(False)
+        
