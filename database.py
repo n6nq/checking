@@ -194,6 +194,7 @@ class Database(object):
             
     def add_prediction(self, pred):
         try:
+            assert(type(pred.cycle) == pcycle.PCycle)
             row = (pred.name, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle, pred.ddate, pred.vdate, pred.desc)
             for mem in row:
                 print (type(mem))

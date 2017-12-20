@@ -6,6 +6,7 @@ from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
 from predicted import Prediction
+from pcycle import PCycle
 
 class MyTableModel(QAbstractTableModel):
     
@@ -187,7 +188,6 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         trig = self.editTrig.text()
         over = self.editOver.text()
         ptypestr = self.comboType.currentText()
-        ptype = pred.get_ptype_from_str(ptypestr)
 
         cyclestr = self.comboCycle.currentText()
         qdate = self.editDate.date()
@@ -195,12 +195,11 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         vdatestr = self.comboDate.currentText()
         #depr cycle = pred.get_cycle_from_str(cyclestr)
         #depr vdate = pred.get_vdate_from_str(cycle, vdatestr)
-        cycle = PCycle(cyclestr, ddate, vdatestr)   #test from here down
         
         desc = self.editComment.text()
-        
         pred = Prediction(self.db)
-        pred.set_without_ids(name, cat, trig, over, ptype, cycle, desc)
+        ptype = pred.get_ptype_from_str(ptypestr)
+        pred.set_without_ids(name, cat, trig, over, ptype, cyclestr, ddate, vdatestr, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
@@ -263,7 +262,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif col == 6:
             mytype = type(value)
             if '-' in value:
-                self.editDate.setDate()strptime(value, '%Y-%m-%d')
+                self.editDate.setDate().strptime(value, '%Y-%m-%d')
                 self.editDate.show()
                 self.comboDate.hide()
                 return

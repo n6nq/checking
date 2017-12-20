@@ -87,23 +87,25 @@ class PCycle(object):
             self.ddate = ddate
         else:
             assert(False)
-        if vdate:
-            if type(vdate) == str:
-                if vdate in DaysOfWeek:
-                    self.vdate = DaysOfWeek[vdate]
-                elif int(vdate) in DaysOfWeek.inv:
-                    self.vdate = int(vdate)
-                else:
-                    assert(False)
-            elif type(vdate) == int:
-                if vdate in DaysOfWeek:
-                    self.vdate = vdate
-                elif vdate in range(1, 32):
-                    self.vdate = vdate
-                else:
-                    assert(False)
+        #if vdate:
+        if type(vdate) == str:
+            if vdate in DaysOfWeek:
+                self.vdate = DaysOfWeek[vdate]
+            elif vdate == '':
+                self.vdate = 0
+            elif int(vdate) in DaysOfWeek.inv:
+                self.vdate = int(vdate)
             else:
                 assert(False)
+        elif type(vdate) == int:
+            if vdate in DaysOfWeek:
+                self.vdate = vdate
+            elif vdate in range(0, 32):
+                self.vdate = vdate
+            else:
+                assert(False)
+        else:
+            assert(False)
                 
     def get_type_str(self):
         return Cycles.inv[self.ptype]
