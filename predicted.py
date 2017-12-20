@@ -30,10 +30,13 @@ class Prediction(object):
     def get_typestr(self):
         return Types.inv[self.p_type]
 
-    #def get_cyclestr(self):
-    #    return PCycles.inv[self.cycle]
+    
+    def get_cyclestr(self):
+        assert(False)  #deprecated
+        #return PCycles.inv[self.cycle]
     
     def get_datestr(self):
+        assert(False)   #deprecated
         if self.cycle == Cycles['Weekly']:
             return DaysOfWeek.inv[self.vdate]
         elif self.cycle == Cycles['Monthly']:
@@ -42,6 +45,7 @@ class Prediction(object):
             return str(self.ddate)
         
     def get_cycle_from_str(self, str):
+        assert(False)   #deprecated
         self.cycle = Cycles[str]
         return self.cycle
     
@@ -50,6 +54,7 @@ class Prediction(object):
         return self.p_type
     
     def get_vdate_from_str(self, cycle, str):
+        assert(False)   #deprecated
         if cycle == Cycles['Weekly']:
             self.vdate = DaysOfWeek[str]
             return self.vdate
@@ -58,6 +63,7 @@ class Prediction(object):
         else:
             self.vdate = 0      # equals none
         return self.vdate
+    
     def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.name = name
         self.cat = cat

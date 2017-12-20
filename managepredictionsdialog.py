@@ -195,7 +195,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         vdatestr = self.comboDate.currentText()
         #depr cycle = pred.get_cycle_from_str(cyclestr)
         #depr vdate = pred.get_vdate_from_str(cycle, vdatestr)
-        cycle = PCycle(cyclestr, ddate, vdatestr)
+        cycle = PCycle(cyclestr, ddate, vdatestr)   #test from here down
         
         desc = self.editComment.text()
         
@@ -263,7 +263,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif col == 6:
             mytype = type(value)
             if '-' in value:
-                self.editDate.setDate(value)
+                self.editDate.setDate()strptime(value, '%Y-%m-%d')
                 self.editDate.show()
                 self.comboDate.hide()
                 return
