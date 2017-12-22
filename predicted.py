@@ -11,6 +11,7 @@ date day-of-month, day-of-week, day/month, adhoc
 from enum import Enum
 from bidict import bidict
 from pcycle import PCycle
+from money import Money
 
 #class PType(Enum):
 #    BILL = 1
@@ -90,7 +91,7 @@ class Prediction(object):
 
     def set_with_row(self, row):
         self.oid = row[0]
-        self.amount = row[1]
+        self.amount = Money.from_number(row[1])
         self.cat = row[2]
         self.trig = row[3]
         self.over = row[4]

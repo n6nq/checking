@@ -113,6 +113,7 @@ class Entry(dbrow.DBRow):
         return hash((self.date, self.amount.value, self.desc))
 
     def amount_as_str(self):
+        assert(False)   #deprecated
         return self.amount.as_str()
 
     def asNotCatStr(self):
