@@ -2,7 +2,6 @@
 will be used to project future balances for 'what-if scenarios.
 
 Amount
-Name
 category
 trigger
 type bill, prediction, subscription, monthly, elective
@@ -64,8 +63,8 @@ class Prediction(object):
             self.vdate = 0      # equals none
         return self.vdate
     
-    def set_without_ids(self, name, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
-        self.name = name
+    def set_without_ids(self, amount, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
+        self.amount = amount
         self.cat = cat
         self.trig = trig
         self.over = over
@@ -76,9 +75,9 @@ class Prediction(object):
         self.cycle = PCycle(cycle, ddate, vdate)
         self.desc = desc
 
-    def set_with_ids(self, oid, name, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
+    def set_with_ids(self, oid, amount, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.oid = oid
-        self.name = name
+        self.amount = amount
         self.cat = cat
         self.trig = trig
         self.over = over
@@ -91,7 +90,7 @@ class Prediction(object):
 
     def set_with_row(self, row):
         self.oid = row[0]
-        self.name = row[1]
+        self.amount = row[1]
         self.cat = row[2]
         self.trig = row[3]
         self.over = row[4]
@@ -104,4 +103,4 @@ class Prediction(object):
 
     @classmethod
     def headers(cls):
-        return ['Name', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
+        return ['Amount', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']

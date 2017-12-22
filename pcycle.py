@@ -63,19 +63,19 @@ DaysOfWeek = bidict({'None': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5
 
 class PCycle(object):
     
-    def __init__(self, ptype=None, ddate=None, vdate=None):
+    def __init__(self, ctype=None, ddate=None, vdate=None):
         
-        if ptype == None or ddate == None or vdate == None:
+        if ctype == None or ddate == None or vdate == None:
             assert(False)
         
-        if type(ptype) == str:
-            if ptype in Cycles:
-                self.ptype = Cycles[ptype]
+        if type(ctype) == str:
+            if ctype in Cycles:
+                self.ctype = Cycles[ctype]
             else:
                 assert(False)
-        elif type(ptype) == int:
-            if ptype in Cycles.inv:
-                self.ptype = ptype
+        elif type(ctype) == int:
+            if ctype in Cycles.inv:
+                self.ctype = ctype
             else:
                 assert(False)
         else:
@@ -108,14 +108,14 @@ class PCycle(object):
             assert(False)
                 
     def get_type_str(self):
-        return Cycles.inv[self.ptype]
+        return Cycles.inv[self.ctype]
     
     def get_date_str(self):
-        if Cycles.inv[self.ptype] == 'Monthly':
+        if Cycles.inv[self.ctype] == 'Monthly':
             return str(self.vdate)
-        elif Cycles.inv[self.ptype] == 'Weekly':
+        elif Cycles.inv[self.ctype] == 'Weekly':
             return DaysOfWeek.inv[self.vdate]
-        elif self.ptype in Cycles.inv:
+        elif self.ctype in Cycles.inv:
             return str(self.ddate)
         else:
             assert(False)

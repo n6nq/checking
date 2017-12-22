@@ -7,6 +7,7 @@ from warninglistdialog import WarningListDialog
 from datetime import date
 from predicted import Prediction
 from pcycle import PCycle
+from money import Money
 
 class MyTableModel(QAbstractTableModel):
     
@@ -27,8 +28,8 @@ class MyTableModel(QAbstractTableModel):
     def data(self, modelindex, role): 
         if modelindex.isValid() and role == Qt.DisplayRole:
             pred = self.listdata[modelindex.row()]
-
-            strings = [pred.name, pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+            #amount = Money.from_number(pred.amount)
+            strings = [pred.amount.as_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
             index = modelindex.column()
             return strings[index]
         else: 
@@ -51,13 +52,13 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.setupUi(self)
 
         # add all the ui init
-        list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.name)
+        list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.trig)
         self.set_list_model(list_data)
 
-        # Setup sort combos#oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
-        self.sortName.activated.connect(lambda: self.new_name_filter())
+        # Setup sort combos#oid,amount,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
+        self.sortAmount.activated.connect(lambda: self.new_amount_filter())
         ascendDescendList = ['Ascend', 'Descend']
-        self.sortName.addItems(ascendDescendList)
+        self.sortAmount.addItems(ascendDescendList)
 
         self.sortCategory.activated.connect(lambda: self.new_category_filter())
         self.sortCategory.addItems(ascendDescendList)
@@ -102,16 +103,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.predictionsView.clicked.connect(lambda: self.select_prediction())
         
         # setup the mapper
-        self.mapper = QDataWidgetMapper(self)
+        #self.mapper = QDataWidgetMapper(self)
 
-        self.mapper.addMapping(self.editName, 0)
-        self.mapper.addMapping(self.comboCat, 1)
-        self.mapper.addMapping(self.editTrig, 2)
-        self.mapper.addMapping(self.editOver, 3)
-        self.mapper.addMapping(self.comboType, 4)
-        self.mapper.addMapping(self.comboCycle, 5)
-        self.mapper.addMapping(self.editDate, 6)
-        self.mapper.addMapping(self.editComment, 7)
+        #self.mapper.addMapping(self.editAmount, 0)
+        #self.mapper.addMapping(self.comboCat, 1)
+        #self.mapper.addMapping(self.editTrig, 2)
+        #self.mapper.addMapping(self.editOver, 3)
+        #self.mapper.addMapping(self.comboType, 4)
+        #self.mapper.addMapping(self.comboCycle, 5)
+        #self.mapper.addMapping(self.editDate, 6)
+        #self.mapper.addMapping(self.editComment, 7)
         self.exec_()
         
     def new_category_filter(self):
@@ -135,7 +136,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def new_date_filter(self):
         pass
         
-    def new_name_filter(self):
+    def new_amount_filter(self):
         pass
     
     def new_override_filter(self):
@@ -183,7 +184,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)
     def add_prediction(self):
-        name = self.editName.text()
+        amount = Money.from_str(self.editAmount.text())
         cat = self.comboCat.currentText()
         trig = self.editTrig.text()
         over = self.editOver.text()
@@ -199,7 +200,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         desc = self.editComment.text()
         pred = Prediction(self.db)
         ptype = pred.get_ptype_from_str(ptypestr)
-        pred.set_without_ids(name, cat, trig, over, ptype, cyclestr, ddate, vdatestr, desc)
+        pred.set_without_ids(amount, cat, trig, over, ptype, cyclestr, ddate, vdatestr, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
@@ -219,7 +220,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def delete_prediction(self):
         pass
     def clear_edit_fields(self):
-        self.editName.setText("")
+        self.editAmount.setText("00.00")
         self.comboCat.setEditText("")
         self.editTrig.setText("")
         self.editOver.setText("")
@@ -242,7 +243,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     
     def set_field(self, col, value):
         if col == 0:
-            self.editName.setText(value)
+            self.editAmount.setText(value)
             return
         elif col == 1:
             self.comboCat.setCurrentText(value)
@@ -262,7 +263,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif col == 6:
             mytype = type(value)
             if '-' in value:
-                self.editDate.setDate().strptime(value, '%Y-%m-%d')
+                date = QDate.fromString(value, 'yyyy-M-d')
+                self.editDate.setDate(date)
                 self.editDate.show()
                 self.comboDate.hide()
                 return

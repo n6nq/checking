@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1256</width>
-    <height>546</height>
+    <height>563</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>910</x>
      <y>510</y>
      <width>341</width>
-     <height>32</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="orientation">
@@ -45,12 +45,12 @@
     <bool>true</bool>
    </attribute>
   </widget>
-  <widget class="QLabel" name="labelName">
+  <widget class="QLabel" name="labelAmount">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>446</y>
-     <width>31</width>
+     <width>51</width>
      <height>20</height>
     </rect>
    </property>
@@ -60,7 +60,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Name</string>
+    <string>Amount</string>
    </property>
   </widget>
   <widget class="QLabel" name="labelCat">
@@ -259,7 +259,7 @@
     <string>Date Expr</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="sortName">
+  <widget class="QComboBox" name="sortAmount">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -406,7 +406,7 @@
     </font>
    </property>
   </widget>
-  <widget class="QLineEdit" name="editName">
+  <widget class="QLineEdit" name="editAmount">
    <property name="geometry">
     <rect>
      <x>10</x>
