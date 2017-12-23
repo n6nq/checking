@@ -54,6 +54,7 @@ class Dirty(Enum):
     DDATE = 7
     VDATE = 8
     COMMENT = 9
+    CLEAR = 10
     
 class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     
@@ -114,10 +115,15 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
         self.predictionsView.clicked.connect(lambda: self.select_prediction())
         
+        # Get the dirty flags here
         self.editAmount.textEdited.connect(lambda: self.set_dirty(Dirty.AMOUNT))
         self.editComment.textEdited.connect(lambda: self.set_dirty(Dirty.COMMENT))
         self.editOver.textEdited.connect(lambda: self.set_dirty(Dirty.OVER))
         self.editTrig.textEdited.connect(lambda: self.set_dirty(Dirty.TRIG))
+        self.editDate.dateChanged.connect(lambda: self.set_dirty(Dirty.DDATE))
+        self.comboCat.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CAT))
+        self.comboType.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TYPE))
+        self.comboCycle.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CYCLE))
         self.dirty_flags = []
         self.exec_()
         
@@ -193,7 +199,9 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     #----------------------------------------------------------------------
     def set_dirty(self, flag):
         """Set dirty flags for all add/update fields"""
-        if flag not in self.dirty_flags:
+        if flag == Dirty.CLEAR:
+            self.dirty_flags = []
+        elif flag not in self.dirty_flags:
             self.dirty_flags.append(flag)
         
     def add_prediction(self):
@@ -229,7 +237,9 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             #self.listTriggers.setCurrentItem(i)
         
     def update_prediction(self):
-        pass
+        if len(self.dirty_flags) > 0:
+            print(self.dirty_flags)
+            
     def delete_prediction(self):
         pass
     def clear_edit_fields(self):
@@ -241,6 +251,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboCycle.setEditText("")
         self.comboDate.setEditText("")
         self.editDate.setDate(date.today())
+        self.set_dirty(Dirty.CLEAR)
         self.editComment.setText("")
         self.update()
 
@@ -253,6 +264,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             new_mi = self.table_model.index(mi.row(), col)
             value = self.table_model.data(new_mi, Qt.DisplayRole)
             self.set_field(col, value)
+        self.set_dirty(Dirty.CLEAR)
     
     def set_field(self, col, value):
         if col == 0:
