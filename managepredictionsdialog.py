@@ -8,6 +8,7 @@ from datetime import date
 from predicted import Prediction
 from pcycle import PCycle
 from money import Money
+from enum import Enum
 
 class MyTableModel(QAbstractTableModel):
     
@@ -43,6 +44,17 @@ class MyTableModel(QAbstractTableModel):
             if orientation == Qt.Horizontal:
                 return self.headers[section]
 
+class Dirty(Enum):
+    AMOUNT = 1
+    CAT = 2
+    TRIG = 3
+    OVER = 4
+    TYPE = 5
+    CYCLE = 6
+    DDATE = 7
+    VDATE = 8
+    COMMENT = 9
+    
 class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     
     def __init__(self, db):
@@ -102,17 +114,11 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
         self.predictionsView.clicked.connect(lambda: self.select_prediction())
         
-        # setup the mapper
-        #self.mapper = QDataWidgetMapper(self)
-
-        #self.mapper.addMapping(self.editAmount, 0)
-        #self.mapper.addMapping(self.comboCat, 1)
-        #self.mapper.addMapping(self.editTrig, 2)
-        #self.mapper.addMapping(self.editOver, 3)
-        #self.mapper.addMapping(self.comboType, 4)
-        #self.mapper.addMapping(self.comboCycle, 5)
-        #self.mapper.addMapping(self.editDate, 6)
-        #self.mapper.addMapping(self.editComment, 7)
+        self.editAmount.textEdited.connect(lambda: self.set_dirty(Dirty.AMOUNT))
+        self.editComment.textEdited.connect(lambda: self.set_dirty(Dirty.COMMENT))
+        self.editOver.textEdited.connect(lambda: self.set_dirty(Dirty.OVER))
+        self.editTrig.textEdited.connect(lambda: self.set_dirty(Dirty.TRIG))
+        self.dirty_flags = []
         self.exec_()
         
     def new_category_filter(self):
@@ -183,6 +189,13 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def set_list_model(self, listOfPredictions):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)
+        
+    #----------------------------------------------------------------------
+    def set_dirty(self, flag):
+        """Set dirty flags for all add/update fields"""
+        if flag not in self.dirty_flags:
+            self.dirty_flags.append(flag)
+        
     def add_prediction(self):
         amount = Money.from_str(self.editAmount.text())
         cat = self.comboCat.currentText()
