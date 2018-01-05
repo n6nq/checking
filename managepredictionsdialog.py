@@ -242,6 +242,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             
     def delete_prediction(self):
         pass
+    
     def clear_edit_fields(self):
         self.editAmount.setText("00.00")
         self.comboCat.setEditText("")
