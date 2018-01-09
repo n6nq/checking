@@ -6,7 +6,7 @@ from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
 from predicted import Prediction
-from pcycle import PCycle
+from pcycle import * 
 from money import Money
 from enum import Enum
 
@@ -81,9 +81,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         self.sortTrigger.activated.connect(lambda: self.new_trigger_filter())
         self.sortTrigger.addItems(ascendDescendList)
-
+        for trig in sorted(self.db.trig_to_oid.keys()):
+            self.sortTrigger.addItem(trig)
+            self.comboTrig.addItem(trig)
+        
         self.sortOverride.activated.connect(lambda: self.new_override_filter())
         self.sortOverride.addItems(ascendDescendList)
+        self.comboOver.addItem('None')
+        for over in sorted(self.db.over_to_oid.keys()):
+            self.sortOverride.addItem(over)
+            self.comboOver.addItem(over)
 
         self.sortType.activated.connect(lambda: self.new_type_filter())
         self.sortType.addItems(ascendDescendList)
@@ -118,11 +125,11 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         # Get the dirty flags here
         self.editAmount.textEdited.connect(lambda: self.set_dirty(Dirty.AMOUNT))
         self.editComment.textEdited.connect(lambda: self.set_dirty(Dirty.COMMENT))
-        self.editOver.textEdited.connect(lambda: self.set_dirty(Dirty.OVER))
-        self.editTrig.textEdited.connect(lambda: self.set_dirty(Dirty.TRIG))
         self.editDate.dateChanged.connect(lambda: self.set_dirty(Dirty.DDATE))
         self.comboCat.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CAT))
+        self.comboTrig.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TRIG))
         self.comboType.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TYPE))
+        self.comboOver.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.OVER))
         self.comboCycle.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CYCLE))
         self.dirty_flags = []
         self.exec_()
@@ -206,9 +213,10 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
     def add_prediction(self):
         amount = Money.from_str(self.editAmount.text())
+        income = self.chkboxIncome.checkState()
         cat = self.comboCat.currentText()
-        trig = self.editTrig.text()
-        over = self.editOver.text()
+        trig = self.comboTrig.currentText()
+        over = self.comboOver.currentText()
         ptypestr = self.comboType.currentText()
 
         cyclestr = self.comboCycle.currentText()
@@ -221,7 +229,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         desc = self.editComment.text()
         pred = Prediction(self.db)
         ptype = pred.get_ptype_from_str(ptypestr)
-        pred.set_without_ids(amount, cat, trig, over, ptype, cyclestr, ddate, vdatestr, desc)
+        pred.set_without_ids(amount, income, cat, trig, over, ptype, cyclestr, ddate, vdatestr, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
@@ -246,8 +254,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def clear_edit_fields(self):
         self.editAmount.setText("00.00")
         self.comboCat.setEditText("")
-        self.editTrig.setText("")
-        self.editOver.setText("")
+        self.comboTrig.setEditText("")
+        self.comboOver.setEditText("")
         self.comboType.setEditText("")
         self.comboCycle.setEditText("")
         self.comboDate.setEditText("")
@@ -275,10 +283,10 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.comboCat.setCurrentText(value)
             return
         elif col == 2:
-            self.editTrig.setText(value)
+            self.comboTrig.setCurrentText(value)
             return
         elif col == 3:
-            self.editOver.setText(value)
+            self.comboOver.setCurrentText(value)
             return
         elif col == 4:
             self.comboType.setCurrentText(value)

@@ -66,10 +66,10 @@
   <widget class="QLabel" name="labelCat">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>160</x>
      <y>450</y>
      <width>21</width>
-     <height>16</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
@@ -84,9 +84,9 @@
   <widget class="QComboBox" name="comboCat">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>160</x>
      <y>470</y>
-     <width>101</width>
+     <width>91</width>
      <height>31</height>
     </rect>
    </property>
@@ -272,9 +272,9 @@
   <widget class="QComboBox" name="sortCategory">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>170</x>
      <y>10</y>
-     <width>91</width>
+     <width>81</width>
      <height>22</height>
     </rect>
    </property>
@@ -282,7 +282,7 @@
   <widget class="QComboBox" name="sortTrigger">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>270</x>
      <y>10</y>
      <width>91</width>
      <height>22</height>
@@ -292,7 +292,7 @@
   <widget class="QComboBox" name="sortOverride">
    <property name="geometry">
     <rect>
-     <x>350</x>
+     <x>370</x>
      <y>10</y>
      <width>91</width>
      <height>22</height>
@@ -411,27 +411,7 @@
     <rect>
      <x>10</x>
      <y>470</y>
-     <width>111</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="editTrig">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>470</y>
-     <width>111</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="editOver">
-   <property name="geometry">
-    <rect>
-     <x>360</x>
-     <y>470</y>
-     <width>111</width>
+     <width>91</width>
      <height>31</height>
     </rect>
    </property>
@@ -444,6 +424,52 @@
      <width>431</width>
      <height>31</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboTrig">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>470</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboOver">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>470</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="chkboxIncome">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>480</y>
+     <width>21</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>112</x>
+     <y>453</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Income</string>
    </property>
   </widget>
  </widget>

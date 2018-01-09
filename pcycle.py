@@ -93,7 +93,7 @@ class PCycle(object):
                 self.vdate = DaysOfWeek[vdate]
             elif vdate == '':
                 self.vdate = 0
-            elif int(vdate) in DaysOfWeek.inv:
+            elif int(vdate) in range(1, 32):
                 self.vdate = int(vdate)
             else:
                 assert(False)

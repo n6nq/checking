@@ -64,11 +64,13 @@ class Prediction(object):
             self.vdate = 0      # equals none
         return self.vdate
     
-    def set_without_ids(self, amount, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
+    def set_without_ids(self, amount, income, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.amount = amount
+        self.income = income
         self.cat = cat
         self.trig = trig
-        self.over = over
+        if over == 'None':
+            self.over = None
         self.cat_id = 0
         self.trig_id = 0
         self.over_id = 0
@@ -76,9 +78,10 @@ class Prediction(object):
         self.cycle = PCycle(cycle, ddate, vdate)
         self.desc = desc
 
-    def set_with_ids(self, oid, amount, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
+    def set_with_ids(self, oid, amount, income, cat, trig=None, over=None, cat_id=0, trig_id=0, over_id=0, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.oid = oid
         self.amount = amount
+        self.income = income
         self.cat = cat
         self.trig = trig
         self.over = over
