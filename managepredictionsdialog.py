@@ -30,7 +30,8 @@ class MyTableModel(QAbstractTableModel):
         if modelindex.isValid() and role == Qt.DisplayRole:
             pred = self.listdata[modelindex.row()]
             #amount = Money.from_number(pred.amount)
-            strings = [pred.amount.as_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+            
+            strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
             index = modelindex.column()
             return strings[index]
         else: 

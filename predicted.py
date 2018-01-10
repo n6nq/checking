@@ -49,6 +49,12 @@ class Prediction(object):
         self.cycle = Cycles[str]
         return self.cycle
     
+    def get_income_str(self):
+        if self.income == 0:
+            return 'N'
+        else:
+            return 'Y'
+        
     def get_ptype_from_str(self, str):
         self.p_type = Types[str]
         return self.p_type
@@ -108,4 +114,4 @@ class Prediction(object):
 
     @classmethod
     def headers(cls):
-        return ['Amount', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
+        return ['Amount', 'Income', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
