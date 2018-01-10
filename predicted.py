@@ -95,15 +95,16 @@ class Prediction(object):
     def set_with_row(self, row):
         self.oid = row[0]
         self.amount = Money.from_number(row[1])
-        self.cat = row[2]
-        self.trig = row[3]
-        self.over = row[4]
-        self.cat_id = row[5]
-        self.trig_id = row[6]
-        self.over_id = row[7]
-        self.p_type = row[8]
-        self.cycle = PCycle(row[9], row[10], row[11])
-        self.desc = row[12]
+        self.income = row[2]
+        self.cat = row[3]
+        self.trig = row[4]
+        self.over = row[5]
+        self.cat_id = row[6]
+        self.trig_id = row[7]
+        self.over_id = row[8]
+        self.p_type = row[9]
+        self.cycle = PCycle(row[10], row[11], row[12])
+        self.desc = row[13]
 
     @classmethod
     def headers(cls):

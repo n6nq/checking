@@ -26,6 +26,9 @@ class Money(object):
     def value(self):
         return self.value
     
+    def negative(self):
+        self.value = 0 - self.value
+    
     def __gt__(self, other):
         return self.value > other.value
     

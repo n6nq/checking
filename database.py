@@ -50,9 +50,9 @@ class Database(object):
         self.accounts = []
         self.load_accounts()
         
-        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, amount int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype int, cycle int, ddate date, vdate int, desc varchar(128))'
-        self.selectAllPredictionsSQL = 'select oid, amount, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
-        self.insertPredictionSQL = 'insert into Predictions(amount, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype int, cycle int, ddate date, vdate int, desc varchar(128))'
+        self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
+        self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
@@ -195,7 +195,7 @@ class Database(object):
     def add_prediction(self, pred):
         try:
             assert(type(pred.cycle) == PCycle)
-            row = (pred.amount.value, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle.ctype, pred.cycle.ddate, pred.cycle.vdate, pred.desc)
+            row = (pred.amount.value, pred.income, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle.ctype, pred.cycle.ddate, pred.cycle.vdate, pred.desc)
             for mem in row:
                 print (type(mem))
                 print (mem)

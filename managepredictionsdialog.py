@@ -214,6 +214,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def add_prediction(self):
         amount = Money.from_str(self.editAmount.text())
         income = self.chkboxIncome.checkState()
+        if income == 0:
+            amount.negative()
         cat = self.comboCat.currentText()
         trig = self.comboTrig.currentText()
         over = self.comboOver.currentText()
