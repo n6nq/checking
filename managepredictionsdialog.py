@@ -218,8 +218,11 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         if income == 0:
             amount.negative()
         cat = self.comboCat.currentText()
+        cat_id = self.db.cat_to_oid[cat]
         trig = self.comboTrig.currentText()
+        trig_id = self.db.trig_to_oid[trig]
         over = self.comboOver.currentText()
+        over_id = self.db.oid_for_over(over)
         ptypestr = self.comboType.currentText()
 
         cyclestr = self.comboCycle.currentText()
@@ -232,7 +235,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         desc = self.editComment.text()
         pred = Prediction(self.db)
         ptype = pred.get_ptype_from_str(ptypestr)
-        pred.set_without_ids(amount, income, cat, trig, over, ptype, cyclestr, ddate, vdatestr, desc)
+        pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, p_type, cyclestr, ddate, vdate, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)

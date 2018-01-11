@@ -862,6 +862,18 @@ class Database(object):
     def name(self):
         return self.dbname
     
+    def oid_for_over(self, over):
+        if over in self.over_to_oid:
+            return self.over_to_oid[over]
+        else:
+            return None
+        
+    def oid_for_trig(self, trig):
+        if trig in self.trig_to_oid:
+            return self.trig_to_oid[trig]
+        else:
+            return None
+        
     def open(self, name, deprecated):  #deprecated
         self.dbname = name
         conn = sqlite3.connect(name+'.db')
