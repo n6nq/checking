@@ -120,3 +120,13 @@ class PCycle(object):
         else:
             assert(False)
         
+    def get_date_type(self):
+        if Cycles.inv[self.ctype] == 'Monthly':
+            return type(self.vdate)
+        elif Cycles.inv[self.ctype] == 'Weekly':
+            return type(self.vdate)
+        elif self.ctype in Cycles.inv:
+            return type(self.ddate)
+        else:
+            assert(False)
+        

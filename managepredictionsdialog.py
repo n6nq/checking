@@ -27,13 +27,16 @@ class MyTableModel(QAbstractTableModel):
         return len(self.listdata) 
     
     def data(self, modelindex, role): 
-        if modelindex.isValid() and role == Qt.DisplayRole:
-            pred = self.listdata[modelindex.row()]
-            #amount = Money.from_number(pred.amount)
-            
-            strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
-            index = modelindex.column()
-            return strings[index]
+        if modelindex.isValid():
+            if role == Qt.DisplayRole:
+                pred = self.listdata[modelindex.row()]
+                #amount = Money.from_number(pred.amount)
+                
+                strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+                index = modelindex.column()
+                return strings[index]
+            elif role == Qt.EditRole:
+                return strings[index]
         else: 
             return QVariant()
 
@@ -220,7 +223,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         cat = self.comboCat.currentText()
         cat_id = self.db.cat_to_oid[cat]
         trig = self.comboTrig.currentText()
-        trig_id = self.db.trig_to_oid[trig]
+        trig_id = self.db.oid_for_trig(trig)
         over = self.comboOver.currentText()
         over_id = self.db.oid_for_over(over)
         ptypestr = self.comboType.currentText()
@@ -235,7 +238,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         desc = self.editComment.text()
         pred = Prediction(self.db)
         ptype = pred.get_ptype_from_str(ptypestr)
-        pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, p_type, cyclestr, ddate, vdate, desc)
+        pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
 
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
@@ -277,7 +280,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.clear_edit_fields()
         for col in range(0, self.table_model.columnCount()):
             new_mi = self.table_model.index(mi.row(), col)
-            value = self.table_model.data(new_mi, Qt.DisplayRole)
+            value = self.table_model.data(new_mi, Qt.EditRole)
             self.set_field(col, value)
         self.set_dirty(Dirty.CLEAR)
     
