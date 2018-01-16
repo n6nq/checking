@@ -22,6 +22,7 @@ class MyTableModel(QAbstractTableModel):
         self.num_of_fields = 9
         self.last_role = None
         self.last_row = -1
+        self.last_selected = -1
         self.strings = []
         
     def columnCount(self, arg0=None):
@@ -38,6 +39,7 @@ class MyTableModel(QAbstractTableModel):
                 return self.strings[index]
             else:
                 pred = self.listdata[row]
+                self.last_selected = pred.oid
                 if role == Qt.DisplayRole:
                     self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
                 elif role == Qt.EditRole:
@@ -87,12 +89,14 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         self.sortCategory.activated.connect(lambda: self.new_category_filter())
         self.sortCategory.addItems(ascendDescendList)
+
         for cat in sorted(self.db.cat_to_oid.keys()):
             self.sortCategory.addItem(cat)
             self.comboCat.addItem(cat)
 
         self.sortTrigger.activated.connect(lambda: self.new_trigger_filter())
         self.sortTrigger.addItems(ascendDescendList)
+        self.comboTrig.addItem('None')
         for trig in sorted(self.db.trig_to_oid.keys()):
             self.sortTrigger.addItem(trig)
             self.comboTrig.addItem(trig)
@@ -106,14 +110,14 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         self.sortType.activated.connect(lambda: self.new_type_filter())
         self.sortType.addItems(ascendDescendList)
-        typeList = ['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective']
+        typeList = ['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective', 'Income', 'None']
         self.sortType.addItems(typeList)
         self.comboType.addItems(typeList)
             
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
         self.comboCycle.activated.connect(lambda: self.set_date_items())
         self.sortCycle.addItems(ascendDescendList)
-        self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'BiWeekly', 'Adhoc']
+        self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'BiWeekly', 'Adhoc', 'None']
         self.sortCycle.addItems(self.cycleList)
         self.comboCycle.addItems(self.cycleList)
 
@@ -121,7 +125,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.sortDate.addItems(ascendDescendList)
         #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
         #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
-
+    
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
         self.sortComment.addItems(ascendDescendList)
         self.sortComment.addItem('Find')
@@ -269,16 +273,17 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         pass
     
     def clear_edit_fields(self):
-        self.editAmount.setText("00.00")
-        self.comboCat.setEditText("")
-        self.comboTrig.setEditText("")
-        self.comboOver.setEditText("")
-        self.comboType.setEditText("")
-        self.comboCycle.setEditText("")
-        self.comboDate.setEditText("")
+        self.editAmount.clear()  #setText("")
+        self.chkboxIncome.setCheckState(False)
+        self.comboCat.setCurrentText('None')
+        self.comboTrig.setCurrentText('None')
+        self.comboOver.setCurrentText('None')
+        self.comboType.setCurrentText('None')
+        self.comboCycle.setCurrentText('None')
+        self.comboDate.setCurrentText('None')
         self.editDate.setDate(date.today())
         self.set_dirty(Dirty.CLEAR)
-        self.editComment.setText("")
+        self.editComment.clear()  #setText("")
         self.update()
 
     def select_prediction(self):
