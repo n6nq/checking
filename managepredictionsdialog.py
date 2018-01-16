@@ -19,6 +19,10 @@ class MyTableModel(QAbstractTableModel):
         self.listdata = datain
         self.db = args[0]
         self.headers = Prediction.headers()
+        self.num_of_fields = 9
+        self.last_role = None
+        self.last_row = -1
+        self.strings = []
         
     def columnCount(self, arg0=None):
         return len(self.headers)
@@ -28,17 +32,21 @@ class MyTableModel(QAbstractTableModel):
     
     def data(self, modelindex, role): 
         if modelindex.isValid():
-            if role == Qt.DisplayRole:
-                pred = self.listdata[modelindex.row()]
-                #amount = Money.from_number(pred.amount)
-                
-                strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
-                index = modelindex.column()
-                return strings[index]
-            elif role == Qt.EditRole:
-                return strings[index]
-        else: 
-            return QVariant()
+            row = modelindex.row()
+            index = modelindex.column()
+            if row == self.last_row and role == self.last_role:
+                return self.strings[index]
+            else:
+                pred = self.listdata[row]
+                if role == Qt.DisplayRole:
+                    self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+                elif role == Qt.EditRole:
+                    self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+                else: 
+                    return QVariant()
+                self.last_row = row
+                self.last_role = role
+                return self.strings[index]
 
     def entryAt(self, modelindex):
         return self.listdata[modelindex.row()]
@@ -278,10 +286,10 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         indexes = selection.selectedIndexes()
         mi = indexes[0]
         self.clear_edit_fields()
-        for col in range(0, self.table_model.columnCount()):
-            new_mi = self.table_model.index(mi.row(), col)
+        for idx in range(0, self.table_model.num_of_fields):
+            new_mi = self.table_model.index(mi.row(), idx)
             value = self.table_model.data(new_mi, Qt.EditRole)
-            self.set_field(col, value)
+            self.set_field(idx, value)
         self.set_dirty(Dirty.CLEAR)
     
     def set_field(self, col, value):
@@ -289,21 +297,25 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.editAmount.setText(value)
             return
         elif col == 1:
-            self.comboCat.setCurrentText(value)
+            if value == 'Y':
+                self.chkboxIncome.setCheckState(True)
             return
         elif col == 2:
-            self.comboTrig.setCurrentText(value)
+            self.comboCat.setCurrentText(value)
             return
         elif col == 3:
-            self.comboOver.setCurrentText(value)
+            self.comboTrig.setCurrentText(value)
             return
         elif col == 4:
-            self.comboType.setCurrentText(value)
+            self.comboOver.setCurrentText(value)
             return
         elif col == 5:
-            self.comboCycle.setCurrentText(value)
+            self.comboType.setCurrentText(value)
             return
         elif col == 6:
+            self.comboCycle.setCurrentText(value)
+            return
+        elif col == 7:
             mytype = type(value)
             if '-' in value:
                 date = QDate.fromString(value, 'yyyy-M-d')
@@ -314,10 +326,10 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             else:
                 self.set_date_items()
                 self.comboDate.setCurrentText(value)
-                self.editDate.show()
-                self.comboDate.hide()
+                self.editDate.hide()
+                self.comboDate.show()
                 return
-        elif col == 7:
+        elif col == 8:
             self.editComment.setText(value)
             return
         else:
