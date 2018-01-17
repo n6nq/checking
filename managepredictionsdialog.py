@@ -53,6 +53,9 @@ class MyTableModel(QAbstractTableModel):
     def entryAt(self, modelindex):
         return self.listdata[modelindex.row()]
         
+    def get_last_selected(self):
+        return self.last_selected
+    
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
@@ -68,7 +71,8 @@ class Dirty(Enum):
     DDATE = 7
     VDATE = 8
     COMMENT = 9
-    CLEAR = 10
+    INCOME = 10
+    CLEAR = 11
     
 class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     
@@ -142,11 +146,13 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.editAmount.textEdited.connect(lambda: self.set_dirty(Dirty.AMOUNT))
         self.editComment.textEdited.connect(lambda: self.set_dirty(Dirty.COMMENT))
         self.editDate.dateChanged.connect(lambda: self.set_dirty(Dirty.DDATE))
+        self.comboDate.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.VDATE))
         self.comboCat.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CAT))
         self.comboTrig.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TRIG))
         self.comboType.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TYPE))
         self.comboOver.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.OVER))
         self.comboCycle.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CYCLE))
+        self.chkboxIncome.stateChanged.connect(lambda: self.set_dirty(Dirty.INCOME))
         self.dirty_flags = []
         self.exec_()
         
@@ -227,7 +233,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif flag not in self.dirty_flags:
             self.dirty_flags.append(flag)
         
-    def add_prediction(self):
+    def row_from_fields(self, oid):
         amount = Money.from_str(self.editAmount.text())
         income = self.chkboxIncome.checkState()
         if income == 0:
@@ -250,8 +256,34 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         desc = self.editComment.text()
         pred = Prediction(self.db)
         ptype = pred.get_ptype_from_str(ptypestr)
-        pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
+        return (oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
+        
+    def add_prediction(self):
+        row = self.row_from_fields(0)
+        #amount = Money.from_str(self.editAmount.text())
+        #income = self.chkboxIncome.checkState()
+        #if income == 0:
+            #amount.negative()
+        #cat = self.comboCat.currentText()
+        #cat_id = self.db.cat_to_oid[cat]
+        #trig = self.comboTrig.currentText()
+        #trig_id = self.db.oid_for_trig(trig)
+        #over = self.comboOver.currentText()
+        #over_id = self.db.oid_for_over(over)
+        #ptypestr = self.comboType.currentText()
 
+        #cyclestr = self.comboCycle.currentText()
+        #qdate = self.editDate.date()
+        #ddate = date(qdate.year(), qdate.month(), qdate.day())
+        #vdatestr = self.comboDate.currentText()
+        ##depr cycle = pred.get_cycle_from_str(cyclestr)
+        ##depr vdate = pred.get_vdate_from_str(cycle, vdatestr)
+        
+        #desc = self.editComment.text()
+        pred = Prediction(self.db)
+        ptype = pred.get_ptype_from_str(ptypestr)
+        #pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
+        pred.set_with_row(row)
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
         dl = WarningListDialog(
@@ -267,9 +299,14 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
     def update_prediction(self):
         if len(self.dirty_flags) > 0:
+            oid = self.table_model.get_last_selected()
+            pred = Prediction(self.db)
+            row = self.row_from_fields(oid)
+            
             print(self.dirty_flags)
             
     def delete_prediction(self):
+        oid = self.table_model.get_last_selected()
         pass
     
     def clear_edit_fields(self):
