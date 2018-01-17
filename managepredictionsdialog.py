@@ -245,7 +245,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         over = self.comboOver.currentText()
         over_id = self.db.oid_for_over(over)
         ptypestr = self.comboType.currentText()
-
+        ptype = pred.get_ptype_from_str(ptypestr)
         cyclestr = self.comboCycle.currentText()
         qdate = self.editDate.date()
         ddate = date(qdate.year(), qdate.month(), qdate.day())
@@ -255,8 +255,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
         desc = self.editComment.text()
         pred = Prediction(self.db)
-        ptype = pred.get_ptype_from_str(ptypestr)
-        return (oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
+        return (amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc, oid)
         
     def add_prediction(self):
         row = self.row_from_fields(0)
@@ -281,7 +280,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
         #desc = self.editComment.text()
         pred = Prediction(self.db)
-        ptype = pred.get_ptype_from_str(ptypestr)
+        #ptype = pred.get_ptype_from_str(ptypestr)
         #pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
         pred.set_with_row(row)
         # check current entries for effect of new trigger

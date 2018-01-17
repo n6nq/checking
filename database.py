@@ -53,7 +53,8 @@ class Database(object):
         self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype int, cycle int, ddate date, vdate int, desc varchar(128))'
         self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
         self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        self.deletePredictionSQL = 'delete from Predictions where amount = ?'
+        self.deletePredictionSQL = 'delete from Predictions where oid = ?'
+        self.updatePredictionSQL = 'update Prediction set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id =`?, trig_id = ?, over_id = ?, ptype = ?, cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
