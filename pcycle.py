@@ -47,18 +47,8 @@ from bidict import bidict
 
 Cycles = bidict({'None': 0,'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
 
-#class DayOfWeek(Enum):
-#    NONE = 0
-#    MON = 1
-#    TUE = 2
-#    WED = 3
-#    THU = 4
-#    FRI = 5
-#    SAT = 6
-#    SUN = 7
 
 DaysOfWeek = bidict({'None': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 7})
-#DaysOfWeek = bidict({'None': DayOfWeek.NONE,'Mon': DayOfWeek.MON, 'Tue': DayOfWeek.TUE, 'Wed': DayOfWeek.WED, 'Thu': DayOfWeek.THU, 'Fri': DayOfWeek.FRI, 'Sat': DayOfWeek.SAT, 'Sun': DayOfWeek.SUN})
 
 
 class PCycle(object):
@@ -129,4 +119,22 @@ class PCycle(object):
             return type(self.ddate)
         else:
             assert(False)
-        
+
+    @classmethod
+    def get_cycle_from_str(cls, str):
+        assert(str in Cycles)
+        return Cycles[str]
+
+    @classmethod
+    def get_vdate_from_str(cls, cycle, str):
+        if cycle == Cycles['Weekly']:
+            assert(str in DaysOfWeek)
+            return DaysOfWeek[str]
+        elif cycle == Cycles['Monthly']:
+            assert(int(str))
+            return int(str)
+        else:
+            return 0
+
+
+

@@ -233,7 +233,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif flag not in self.dirty_flags:
             self.dirty_flags.append(flag)
         
-    def row_from_fields(self, oid):
+    def list_from_fields(self, oid):
         amount = Money.from_str(self.editAmount.text())
         income = self.chkboxIncome.checkState()
         if income == 0:
@@ -245,20 +245,18 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         over = self.comboOver.currentText()
         over_id = self.db.oid_for_over(over)
         ptypestr = self.comboType.currentText()
-        ptype = pred.get_ptype_from_str(ptypestr)
+        ptype = Prediction.get_ptype_from_str(ptypestr)
         cyclestr = self.comboCycle.currentText()
+        cycle = PCycle.get_cycle_from_str(cyclestr)
         qdate = self.editDate.date()
         ddate = date(qdate.year(), qdate.month(), qdate.day())
         vdatestr = self.comboDate.currentText()
-        #depr cycle = pred.get_cycle_from_str(cyclestr)
-        #depr vdate = pred.get_vdate_from_str(cycle, vdatestr)
-        
+        vdate = PCycle.get_vdate_from_str(cycle, vdatestr)
         desc = self.editComment.text()
-        pred = Prediction(self.db)
-        return (amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc, oid)
+        return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc]
         
     def add_prediction(self):
-        row = self.row_from_fields(0)
+        aList = self.list_from_fields(0)
         #amount = Money.from_str(self.editAmount.text())
         #income = self.chkboxIncome.checkState()
         #if income == 0:
@@ -282,7 +280,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         pred = Prediction(self.db)
         #ptype = pred.get_ptype_from_str(ptypestr)
         #pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
-        pred.set_with_row(row)
+        pred.set_with_list(aList)
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(trig, over)
         dl = WarningListDialog(
@@ -300,8 +298,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         if len(self.dirty_flags) > 0:
             oid = self.table_model.get_last_selected()
             pred = Prediction(self.db)
-            row = self.row_from_fields(oid)
-            
+            aList = self.list_from_fields(oid)
+            aList.append(aList.pop([0]))
             print(self.dirty_flags)
             
     def delete_prediction(self):

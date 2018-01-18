@@ -44,31 +44,13 @@ class Prediction(object):
         else:
             return str(self.ddate)
         
-    def get_cycle_from_str(self, str):
-        assert(False)   #deprecated
-        self.cycle = Cycles[str]
-        return self.cycle
-    
     def get_income_str(self):
         if self.income == 0:
             return 'N'
         else:
             return 'Y'
         
-    def get_ptype_from_str(self, str):
-        self.p_type = Types[str]
-        return self.p_type
     
-    def get_vdate_from_str(self, cycle, str):
-        assert(False)   #deprecated
-        if cycle == Cycles['Weekly']:
-            self.vdate = DaysOfWeek[str]
-            return self.vdate
-        elif cycle == Cycles['Monthly']:
-            self.vdate = int(str)
-        else:
-            self.vdate = 0      # equals none
-        return self.vdate
     
     def set_without_ids(self, amount, income, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.amount = amount
@@ -98,20 +80,46 @@ class Prediction(object):
         self.cycle = PCycle(cycle, ddate, vdate)
         self.desc = desc
 
-    def set_with_row(self, row):
-        self.oid = row[13]
-        self.amount = Money.from_number(row[0])
-        self.income = row[1]
-        self.cat = row[2]
-        self.trig = row[3]
-        self.over = row[4]
-        self.cat_id = row[5]
-        self.trig_id = row[6]
-        self.over_id = row[7]
-        self.p_type = row[8]
-        self.cycle = PCycle(row[9], row[10], row[11])
-        self.desc = row[12]
+    def set_with_list(self, lst):
+        self.oid = lst[0]
+        self.amount = Money.from_number(lst[1])
+        self.income = lst[2]
+        self.cat = lst[3]
+        self.trig = lst[4]
+        self.over = lst[5]
+        self.cat_id = lst[6]
+        self.trig_id = lst[7]
+        self.over_id = lst[8]
+        self.p_type = lst[9]
+        self.cycle = PCycle(lst[10], lst[11], lst[12])
+        self.desc = lst[13]
 
+    #---- CLASSMETHODS -------------------------------#
     @classmethod
     def headers(cls):
         return ['Amount', 'Income', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
+    
+    @classmethod
+    def get_ptype_from_str(cls, str):
+        assert(str in Types)
+        return Types[str]
+
+    @classmethod
+    def get_cycle_from_str(cls, str):
+        assert(False)           #deprecated
+        return Cycles[str]
+
+    @classmethod
+    def get_vdate_from_str(cls, cycle, str):
+        assert(False)               #deprecated
+        if cycle == Cycles['Weekly']:
+            assert(str in DaysOfWeek)
+            return DaysOfWeek[str]
+        elif cycle == Cycles['Monthly']:
+            assert(int(str))
+            return int(str)
+        else:
+            assert(False)
+        return 0
+    
+    

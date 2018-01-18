@@ -739,7 +739,7 @@ class Database(object):
             self.conn.execute(self.createPredictionsSQL)
             for row in self.conn.execute(self.selectAllPredictionsSQL):
                 pred = Prediction(self)
-                pred.set_with_row(row)
+                pred.set_with_list(list(row))
                 self.predictions.append(pred)
                 self.num_predictions += 1
         except sqlite3.Error as e:
