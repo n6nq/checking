@@ -300,8 +300,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             oid = self.table_model.get_last_selected()
             pred = Prediction(self.db)
             aList = self.list_from_fields(oid)
-            aList.append(aList.pop(0))
-            self.db.update_prediction(tuple(aList))
+            self.db.update_prediction(aList)
+            #update the model and the list here 
             print(self.dirty_flags)
             
     def delete_prediction(self):

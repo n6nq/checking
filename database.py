@@ -1175,8 +1175,15 @@ class Database(object):
         
     def update_prediction(self, lst):
         try:
-            cur = self.conn.execute(self.updatePredictionSQL, lst)
+            sql_list = []
+            sql_list = sql_list + lst
+            oid = sql_list.pop(0)
+            sql_list.append(oid)
+            cur = self.conn.execute(self.updatePredictionSQL, sql_list)
             self.commit()
+            for pred in self.predictions:
+                if pred.oid == oid:
+                    pred.update_with_list(lst)
             return True
         except sqlite3.Error as e:
             self.error("Error while prediction.", e.args[0])

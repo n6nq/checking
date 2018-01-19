@@ -80,8 +80,7 @@ class Prediction(object):
         self.cycle = PCycle(cycle, ddate, vdate)
         self.desc = desc
 
-    def set_with_list(self, lst):
-        self.oid = lst[0]
+    def set_without_oid(self, lst):
         self.amount = Money.from_number(lst[1])
         self.income = lst[2]
         self.cat = lst[3]
@@ -93,7 +92,15 @@ class Prediction(object):
         self.p_type = lst[9]
         self.cycle = PCycle(lst[10], lst[11], lst[12])
         self.desc = lst[13]
-
+        
+    def set_with_list(self, lst):
+        self.oid = lst[0]
+        self.set_without_oid(lst)
+        
+    def update_with_list(self, lst):
+        assert(self.oid == lst[0])
+        self.set_without_oid(lst)
+        
     #---- CLASSMETHODS -------------------------------#
     @classmethod
     def headers(cls):
