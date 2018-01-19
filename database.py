@@ -54,7 +54,7 @@ class Database(object):
         self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
         self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.deletePredictionSQL = 'delete from Predictions where oid = ?'
-        self.updatePredictionSQL = 'update Prediction set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id =`?, trig_id = ?, over_id = ?, ptype = ?, cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
+        self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, ptype = ?, cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
@@ -868,13 +868,13 @@ class Database(object):
         if over in self.over_to_oid:
             return self.over_to_oid[over]
         else:
-            return None
+            return -1
         
     def oid_for_trig(self, trig):
         if trig in self.trig_to_oid:
             return self.trig_to_oid[trig]
         else:
-            return None
+            return -1
         
     def open(self, name, deprecated):  #deprecated
         self.dbname = name
@@ -1171,5 +1171,14 @@ class Database(object):
             return True
         except sqlite3.Error as e:
             self.error("Error while updating override's categories.", e.args[0])
+            return False
+        
+    def update_prediction(self, lst):
+        try:
+            cur = self.conn.execute(self.updatePredictionSQL, lst)
+            self.commit()
+            return True
+        except sqlite3.Error as e:
+            self.error("Error while prediction.", e.args[0])
             return False
         

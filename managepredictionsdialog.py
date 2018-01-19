@@ -234,10 +234,11 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.dirty_flags.append(flag)
         
     def list_from_fields(self, oid):
-        amount = Money.from_str(self.editAmount.text())
+        mny = Money.from_str(self.editAmount.text())
         income = self.chkboxIncome.checkState()
-        if income == 0:
-            amount.negative()
+        #if income == 0:
+        #    mny.negative()
+        amount = mny.value
         cat = self.comboCat.currentText()
         cat_id = self.db.cat_to_oid[cat]
         trig = self.comboTrig.currentText()
@@ -299,7 +300,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             oid = self.table_model.get_last_selected()
             pred = Prediction(self.db)
             aList = self.list_from_fields(oid)
-            aList.append(aList.pop([0]))
+            aList.append(aList.pop(0))
+            self.db.update_prediction(tuple(aList))
             print(self.dirty_flags)
             
     def delete_prediction(self):
