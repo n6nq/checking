@@ -283,14 +283,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         #pred.set_with_ids(0, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc)
         pred.set_with_list(aList)
         # check current entries for effect of new trigger
-        affected = self.db.find_all_with_trigger_or_override(trig, over)
+        affected = self.db.find_all_with_trigger_or_override(pred.trig, pred.over)
         dl = WarningListDialog(
-            "All entries listed below have the trigger string '"+trig+"' or the override string '"+over+"'.\n" + \
+            "All entries listed below have the trigger string '"+pred.trig+"' or the override string '"+pred.over+"'.\n" + \
             "Similar entries will be potential matches to predictions when when new check files are read.", 
             affected)
         if dl.reply == True:
             self.db.add_prediction(pred)
-            self.new_category_filter()
+            self.set_list_model(self.db.predictions)
+            self.show()
+
             #i = QListWidgetItem(self.trigger_str)
             #self.listTriggers.addItem(i)
             #self.listTriggers.setCurrentItem(i)
@@ -302,10 +304,15 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             aList = self.list_from_fields(oid)
             self.db.update_prediction(aList)
             #update the model and the list here 
-            print(self.dirty_flags)
+            #self.new_category_filter()
+            self.set_list_model(self.db.predictions)
+            self.show()
             
     def delete_prediction(self):
         oid = self.table_model.get_last_selected()
+        self.db.delete_prediction(oid)
+        self.set_list_model(self.db.predictions)
+        self.show()
         pass
     
     def clear_edit_fields(self):

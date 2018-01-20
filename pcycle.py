@@ -131,6 +131,8 @@ class PCycle(object):
             assert(str in DaysOfWeek)
             return DaysOfWeek[str]
         elif cycle == Cycles['Monthly']:
+            if str == '':
+                return 0
             assert(int(str))
             return int(str)
         else:

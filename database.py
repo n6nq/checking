@@ -1186,6 +1186,19 @@ class Database(object):
                     pred.update_with_list(lst)
             return True
         except sqlite3.Error as e:
-            self.error("Error while prediction.", e.args[0])
+            self.error("Error while updating prediction.", e.args[0])
             return False
         
+    def delete_prediction(self, oid):
+        try:
+            self.conn.execute(self.deletePredictionSQL, (oid, ))
+            self.commit()
+            for i in range(len(self.predictions)):
+                if self.predictions[i].oid == oid:
+                    del self.predictions[i]
+                    break
+            return True
+        except sqlite3.Error as e:
+            self.error("Error while deletingprediction.", e.args[0])
+            return False
+            
