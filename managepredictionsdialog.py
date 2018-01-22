@@ -6,7 +6,8 @@ from managepredictions_auto import Ui_PredictionsDialog
 from warninglistdialog import WarningListDialog
 from datetime import date
 from predicted import Prediction
-from pcycle import * 
+from pcycle import *
+from entry import Entry
 from money import Money
 from enum import Enum
 
@@ -76,7 +77,7 @@ class Dirty(Enum):
     
 class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     
-    def __init__(self, db):
+    def __init__(self, db, entry=None):
         super(ManagePredictionsDialog, self).__init__()
         self.db = db
         
@@ -154,7 +155,21 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboCycle.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CYCLE))
         self.chkboxIncome.stateChanged.connect(lambda: self.set_dirty(Dirty.INCOME))
         self.dirty_flags = []
+
+        if entry:
+            self.make_new_prediction(entry)
+            
         self.exec_()
+        
+    def make_new_prediction(self, entry):
+        affected = self.db.find_pred_simiar_to(entry.amount, entry.cat, entry.trig)
+        dl = WarningListDialog(
+            "All predictions listed below may be the same prediction you are about to define. They have the " + \
+            "same amount: "+entry.amount.asStr() + ", the same category: '"+entry.cat+"' and the same trigger: '" + \
+            entry.trigger+"'.\n\nIs this entry really a new prediction?", 
+            affected)
+        if dl.reply == True:
+        
         
     def new_category_filter(self):
         cat = self.sortCategory.currentText()

@@ -87,12 +87,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnChart.clicked.connect(lambda: self.pressedOnButton())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         self.btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton())
+
         # Setup the entry list
         self.search_choice = 'All'
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
         self.set_list_model(list_data)
         self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
         self.listEntries.pressed.connect(lambda index:  self.mousePressed(index))
+        self.selectedEntry = None
         self.createPopUpActions()
         
         # Setup the Category combobox
@@ -177,12 +179,15 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     
     def createPopUpActions(self):
         self.NewCatAct = QAction("New&Cat")
+        self.NewPredAct = QAction("New Pred")
         self.NoneCatAct = QAction("&None")
         #newAct->setShortcuts(QKeySequence::New);
-        self.NewCatAct.setStatusTip("Set entry to this category");
+        self.NewCatAct.setStatusTip("Set entry to this category")
+        self.NewPredAct.setStatusTip("Use this entry to make a new Prediction")
         self.NoneCatAct.setStatusTip("Set entry category to None")
         self.NewCatAct.triggered.connect(lambda act: self.NewCatActionFunc(act))
-        self.NoneCatAct.triggered.connect(self.NoneCatActionFunc)
+        self.NewPredAct.triggered.connect(self.NewPredActionFunc())
+        self.NoneCatAct.triggered.connect(self.NoneCatActionFunc())
     
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
@@ -393,6 +398,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.selectedEntry.cat_id = cat_id
         self.db.update_entry_cat_by_oid(cat, cat_id, self.selectedEntry.oid)
         #self.ResortList()
+    
+    def NewPredActionFunc(self):
+        okay = ManagePredictionsDialog(self.db, self.selectedEntry)
         
     def NoneCatActionFunc(self):
         self.selectedEntry.category = None
