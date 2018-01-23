@@ -156,6 +156,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         cat_menu.addActions(actions)
         cat_menu.triggered.connect(self.NewCatActionFunc)
+        menu.addAction(self.NewPredAct)
         menu.addMenu(cat_menu)
         menu.addAction(self.NoneCatAct)
         
@@ -186,8 +187,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.NewPredAct.setStatusTip("Use this entry to make a new Prediction")
         self.NoneCatAct.setStatusTip("Set entry category to None")
         self.NewCatAct.triggered.connect(lambda act: self.NewCatActionFunc(act))
-        self.NewPredAct.triggered.connect(self.NewPredActionFunc())
-        self.NoneCatAct.triggered.connect(self.NoneCatActionFunc())
+        self.NewPredAct.triggered.connect(lambda: self.NewPredActionFunc())
+        self.NoneCatAct.triggered.connect(lambda: self.NoneCatActionFunc())
     
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()

@@ -511,7 +511,14 @@ class Database(object):
                     affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
  
         return affected
-        
+    
+    def find_pred_simiar_to(self, entry):
+        affected = []
+        for pred in self.predictions:
+            if pred.amount.value == entry.amount.value:
+                affected.append('<Prediction>'+pred.as_str())
+        return affected
+    
     def find_all_related_to_over(self, cur_over, new_over):
         affected = []
         #Are we trying to rename an existing override to another override that exists?
@@ -876,6 +883,12 @@ class Database(object):
         else:
             return -1
         
+    def trig_for_oid(self, oid):
+        if oid in self.trig_to_oid.inv:
+            return self.trig_to_oid.inv[oid]
+        else:
+            assert(False)
+            
     def open(self, name, deprecated):  #deprecated
         self.dbname = name
         conn = sqlite3.connect(name+'.db')

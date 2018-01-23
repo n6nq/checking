@@ -162,13 +162,30 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.exec_()
         
     def make_new_prediction(self, entry):
-        affected = self.db.find_pred_simiar_to(entry.amount, entry.cat, entry.trig)
+        affected = self.db.find_pred_simiar_to(entry)
         dl = WarningListDialog(
             "All predictions listed below may be the same prediction you are about to define. They have the " + \
-            "same amount: "+entry.amount.asStr() + ", the same category: '"+entry.cat+"' and the same trigger: '" + \
-            entry.trigger+"'.\n\nIs this entry really a new prediction?", 
+            "same amount: "+entry.amount.as_str()+", the same category: '"+entry.category+"' and the same trigger: '" + \
+            self.db.trig_for_oid(entry.trig_id)+"'.\n\nIs this entry really a new prediction?", 
             affected)
         if dl.reply == True:
+            #selection = self.predictionsView.selectionModel()
+            #indexes = selection.selectedIndexes()
+            #mi = indexes[0]
+            self.clear_edit_fields()
+            #for idx in range(0, self.table_model.num_of_fields):
+            #    new_mi = self.table_model.index(mi.row(), idx)
+            #    value = self.table_model.data(new_mi, Qt.EditRole)
+            
+            self.set_field(0, entry.amount_as_str())
+            income = 'N'
+            if entry.amount.value > 0:
+                income = 'Y'
+            self.set_field(1, income)
+            self.set_field(2, entry.category)
+            self.set_field(3, self.db.trig_for_oid(entry.trig_id))
+            self.set_dirty(Dirty.ALL)
+            
         
         
     def new_category_filter(self):

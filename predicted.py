@@ -27,6 +27,9 @@ class Prediction(object):
         self.db = db
         self.cycle = None
     
+    def as_str(self):
+        return ' Amount: ' + self.amount.as_str() + ' cat: ' + self.cat + ' trig: ' + self.trig + ' desc: ' + self.desc
+    
     def get_typestr(self):
         return Types.inv[self.p_type]
 
