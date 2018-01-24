@@ -158,8 +158,12 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         if entry:
             self.make_new_prediction(entry)
-            
-        self.exec_()
+        
+        self.show()    
+        #self.exec_()
+    
+    def newPred(self, db, entry):
+        self.make_new_prediction(entry)
         
     def make_new_prediction(self, entry):
         affected = self.db.find_pred_simiar_to(entry)
@@ -177,14 +181,14 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             #    new_mi = self.table_model.index(mi.row(), idx)
             #    value = self.table_model.data(new_mi, Qt.EditRole)
             
-            self.set_field(0, entry.amount_as_str())
+            self.set_field(0, entry.amount.as_str())
             income = 'N'
             if entry.amount.value > 0:
                 income = 'Y'
             self.set_field(1, income)
             self.set_field(2, entry.category)
             self.set_field(3, self.db.trig_for_oid(entry.trig_id))
-            self.set_dirty(Dirty.ALL)
+            self.set_dirty(Dirty.AMOUNT)
             
         
         

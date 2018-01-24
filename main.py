@@ -67,6 +67,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         super(self.__class__, self).__init__()
         self.setupUi(self)
+
+        self.PredDlg = None
         
         # Setup calenders
         self.second_date = datetime.date.today()
@@ -175,8 +177,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #menu.addAction(pasteAct)
         menu.show()
         what = menu.exec_(PyQt5.QtGui.QCursor.pos())
-        if (what):
-            what.trigger()
+#        if (what):
+#            what.trigger()
     
     def createPopUpActions(self):
         self.NewCatAct = QAction("New&Cat")
@@ -401,8 +403,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #self.ResortList()
     
     def NewPredActionFunc(self):
-        okay = ManagePredictionsDialog(self.db, self.selectedEntry)
-        
+        if self.PredDlg == None:
+            self.PredDlg = ManagePredictionsDialog(self.db, self.selectedEntry)
+        else:
+            self.PredDlg.newPred(self.db, self.selectedEntry)
+
     def NoneCatActionFunc(self):
         self.selectedEntry.category = None
         self.ResortList()
