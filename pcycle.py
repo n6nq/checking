@@ -138,5 +138,12 @@ class PCycle(object):
         else:
             return 0
 
+    @classmethod
+    def get_cycle_list(cls):
+        cycleList = []
+        for key in Cycles.keys():
+            cycleList.append(key)
+        return cycleList
+    
 
 

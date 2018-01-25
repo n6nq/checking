@@ -19,7 +19,7 @@ from money import Money
 #    SUBSCR = 3
 #    MONTH = 4
 #    ELECT = 5
-Types = bidict({'None': 0,'Bill': 1, 'Prediction': 2, 'Subscription': 3, 'Monthly': 4, 'Elective': 5})
+Types = bidict({'None': 0, 'Bill': 1, 'Prediction': 2, 'Subscription': 3, 'Monthly': 4, 'Elective': 5, 'Income': 6})
 
 class Prediction(object):
     
@@ -108,6 +108,13 @@ class Prediction(object):
     @classmethod
     def headers(cls):
         return ['Amount', 'Income', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
+    
+    @classmethod
+    def get_type_list(cls):
+        keyList = []
+        for key in Types.keys():
+            keyList.append(key)
+        return keyList
     
     @classmethod
     def get_ptype_from_str(cls, str):

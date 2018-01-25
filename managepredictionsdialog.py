@@ -115,14 +115,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         self.sortType.activated.connect(lambda: self.new_type_filter())
         self.sortType.addItems(ascendDescendList)
-        typeList = ['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective', 'Income', 'None']
+        typeList = Prediction.get_type_list()
+        #typeList = ['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective', 'Income', 'None']
         self.sortType.addItems(typeList)
         self.comboType.addItems(typeList)
             
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
         self.comboCycle.activated.connect(lambda: self.set_date_items())
         self.sortCycle.addItems(ascendDescendList)
-        self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'BiWeekly', 'Adhoc', 'None']
+        #self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'BiWeekly', 'Adhoc', 'None']
+        self.cycleList = PCycle.get_cycle_list()
         self.sortCycle.addItems(self.cycleList)
         self.comboCycle.addItems(self.cycleList)
 
@@ -247,7 +249,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif cycle_choice == 'Annual':
             self.editDate.show()
             return
-        elif cycle_choice == 'Bi-weekly':
+        elif cycle_choice == 'BiWeekly':
             self.editDate.show()
             return
         elif cycle_choice == 'Adhoc':
