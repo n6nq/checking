@@ -22,6 +22,7 @@ from managepredictionsdialog import ManagePredictionsDialog
 import readcheckfile_auto
 from entry import Entry
 from money import Money
+import common_ui
 
 # create class for Raspberry Pi GUI (currently Windows PC only)
 ########################################################################
@@ -54,7 +55,7 @@ class MyListModel(QAbstractListModel):
         return self.listdata[modelindex.row()]
     
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
-    """"""
+    """ The main window of the checking app"""
 
     # Date filter dictionary
     dateFilterMap = {'Ascend': 'A', 'Descend': 'D', 'Find': 'F', 'Range': 'R','Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, \
@@ -69,7 +70,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.setupUi(self)
 
         self.PredDlg = None
-        
+             
         # Setup calenders
         self.second_date = datetime.date.today()
         self.first_date = self.second_date - datetime.timedelta(days=365)
@@ -101,7 +102,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         # Setup the Category combobox
         self.cbCategory.activated.connect(lambda: self.new_category_filter())
-        self.cbCategory.addItems(['Ascend', 'Descend'])
+        self.cbCategory.addItems(common_ui.ascend_descend)
         for cat in sorted(self.db.cat_to_oid.keys()):
             self.cbCategory.addItem(cat)
         
@@ -109,26 +110,27 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbDate.activated.connect(lambda: self.new_date_filter())
         for filtStr in self.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
-            
+
         # Setup Amount combo
+        # labels are 'Ascend', 'Descend', 'Find', '>100', '<100', 'Deposit'
         self.cbAmount.activated.connect(lambda: self.new_amount_filter())
-        self.cbAmount.addItems(['Ascend', 'Descend', 'Find', '>100', 'Deposit'])
+        self.cbAmount.addItems(common_ui.amount_sort)
 
         # Setup check number combo box
         self.cbCheckNum.activated.connect(lambda: self.new_checknum_filter())
-        self.cbCheckNum.addItems(['Ascend', 'Descend', 'Find'])
+        self.cbCheckNum.addItems(common_ui.ascend_descend_find)
         
         # Setup description combo box
         self.cbDescription.activated.connect(lambda: self.new_description_filter())
-        self.cbDescription.addItems(['Ascend', 'Descend', 'Find'])
+        self.cbDescription.addItems(common_ui.ascend_descend_find)
         
         # Setup search scope combobox 
         self.cbSearchIn.activated.connect(lambda: self.new_search_filter())
-        self.cbSearchIn.addItems(('All', 'Results'))
+        self.cbSearchIn.addItems(common_ui.all_results)
 
         # Setup group by combo box
         self.cbGroupBy.activated.connect(lambda: self.new_group_by_filter())
-        self.cbGroupBy.addItems(('None', 'MonthByCat', 'CatByMonth'))
+        self.cbGroupBy.addItems(common_ui.groupby_labels)
         self.show()
 
     def mousePressed(self, modelindex):
@@ -177,8 +179,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #menu.addAction(pasteAct)
         menu.show()
         what = menu.exec_(PyQt5.QtGui.QCursor.pos())
-#        if (what):
-#            what.trigger()
     
     def createPopUpActions(self):
         self.NewCatAct = QAction("New&Cat")
@@ -194,21 +194,26 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     
     def new_amount_filter(self):
         choice = self.cbAmount.currentText()
-        if choice == 'Ascend':
+        labels = common_ui.amount_sort
+        if choice == labels[0]:     #'Ascend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value)
-        elif choice == 'Descend':
+        elif choice == labels[1]:  #'Descend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value, reverse=True)
-        elif choice == 'Find':
+        elif choice == labels[2]:  #'Find'
             op = database.CompareOps.MONEY_EQUALS
             value = QInputDialog.getText(self, 'Amount to search for:', 'Amount:')
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.amount.value)
-        elif choice == '>100':
-            op = database.CompareOps.MONEY_LESS_THAN
-            value = '-100'
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
-        elif choice == 'Deposit':
+        elif choice == labels[3]:  #'>100'
             op = database.CompareOps.MONEY_MORE_THAN
-            value = '0'
+            value = -10000
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+        elif choice == labels[4]:  #'<100'
+            op = database.CompareOps.MONEY_LESS_THAN
+            value = -10000
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+        elif choice == labels[5]:  #'Deposit'
+            op = database.CompareOps.MONEY_MORE_THAN
+            value = 0
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
         else:
             return
@@ -220,9 +225,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def new_checknum_filter(self):
         choice = self.cbCheckNum.currentText()
-        if choice == 'Ascend':
+        labels = common_ui.ascend_descend_find
+        if choice == labels[0]:  #'Ascend':
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum)
-        elif choice == 'Descend':
+        elif choice == labels[1]:  #'Descend':
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum, reverse=True)
         elif choice == 'Find':
             op = database.CompareOps.CHECKNUM_EQUALS

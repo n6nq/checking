@@ -87,7 +87,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.trig)
         self.set_list_model(list_data)
 
-        # Setup sort combos#oid,amount,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
+        # Setup sort combos #oid,amount,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
         self.sortAmount.activated.connect(lambda: self.new_amount_filter())
         ascendDescendList = ['Ascend', 'Descend']
         self.sortAmount.addItems(ascendDescendList)
@@ -216,7 +216,27 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         pass
         
     def new_amount_filter(self):
-        pass
+        choice = self.sortAmount.currentText()
+        if choice == 'Ascend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value)
+        elif choice == 'Descend':
+            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value, reverse=True)
+        elif choice == 'Find':
+            op = database.CompareOps.MONEY_EQUALS
+            value = QInputDialog.getText(self, 'Amount to search for:', 'Amount:')
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.amount.value)
+        elif choice == '>100':
+            op = database.CompareOps.MONEY_LESS_THAN
+            value = '<100'
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+        elif choice == 'Deposit':
+            op = database.CompareOps.MONEY_MORE_THAN
+            value = '0'
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+        else:
+            return
+
+        self.set_list_model(filtered)
     
     def new_override_filter(self):
         pass
