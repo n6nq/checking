@@ -57,10 +57,6 @@ class MyListModel(QAbstractListModel):
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     """ The main window of the checking app"""
 
-    # Date filter dictionary
-    dateFilterMap = {'Ascend': 'A', 'Descend': 'D', 'Find': 'F', 'Range': 'R','Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, \
-                     'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12, \
-                     'ThisY': 'T', 'LastY': 'L'}
 
 
     # access variables inside the UI's file
@@ -92,7 +88,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton())
 
         # Setup the entry list
-        self.search_choice = 'All'
+        self.search_choice = common_ui.all_results[0]  #'All'
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
         self.set_list_model(list_data)
         self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
@@ -140,7 +136,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def entryPopUpMenuHndlr(self, entryList):
         menu = QMenu(self)
         cat_menu = QMenu(menu)
-        cat_menu.setTitle('NewCat')
+        cat_menu.setTitle(common_ui.new_cat)  #'NewCat'
         
         selectedIndex = entryList.currentIndex().row()
         #self.list_data
@@ -182,7 +178,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     
     def createPopUpActions(self):
         self.NewCatAct = QAction("New&Cat")
-        self.NewPredAct = QAction("New Pred")
+        self.NewPredAct = QAction("New &Pred")
         self.NoneCatAct = QAction("&None")
         #newAct->setShortcuts(QKeySequence::New);
         self.NewCatAct.setStatusTip("Set entry to this category")
@@ -230,7 +226,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum)
         elif choice == labels[1]:  #'Descend':
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum, reverse=True)
-        elif choice == 'Find':
+        elif choice == labels[2]:  #'Find'
             op = database.CompareOps.CHECKNUM_EQUALS
             value = QInputDialog.getText(self, 'Check Number to search for:', 'Check Number:')
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
@@ -257,41 +253,43 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def new_category_filter(self):
         cat = self.cbCategory.currentText()
-        self.set_search_filter('All')
-        if cat == 'Ascend':
+        self.set_search_filter(common_ui.all_results[0])  #'All'
+        labels = common_ui.ascend_descend
+        if cat == labels[0]:  #'Ascend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
-        elif cat == 'Descend':
+        elif cat == labels[1]:  #'Descend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
         else:
             filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
             
         self.set_list_model(filtered)
-        self.set_search_filter('Results')
+        self.set_search_filter(common_ui.all_results[1])  #'Results'
         self.show()
         
     def new_date_filter(self):
         today = datetime.date.today()
         self.date_choice = self.cbDate.currentText()
-        
-        if self.date_choice == 'Find':
+        labels = common_ui.dateFilterMap.keys()
+        #Ascend, Descend, Find, Range, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, ThisY, LastY        
+        if self.date_choice == labels[2]:  #'Find'
             self.calendar1.show()
             return
-        elif self.date_choice == 'Range':
+        elif self.date_choice == labels[3]:  #'Range'
             self.calendar1.show()
             self.calendar2.show()
             return
-        elif self.date_choice == 'Ascend':
+        elif self.date_choice == labels[0]:  #'Ascend'
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat())
-        elif self.date_choice == 'Descend':
+        elif self.date_choice == labels[1]:  #'Descend'
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat(), reverse=True)
-        elif self.date_choice == 'ThisY':
+        elif self.date_choice == labels[16]:  #'ThisY'
             self.first_date = datetime.date(today.year, 1, 1)
             self.second_date = datetime.date(today.year, 12, 31)
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat())
-        elif self.date_choice == 'LastY':
+        elif self.date_choice == labels[17]:  #'LastY'
             self.first_date = datetime.date(today.year - 1, 1, 1)
             self.second_date = datetime.date(today.year - 1, 12, 31)
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
@@ -319,11 +317,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def new_description_filter(self):
         choice = self.cbDescription.currentText()
-        if choice == 'Ascend':
+        labels = common_ui.ascend_descend_find
+        if choice == labels[0]:  #'Ascend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.desc)
-        elif choice == 'Descend':
+        elif choice == labels[1]:  #'Descend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.desc, reverse=True)
-        elif choice == 'Find':
+        elif choice == labels[2]:  #'Find'
             op = database.CompareOps.SEARCH_DESC
             value = QInputDialog.getText(self, 'String to search for:', 'String:')
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.checknum)
@@ -342,9 +341,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         CatByMonth = Group by Category first and then by month
         """
         choice = self.cbGroupBy.currentText()
-        if choice == 'MonthByCat':
+        #'None', 'MonthByCat', 'CatByMonth'
+        labels = common_ui.groupby_labels
+        if choice == labels[1]:  #'MonthByCat':
             filtered = self.db.get_month_by_cat()
-        elif choice == 'CatByMonth':
+        elif choice == labels[2]:  #'CatByMonth'
             filtered = self.db.get_cat_by_month()
         else:
             return
@@ -362,15 +363,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.search_choice = choice
 
     def pressedOnButton(self):
-        print ("Pressed On!")
         ChartTestDialog(self.db)
         
     def pressedReadCheckFileButton(self):
-        print ("Pressed ReadCheckFile")
-        
         readIt = CheckFileDialog(self.db)
         # refresh the lists
-        self.cbCategory.setCurrentText('Ascend')
+        self.cbCategory.setCurrentText(common_ui.ascend_descend[0])  #'Ascend'
         self.new_category_filter()
         
         #print(readIt.cf)
@@ -382,18 +380,19 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         qdate = self.calendar1.selectedDate()
         self.first_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
         self.got_first_date = True
-        if self.date_choice == 'Find':
+        labels = common_ui.dateFilterMap
+        if self.date_choice == labels[2]:  #'Find'
             self.got_second_date = True
             self.second_date = self.first_date
             self.new_calender_filter()
-        if self.date_choice == 'Range' and self.got_second_date:
+        if self.date_choice == labels[3] and self.got_second_date:  #'Range'
             self.new_calender_filter()
                 
     def select_second_date(self):
         qdate = self.calendar2.selectedDate()
         self.second_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
         self.got_second_date = True
-        if self.got_first_date and self.date_choice == 'Range':
+        if self.got_first_date and self.date_choice == common_ui.dateFilterMap[3]:  #'Range'
             self.new_calender_filter()
             
     def set_list_model(self, listOfEnts):
