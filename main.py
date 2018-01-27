@@ -104,7 +104,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         # Setup the Date combobox
         self.cbDate.activated.connect(lambda: self.new_date_filter())
-        for filtStr in self.dateFilterMap.keys():
+        for filtStr in common_ui.dateFilterMap.keys():
             self.cbDate.addItem(filtStr)
 
         # Setup Amount combo
@@ -201,11 +201,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.amount.value)
         elif choice == labels[3]:  #'>100'
             op = database.CompareOps.MONEY_MORE_THAN
-            value = -10000
+            value = '100.00'
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == labels[4]:  #'<100'
             op = database.CompareOps.MONEY_LESS_THAN
-            value = -10000
+            value = '100.00'
             filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == labels[5]:  #'Deposit'
             op = database.CompareOps.MONEY_MORE_THAN

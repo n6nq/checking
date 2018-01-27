@@ -10,6 +10,7 @@ from pcycle import *
 from entry import Entry
 from money import Money
 from enum import Enum
+import common_ui
 
 class MyTableModel(QAbstractTableModel):
     
@@ -90,7 +91,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         # Setup sort combos #oid,amount,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
         self.sortAmount.activated.connect(lambda: self.new_amount_filter())
         ascendDescendList = ['Ascend', 'Descend']
-        self.sortAmount.addItems(ascendDescendList)
+        self.sortAmount.addItems(common_ui.ascend_descend)
 
         self.sortCategory.activated.connect(lambda: self.new_category_filter())
         self.sortCategory.addItems(ascendDescendList)
