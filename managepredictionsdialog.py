@@ -84,53 +84,59 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
         self.setupUi(self)
 
-        # add all the ui init
+        # Setup prediction list
         list_data = sorted(self.db.get_all_predictions(), key=lambda pred: pred.trig)
         self.set_list_model(list_data)
 
-        # Setup sort combos #oid,amount,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
+        # Setup sort combos #amount,cat,trig,over,p_type,cycle,pdate,comment
+        # Setup amount combos
         self.sortAmount.activated.connect(lambda: self.new_amount_filter())
-        ascendDescendList = ['Ascend', 'Descend']
-        self.sortAmount.addItems(common_ui.ascend_descend)
+        # Ascend, Descend, Find
+        self.sortAmount.addItems(common_ui.ascend_descend_find)
 
+        # Setup cat combos
         self.sortCategory.activated.connect(lambda: self.new_category_filter())
-        self.sortCategory.addItems(ascendDescendList)
+        self.sortCategory.addItems(common_ui.ascend_descend)
 
         for cat in sorted(self.db.cat_to_oid.keys()):
             self.sortCategory.addItem(cat)
             self.comboCat.addItem(cat)
 
+        # Setup trigger combos
         self.sortTrigger.activated.connect(lambda: self.new_trigger_filter())
-        self.sortTrigger.addItems(ascendDescendList)
+        self.sortTrigger.addItems(common_ui.ascend_descend)
         self.comboTrig.addItem('None')
         for trig in sorted(self.db.trig_to_oid.keys()):
             self.sortTrigger.addItem(trig)
             self.comboTrig.addItem(trig)
         
+        # Setup override combos
         self.sortOverride.activated.connect(lambda: self.new_override_filter())
-        self.sortOverride.addItems(ascendDescendList)
+        self.sortOverride.addItems(common_ui.ascend_descend)
         self.comboOver.addItem('None')
         for over in sorted(self.db.over_to_oid.keys()):
             self.sortOverride.addItem(over)
             self.comboOver.addItem(over)
 
+        # Setup type combos
         self.sortType.activated.connect(lambda: self.new_type_filter())
-        self.sortType.addItems(ascendDescendList)
+        self.sortType.addItems(common_ui.ascend_descend)
         typeList = Prediction.get_type_list()
-        #typeList = ['Bill', 'Prediction', 'Subscription', 'Monthly', 'Elective', 'Income', 'None']
+        # Bill, Prediction, Subscription, Monthly, Elective, Income, None
         self.sortType.addItems(typeList)
         self.comboType.addItems(typeList)
             
+        # Setup Cycle combos
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
         self.comboCycle.activated.connect(lambda: self.set_date_items())
-        self.sortCycle.addItems(ascendDescendList)
-        #self.cycleList = ['Monthly', 'Weekly', 'Quarterly', 'Annual', 'BiWeekly', 'Adhoc', 'None']
+        self.sortCycle.addItems(common_ui.ascend_descend)
+        # Monthly, Weekly, Quarterly, Annual, BiWeekly, Adhoc, None
         self.cycleList = PCycle.get_cycle_list()
         self.sortCycle.addItems(self.cycleList)
         self.comboCycle.addItems(self.cycleList)
 
         self.sortDate.activated.connect(lambda: self.new_date_filter())
-        self.sortDate.addItems(ascendDescendList)
+        self.sortDate.addItems(common_ui.)
         #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
         #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
     
