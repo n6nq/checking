@@ -7,6 +7,7 @@ from warninglistdialog import WarningListDialog
 from datetime import date
 from predicted import Prediction
 from pcycle import *
+from database import CompareOps
 from entry import Entry
 from money import Money
 from enum import Enum
@@ -92,7 +93,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         # Setup amount combos
         self.sortAmount.activated.connect(lambda: self.new_amount_filter())
         # Ascend, Descend, Find
-        self.sortAmount.addItems(common_ui.ascend_descend_find)
+        self.sortAmount.addItems(common_ui.amount_sort)
 
         # Setup cat combos
         self.sortCategory.activated.connect(lambda: self.new_category_filter())
@@ -136,12 +137,12 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboCycle.addItems(self.cycleList)
 
         self.sortDate.activated.connect(lambda: self.new_date_filter())
-        self.sortDate.addItems(common_ui.)
+        self.sortDate.addItems(['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth'])
         #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
         #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
     
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
-        self.sortComment.addItems(ascendDescendList)
+        self.sortComment.addItems(common_ui.ascend_descend_find)
         self.sortComment.addItem('Find')
         
         # Action button setups
@@ -225,21 +226,25 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def new_amount_filter(self):
         choice = self.sortAmount.currentText()
         if choice == 'Ascend':
-            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value)
+            filtered = sorted(self.db.get_all_predictions(), key=lambda ent: ent.amount.value)
         elif choice == 'Descend':
-            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value, reverse=True)
+            filtered = sorted(self.db.get_all_predictions(), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == 'Find':
-            op = database.CompareOps.MONEY_EQUALS
+            op = CompareOps.MONEY_EQUALS
             value = QInputDialog.getText(self, 'Amount to search for:', 'Amount:')
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.amount.value)
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value[0]), key=lambda ent: ent.amount.value)
+        elif choice == '<100':
+            op = CompareOps.MONEY_LESS_THAN
+            value = '100'
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == '>100':
-            op = database.CompareOps.MONEY_LESS_THAN
-            value = '<100'
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+            op = CompareOps.MONEY_MORE_THAN
+            value = '100'
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == 'Deposit':
-            op = database.CompareOps.MONEY_MORE_THAN
+            op = CompareOps.MONEY_MORE_THAN
             value = '0'
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
         else:
             return
 

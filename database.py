@@ -23,6 +23,7 @@ from enum import Enum
 from money import Money
 from PyQt5.QtWidgets import QMessageBox
 from pcycle import PCycle
+import common_ui
 # storage defines
 EMPTY = 0
 STORE_DB = 1
@@ -581,10 +582,10 @@ class Database(object):
         return self.categories
     
     def get_all_entries(self, which):
-        if which == 'All':
+        if which == common_ui.All:
             self.filtered_entries = self.entries
             return self.entries
-        elif which == 'Results':
+        elif which == common_ui.Results:
             return self.filtered_entries
         
     def get_all_entries_meeting(self, which, op, value):
@@ -649,6 +650,30 @@ class Database(object):
     def get_all_predictions(self):
         return self.predictions
     
+    def get_all_predictions_meeting(self, op, value):
+        requested = []
+        
+        for pred in self.predictions:
+            if op == CompareOps.MONEY_LESS_THAN:
+                if pred.amount < Money.from_str(value):
+                    requested.append(pred)
+            elif op == CompareOps.MONEY_MORE_THAN:
+                if pred.amount > Money.from_str(value):
+                    requested.append(pred)
+            elif op == CompareOps.MONEY_EQUALS:
+                if pred.amount == Money.from_str(value):
+                    requested.append(pred)
+            elif op == CompareOps.CHECKNUM_EQUALS:
+                if pred.checknum == value:
+                    requested.append(pred)
+            elif op == CompareOps.SEARCH_DESC:
+                if value in pred.desc:
+                    requested.append(pred)
+            else:
+                self.error('Failed to build prediction list.', '{0} is an unknown comparison operator.')
+        self.filtered_entries = requested
+        return requested
+
     def get_all_predictions_with_cat(self, cat):
         requested = []
             
