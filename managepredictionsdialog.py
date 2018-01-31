@@ -43,6 +43,7 @@ class MyTableModel(QAbstractTableModel):
             else:
                 pred = self.listdata[row]
                 self.last_selected = pred.oid
+                print(self.last_selected)
                 if role == Qt.DisplayRole:
                     self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
                 elif role == Qt.EditRole:
@@ -165,7 +166,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboCycle.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CYCLE))
         self.chkboxIncome.stateChanged.connect(lambda: self.set_dirty(Dirty.INCOME))
         self.dirty_flags = []
-
+        self.last_selected = 0
         if entry:
             self.make_new_prediction(entry)
         
@@ -369,7 +370,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
     def update_prediction(self):
         if len(self.dirty_flags) > 0:
-            oid = self.table_model.get_last_selected()
+            oid = self.last_selected
             pred = Prediction(self.db)
             aList = self.list_from_fields(oid)
             self.db.update_prediction(aList)
@@ -379,7 +380,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.show()
             
     def delete_prediction(self):
-        oid = self.table_model.get_last_selected()
+        oid = self.last_selected
         self.db.delete_prediction(oid)
         self.set_list_model(self.db.predictions)
         self.show()
@@ -408,6 +409,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             new_mi = self.table_model.index(mi.row(), idx)
             value = self.table_model.data(new_mi, Qt.EditRole)
             self.set_field(idx, value)
+        self.last_selected = self.table_model.get_last_selected()
         self.set_dirty(Dirty.CLEAR)
     
     def set_field(self, col, value):

@@ -450,7 +450,10 @@ class Database(object):
             self.error('Could not delete Trigger:')
             return False
             
-
+    def dump_predictions(self):
+        for pred in self.predictions:
+            pred.dump()
+            
     def entry_is_dupe(self, newEtry):
         for entry in self.entrylist:
             if entry.compare(newEtry):
