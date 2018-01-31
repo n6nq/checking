@@ -681,10 +681,34 @@ class Database(object):
         requested = []
             
         for pred in self.predictions:
-            if pred.category == cat:
+            if pred.cat == cat:
                 requested.append(pred)
         return requested
-        
+
+    def get_all_predictions_with_over(self, over):
+        requested = []
+            
+        for pred in self.predictions:
+            if pred.over == over:
+                requested.append(pred)
+        return requested
+
+    def get_all_predictions_with_ptype(self, ptype):
+        requested = []
+            
+        for pred in self.predictions:
+            if pred.p_type == ptype:
+                requested.append(pred)
+        return requested
+                
+    def get_all_predictions_with_trig(self, trig):
+        requested = []
+            
+        for pred in self.predictions:
+            if pred.trig == trig:
+                requested.append(pred)
+        return requested
+                
     def get_all_triggers(self):
         triggers = {}
         try:

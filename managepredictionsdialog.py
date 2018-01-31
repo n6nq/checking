@@ -43,7 +43,7 @@ class MyTableModel(QAbstractTableModel):
             else:
                 pred = self.listdata[row]
                 self.last_selected = pred.oid
-                print(self.last_selected)
+                #print(self.last_selected)
                 if role == Qt.DisplayRole:
                     self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
                 elif role == Qt.EditRole:
@@ -208,9 +208,9 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         if cat == 'Ascend':
             filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.cat)
         elif cat == 'Descend':
-            filtered = sorted(self.db.get_all_predictions(), key=lambda ent: pred.cat, reverse=True)
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.cat, reverse=True)
         else:
-            filtered = sorted(self.db.get_all_predictions_with_cat(cat), key=lambda ent: ent.asCategorizedStr())
+            filtered = sorted(self.db.get_all_predictions_with_cat(cat), key=lambda pred: pred.amount.value)
             
         self.set_list_model(filtered)
         self.show()
@@ -233,14 +233,19 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif choice == 'Find':
             op = CompareOps.MONEY_EQUALS
             value = QInputDialog.getText(self, 'Amount to search for:', 'Amount:')
+            if value[0] == '':
+                return
             filtered = sorted(self.db.get_all_predictions_meeting(op, value[0]), key=lambda ent: ent.amount.value)
         elif choice == '<100':
-            op = CompareOps.MONEY_LESS_THAN
-            value = '100'
+            # if this doesn't make sense to you, leave it alone. Remember that we are searching for
+            # smaller negatives, therefore 'more' is 'less' in this case
+            op = CompareOps.MONEY_MORE_THAN
+            value = '-100'
             filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == '>100':
-            op = CompareOps.MONEY_MORE_THAN
-            value = '100'
+            # Same backwards magnitudes here is in '<100'
+            op = CompareOps.MONEY_LESS_THAN
+            value = '-100'
             filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
         elif choice == 'Deposit':
             op = CompareOps.MONEY_MORE_THAN
@@ -252,13 +257,40 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.set_list_model(filtered)
     
     def new_override_filter(self):
-        pass
+        over = self.sortOverride.currentText()
+        if over == 'Ascend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.over)
+        elif over == 'Descend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.over, reverse=True)
+        else:
+            filtered = sorted(self.db.get_all_predictions_with_over(over), key=lambda pred: pred.amount.value)
+            
+        self.set_list_model(filtered)
+        self.show()
     
     def new_trigger_filter(self):
-        pass
+        trig = self.sortTrigger.currentText()
+        if trig == 'Ascend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.trig)
+        elif trig == 'Descend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.trig, reverse=True)
+        else:
+            filtered = sorted(self.db.get_all_predictions_with_trig(trig), key=lambda pred: pred.amount.value)
+            
+        self.set_list_model(filtered)
+        self.show()
     
     def new_type_filter(self):
-        pass
+        ptype = self.sortType.currentText()
+        if ptype == 'Ascend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.p_type)
+        elif ptype == 'Descend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.p_type, reverse=True)
+        else:
+            filtered = sorted(self.db.get_all_predictions_with_ptype(ptype), key=lambda pred: pred.amount.value)
+            
+        self.set_list_model(filtered)
+        self.show()
     
     def set_date_items(self):
         self.editDate.hide()
@@ -410,6 +442,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             value = self.table_model.data(new_mi, Qt.EditRole)
             self.set_field(idx, value)
         self.last_selected = self.table_model.get_last_selected()
+        print(self.last_selected)
         self.set_dirty(Dirty.CLEAR)
     
     def set_field(self, col, value):
