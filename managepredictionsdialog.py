@@ -219,7 +219,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         pass
     
     def new_cycle_filter(self):
-        pass
+        cycle = self.sortCycle.currentText()
+        if cycle == 'Ascend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.cycle.get_type_str())
+        elif cycle == 'Descend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.cycle.get_type_str(), reverse=True)
+        else:
+            filtered = sorted(self.db.get_all_predictions_with_cycle(cycle), key=lambda pred: pred.amount.value)
+            
+        self.set_list_model(filtered)
+        self.show()
     
     def new_date_filter(self):
         pass

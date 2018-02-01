@@ -685,6 +685,14 @@ class Database(object):
                 requested.append(pred)
         return requested
 
+    def get_all_predictions_with_cycle(self, cycle):
+        requested = []
+            
+        for pred in self.predictions:
+            if pred.cycle.get_type_str() == cycle:
+                requested.append(pred)
+        return requested
+
     def get_all_predictions_with_over(self, over):
         requested = []
             
@@ -697,7 +705,7 @@ class Database(object):
         requested = []
             
         for pred in self.predictions:
-            if pred.p_type == ptype:
+            if pred.get_typestr() == ptype:
                 requested.append(pred)
         return requested
                 

@@ -13,13 +13,8 @@ from bidict import bidict
 from pcycle import PCycle
 from money import Money
 
-#class PType(Enum):
-#    BILL = 1
-#    PRED = 2
-#    SUBSCR = 3
-#    MONTH = 4
-#    ELECT = 5
-Types = bidict({'None': 0, 'Bill': 1, 'Prediction': 2, 'Subscription': 3, 'Monthly': 4, 'Elective': 5, 'Income': 6})
+# Keep Types in alphabetical order so type combo will sort correctly
+Types = bidict({'None': 0, 'Bill': 1, 'Elective': 2, 'Income': 3, 'Monthly': 4, 'Prediction': 5, 'Subscription': 6})
 
 class Prediction(object):
     
