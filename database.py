@@ -656,10 +656,15 @@ class Database(object):
     def get_all_predictions_with_date_filter(self, filter_str):
         requested = []
         for pred in self.predictions:
-            #['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth']        
-            if pred.cycle.ctype == Cycles['Weekly'] and filter_str == common_ui.date_sort[0]:    #DayOfWeek
+            #Cycles{'None': 0, 'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
+            #['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth']
+            ctype = pred.cycle.ctype
+            if ctype == Cycles['Weekly'] and filter_str == common_ui.date_sort[0]:    #DayOfWeek
                 requested.append(pred)
-                
+            elif ctype == Cycles['Monthly'] and filter_str == common_ui.date_sort[1]:    #DayOfMonth
+                requested.append(pred)
+            elif filter_str == common_ui.date_sort[2] and (ctype == Cycles['Quarterly'] or ctype == Cycles['Annual'] or ctype == Cycles['BiWeekly'] or ctype == Cycles['Adhoc']):
+                requested.append(pred)
         return requested
     
     def get_all_predictions_meeting(self, op, value):

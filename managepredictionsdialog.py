@@ -233,11 +233,12 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def new_date_filter(self):
         filter_str = self.sortDate.currentText()
         filtered = self.db.get_all_predictions_with_date_filter(filter_str)
+        #Cycles{'None': 0, 'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
         #['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth']
         if filter_str == common_ui.date_sort[0] or filter_str == common_ui.date_sort[1]:    #DayOfWeek or DayofMonth
             results = sorted(filtered, key=lambda pred: pred.cycle.get_date_str())
         elif filter_str == common_ui.date_sort[2]:  #Month/Dat
-            results = sorted(filtered, key=lambda pred: pred.cycle.get_datestr())
+            results = sorted(filtered, key=lambda pred: pred.cycle.get_date_str())
         else:
             results = filtered
         self.set_list_model(filtered)
@@ -347,7 +348,6 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.table_model = MyTableModel(listOfPredictions, self.predictionsView, self.db)
         self.predictionsView.setModel(self.table_model)
         
-    #----------------------------------------------------------------------
     def set_dirty(self, flag):
         """Set dirty flags for all add/update fields"""
         if flag == Dirty.CLEAR:
