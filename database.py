@@ -22,7 +22,7 @@ from bidict import bidict
 from enum import Enum
 from money import Money
 from PyQt5.QtWidgets import QMessageBox
-from pcycle import PCycle
+from pcycle import PCycle, Cycles
 import common_ui
 # storage defines
 EMPTY = 0
@@ -652,6 +652,15 @@ class Database(object):
     
     def get_all_predictions(self):
         return self.predictions
+    
+    def get_all_predictions_with_date_filter(self, filter_str):
+        requested = []
+        for pred in self.predictions:
+            #['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth']        
+            if pred.cycle.ctype == Cycles['Weekly'] and filter_str == common_ui.date_sort[0]:    #DayOfWeek
+                requested.append(pred)
+                
+        return requested
     
     def get_all_predictions_meeting(self, op, value):
         requested = []

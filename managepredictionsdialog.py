@@ -138,7 +138,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboCycle.addItems(self.cycleList)
 
         self.sortDate.activated.connect(lambda: self.new_date_filter())
-        self.sortDate.addItems(['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth'])
+        self.sortDate.addItems(common_ui.date_sort)
         #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
         #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
     
@@ -231,8 +231,18 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.show()
     
     def new_date_filter(self):
-        pass
-        
+        filter_str = self.sortDate.currentText()
+        filtered = self.db.get_all_predictions_with_date_filter(filter_str)
+        #['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth']
+        if filter_str == common_ui.date_sort[0] or filter_str == common_ui.date_sort[1]:    #DayOfWeek or DayofMonth
+            results = sorted(filtered, key=lambda pred: pred.cycle.get_date_str())
+        elif filter_str == common_ui.date_sort[2]:  #Month/Dat
+            results = sorted(filtered, key=lambda pred: pred.cycle.get_datestr())
+        else:
+            results = filtered
+        self.set_list_model(filtered)
+        self.show()
+            
     def new_amount_filter(self):
         choice = self.sortAmount.currentText()
         if choice == 'Ascend':
