@@ -358,9 +358,11 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
     def list_from_fields(self, oid):
         mny = Money.from_str(self.editAmount.text())
         income = self.chkboxIncome.checkState()
-        #if income == 0:
-        #    mny.negative()
         amount = mny.value
+        if income and amount < 0:
+            amount = abs(amount)
+        elif not income and amount > 0:
+            amount = 0 - amount
         cat = self.comboCat.currentText()
         cat_id = self.db.cat_to_oid[cat]
         trig = self.comboTrig.currentText()

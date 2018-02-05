@@ -655,6 +655,7 @@ class Database(object):
     
     def get_all_predictions_with_date_filter(self, filter_str):
         requested = []
+        today = datetime.date.today()
         for pred in self.predictions:
             #Cycles{'None': 0, 'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
             #['DayOfWeek', 'DayOfMonth', 'Month\Day', 'NextWeek', 'NextMonth']
@@ -664,6 +665,12 @@ class Database(object):
             elif ctype == Cycles['Monthly'] and filter_str == common_ui.date_sort[1]:    #DayOfMonth
                 requested.append(pred)
             elif filter_str == common_ui.date_sort[2] and (ctype == Cycles['Quarterly'] or ctype == Cycles['Annual'] or ctype == Cycles['BiWeekly'] or ctype == Cycles['Adhoc']):
+                requested.append(pred)
+            elif filter_str == common_ui.date_sort[3] and pred.in_next_week(today):
+                requested.append(pred)
+            elif filter_str == common_ui.date_sort[4] and pred.in_next_month(today):
+                requested.append(pred)
+            elif filter_str == common_ui.date_sort[5] and pred.in_three_month(today):
                 requested.append(pred)
         return requested
     

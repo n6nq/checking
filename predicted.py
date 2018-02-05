@@ -10,7 +10,7 @@ date day-of-month, day-of-week, day/month, adhoc
 """
 from enum import Enum
 from bidict import bidict
-from pcycle import PCycle
+from pcycle import PCycle, Cycles
 from money import Money
 
 # Keep Types in alphabetical order so type combo will sort correctly
@@ -48,7 +48,18 @@ class Prediction(object):
         else:
             return 'Y'
         
+    def in_next_week(self, today):
+        ctype = self.cycle.ctype
+        if ctype == Cycles['Weekly']:
+            return True
+        elif ctype == Cycles['Monthly']:
+            self.cycle.vdate < 
     
+    def in_next_month(self, today):
+        pass
+    
+    def in_three_month(self, today):
+        pass
     
     def set_without_ids(self, amount, income, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.amount = amount
