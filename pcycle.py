@@ -33,7 +33,7 @@ Changes
     pred.set_with_ids       #gets new param of type Cycle
     pred.set_with_row       #need to build aand put in row
 """
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from bidict import bidict
 
 
@@ -120,6 +120,32 @@ class PCycle(object):
         else:
             assert(False)
 
+    def in_the_past(self, today):
+        ctype = self.ctype
+        if ctype == Cycles['Weekly'] or ctype == Cycles['Monthly']:
+            return False
+        else:
+            if self.ddate >= today:
+                return False
+        return True
+    
+    def promote(self, today):
+        # Monthly, Weekly, Quarterly, Annual, BiWeekly, Adhoc
+        assert(self.ddate < today)
+        ctype = self.ctype
+        while self.ddate < today:
+            if ctype == Cycles['Quarterly']:
+                self.ddate += timedelta(91)
+                continue
+            elif ctype == Cycles['Annual']:
+                self.ddate += timedelta(365)
+                continue
+            elif ctype == Cycles['BiWeekly']:
+                self.ddate += timedelta(14)
+                continue
+            else:
+                assert(False)
+    
     @classmethod
     def get_cycle_from_str(cls, str):
         assert(str in Cycles)

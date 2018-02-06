@@ -12,6 +12,10 @@ from enum import Enum
 from bidict import bidict
 from pcycle import PCycle, Cycles
 from money import Money
+from datetime import datetime, timedelta
+
+#              jan feb mar apr may jun jul aug sep oct nov dec
+DaysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 # Keep Types in alphabetical order so type combo will sort correctly
 Types = bidict({'None': 0, 'Bill': 1, 'Elective': 2, 'Income': 3, 'Monthly': 4, 'Prediction': 5, 'Subscription': 6})
@@ -50,10 +54,28 @@ class Prediction(object):
         
     def in_next_week(self, today):
         ctype = self.cycle.ctype
+        end = (today + timedelta(7)).day
+        start = today.day
         if ctype == Cycles['Weekly']:
             return True
         elif ctype == Cycles['Monthly']:
-            self.cycle.vdate < 
+            pday = self.cycle.vdate
+            if end > start and pday >= start and pday <= end:
+                return True
+            elif start > end and (pday >= start or pday <= end):
+                return True
+            else:
+                return False
+        elif ctype == Cycles['Quarterly'] or ctype == Cycles['Annual'] or \
+             ctype == Cycles['BiWeekly'] or ctype == Cycles['Adhoc']:
+            if self.cycle.in_the_past(today):
+                self.cycle.promote(today)
+            end = (today + timedelta(7))
+            if self.cycle.ddate <= end:
+                return True
+        else:
+            assert(False)
+        return False
     
     def in_next_month(self, today):
         pass
