@@ -269,8 +269,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def new_date_filter(self):
         today = datetime.date.today()
         self.date_choice = self.cbDate.currentText()
-        labels = common_ui.dateFilterMap.keys()
-        #Ascend, Descend, Find, Range, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, ThisY, LastY        
+        labels = list(common_ui.dateFilterMap.keys())        #Ascend, Descend, Find, Range, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, ThisY, LastY        
         if self.date_choice == labels[2]:  #'Find'
             self.calendar1.show()
             return
@@ -295,9 +294,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                             self.second_date), key=lambda ent: ent.date.isoformat())
         else:
-            if self.date_choice in self.dateFilterMap:
+            if self.date_choice in common_ui.dateFilterMap:
                 days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-                month = self.dateFilterMap[self.date_choice]
+                month = common_ui.dateFilterMap[self.date_choice]
                 today = datetime.date.today()
                 year = today.year
                 if month > today.month:
@@ -380,7 +379,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         qdate = self.calendar1.selectedDate()
         self.first_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
         self.got_first_date = True
-        labels = common_ui.dateFilterMap
+        labels = list(common_ui.dateFilterMap.keys())
         if self.date_choice == labels[2]:  #'Find'
             self.got_second_date = True
             self.second_date = self.first_date
@@ -392,7 +391,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         qdate = self.calendar2.selectedDate()
         self.second_date = datetime.date(qdate.year(), qdate.month(), qdate.day())
         self.got_second_date = True
-        if self.got_first_date and self.date_choice == common_ui.dateFilterMap[3]:  #'Range'
+        if self.got_first_date and self.date_choice == list(common_ui.dateFilterMap.keys())[3]:  #'Range'
             self.new_calender_filter()
             
     def set_list_model(self, listOfEnts):
