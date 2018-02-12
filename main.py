@@ -61,15 +61,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     # access variables inside the UI's file
     def __init__(self):
-        
+                
         super(self.__class__, self).__init__()
         self.setupUi(self)
 
         self.PredDlg = None
              
         # Setup calenders
-        self.second_date = datetime.date.today()
-        self.first_date = self.second_date - datetime.timedelta(days=365)
+        self.default_dates()
         self.calendar1.hide()
         self.calendar2.hide()
         self.calendar1.clicked.connect(lambda: self.select_first_date())
@@ -129,6 +128,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbGroupBy.addItems(common_ui.groupby_labels)
         self.show()
 
+    def default_dates(self):
+        self.second_date = datetime.date.today()
+        self.first_date = self.second_date - datetime.timedelta(days=365)
+        
     def mousePressed(self, modelindex):
         self.selectedRow = modelindex.row()
         self.selectedEntry = self.list_model.entryAt(modelindex)
@@ -242,7 +245,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.calendar2.hide()
         #TODO: This sorted by date rather than by asStr of the ent.
         filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
-                          self.second_date), key=lambda ent: ent.asCategorizedStr())
+                          self.second_date), key=lambda ent: ent.date.strftime('%m-%d-%Y'))
         
         self.set_list_model(filtered)
         #self.listEntries.clear()
@@ -267,6 +270,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.show()
         
     def new_date_filter(self):
+        self.default_dates()
         today = datetime.date.today()
         self.date_choice = self.cbDate.currentText()
         labels = list(common_ui.dateFilterMap.keys())        #Ascend, Descend, Find, Range, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, ThisY, LastY        
@@ -307,7 +311,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 self.second_date = datetime.date(year, month, days[month])
                 
                 filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
-                                    self.second_date), key=lambda ent: ent.date.isoformat())
+                                    self.second_date), key=lambda ent: ent.date.strftime('%m-%d-%Y'))
         self.set_list_model(filtered)
         #self.listEntries.clear()
         #for ent in filtered:
