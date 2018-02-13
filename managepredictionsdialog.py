@@ -241,7 +241,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             results = sorted(filtered, key=lambda pred: pred.cycle.get_date_str())
         else:
             results = filtered
-        self.set_list_model(filtered)
+        self.set_list_model(results)
         self.show()
             
     def new_amount_filter(self):

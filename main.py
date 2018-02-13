@@ -232,7 +232,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         elif choice == labels[2]:  #'Find'
             op = database.CompareOps.CHECKNUM_EQUALS
             value = QInputDialog.getText(self, 'Check Number to search for:', 'Check Number:')
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
+            if value[0] != '' and value[0] != None:
+                filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
         else:    
             return
         self.set_list_model(filtered)

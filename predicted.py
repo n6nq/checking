@@ -78,10 +78,46 @@ class Prediction(object):
         return False
     
     def in_next_month(self, today):
-        pass
+        ctype = self.cycle.ctype
+        end = (today + timedelta(30)).day
+        start = today.day
+        if ctype == Cycles['Weekly'] or ctype == Cycles['Monthly']:
+            return True
+        elif ctype == Cycles['Quarterly'] or ctype == Cycles['Annual'] or \
+             ctype == Cycles['BiWeekly'] or ctype == Cycles['Adhoc']:
+            if self.cycle.in_the_past(today):
+                self.cycle.promote(today)
+            end = (today + timedelta(30))
+            if self.cycle.ddate <= end:
+                return True
+        else:
+            assert(False)
+        return False
     
     def in_three_month(self, today):
-        pass
+        ctype = self.cycle.ctype
+        end = (today + timedelta(7)).day
+        start = today.day
+        if ctype == Cycles['Weekly']:
+            return True
+        elif ctype == Cycles['Monthly']:
+            pday = self.cycle.vdate
+            if end > start and pday >= start and pday <= end:
+                return True
+            elif start > end and (pday >= start or pday <= end):
+                return True
+            else:
+                return False
+        elif ctype == Cycles['Quarterly'] or ctype == Cycles['Annual'] or \
+             ctype == Cycles['BiWeekly'] or ctype == Cycles['Adhoc']:
+            if self.cycle.in_the_past(today):
+                self.cycle.promote(today)
+            end = (today + timedelta(7))
+            if self.cycle.ddate <= end:
+                return True
+        else:
+            assert(False)
+        return False
     
     def set_without_ids(self, amount, income, cat, trig=None, over=None, p_type=None, cycle=None, ddate=None, vdate=None, desc=None):
         self.amount = amount
