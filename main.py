@@ -139,7 +139,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def entryPopUpMenuHndlr(self, entryList):
         menu = QMenu(self)
         cat_menu = QMenu(menu)
-        cat_menu.setTitle(common_ui.new_cat)  #'NewCat'
+        cat_menu.setTitle('NewCat')
         
         selectedIndex = entryList.currentIndex().row()
         #self.list_data
