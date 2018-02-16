@@ -21,7 +21,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.db.clear_ncf_entries()
         self.cf = check_file.CheckFile(self.db)
         
-        # Set up the user interface from Designer.
+        # Set up the user interface from QTDesigner.
         self.setupUi(self)
 
         # Setup button actions
@@ -181,7 +181,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #self.selectedEntry = self.cf.find(selectedEntryStr)        
         # repopulate
         for check in self.db.get_ncf_entries():
-            if check.category == None:
+            if check.category == 'None':
                 cat_tuple = self.db.cat_from_desc(check.desc)
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
@@ -264,7 +264,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
-                check.over.id = cat_tuple[3]
+                check.over_id = cat_tuple[3]
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())

@@ -82,7 +82,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.db = database.Database(curr+'\\checking')
 
         # Setup the buttons
-        self.btnChart.clicked.connect(lambda: self.pressedOnButton())
+        self.btnChart.clicked.connect(lambda: self.pressedChartBtn())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         self.btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton())
 
@@ -366,7 +366,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.cbSearchIn.setCurrentText(choice)
         self.search_choice = choice
 
-    def pressedOnButton(self):
+    def pressedChartBtn(self):
         ChartTestDialog(self.db)
         
     def pressedReadCheckFileButton(self):

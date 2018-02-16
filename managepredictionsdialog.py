@@ -142,9 +142,10 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
         #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
     
+        # Setup comment combo
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
         self.sortComment.addItems(common_ui.ascend_descend_find)
-        self.sortComment.addItem('Find')
+        
         
         # Action button setups
         self.buttonAdd.clicked.connect(lambda: self.add_prediction())
@@ -216,7 +217,18 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.show()
     
     def new_comment_filter(self):
-        pass
+        filtstr = self.sortComment.currentText()
+        if filtstr == 'Ascend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.desc)
+        elif filtstr == 'Descend':
+            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.desc, reverse=True)
+        elif filtstr == 'Find':
+            op = CompareOps.SEARCH_DESC
+            value = QInputDialog.getText(self, 'String to search for:', 'String:')
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value[0]), key=lambda pred: pred.desc)
+            
+        self.set_list_model(filtered)
+        self.show()
     
     def new_cycle_filter(self):
         cycle = self.sortCycle.currentText()
@@ -261,16 +273,16 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             # smaller negatives, therefore 'more' is 'less' in this case
             op = CompareOps.MONEY_MORE_THAN
             value = '-100'
-            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda pred: pred.amount.value, reverse=True)
         elif choice == '>100':
             # Same backwards magnitudes here is in '<100'
             op = CompareOps.MONEY_LESS_THAN
             value = '-100'
-            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda pred: pred.amount.value, reverse=True)
         elif choice == 'Deposit':
             op = CompareOps.MONEY_MORE_THAN
             value = '0'
-            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda ent: ent.amount.value, reverse=True)
+            filtered = sorted(self.db.get_all_predictions_meeting(op, value), key=lambda pred: pred.amount.value, reverse=True)
         else:
             return
 

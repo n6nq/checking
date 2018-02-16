@@ -21,6 +21,7 @@ class ChartTestDialog(QDialog, Ui_predictions):
         self.get_chart_data(today, values[0])
             
         self.scene = QGraphicsScene()
+        self.scene.setSceneRect(QtCore.QRectF(0, 0, 500, 400))
         self.graph.setScene(self.scene)
         self.graph.scale(1, -1)
         #self.resizeEvent.connect(self.resizeGraph())
