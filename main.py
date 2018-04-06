@@ -14,7 +14,7 @@ import datetime
 from enum import Enum
 # get the window
 import mainwindow_auto
-import chart_test_auto
+import chart_window_auto
 from checkfiledialog import CheckFileDialog
 from charttestdialog import ChartTestDialog
 from managepredictionsdialog import ManagePredictionsDialog

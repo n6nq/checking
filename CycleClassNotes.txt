@@ -1,0 +1,33 @@
+# Cycle class notes
+
+types
+
+methods
+    Cycle(typestr, valuestr)    #return new Cycle from input strings set values
+    Cycle(typestr, dstr, vstr)  #return new Cycle from input strings set values
+    get_type_str    #get the cycle type as a string
+    get_value_str   #get cycle value as a date, dow or dom str
+    get_date_str    #get the datatime.date as a string
+    get_dow_str     #get the day of week str
+    get_dom_str     #get the day of month str
+    is_weekly       #return bool 
+    is_monthly      #return bool
+    
+    set_type        #set type with validated input string
+    set_date        #set date with datetime.date
+    set_date        #set date with QDate
+    set_dow         #set day of week with validated string
+    set_dom         #set day of month with vlidated string
+    
+deprecated  methods
+    pred.get_cyclestr() #changes to cycle.get_type_str()
+    pred.get_datestr()  #changes to cycle.get_value_str()
+    pred.get_cycle_from_str()   #changes to cycle.set_type()
+    
+        cycle = pred.get_cycle_from_str(cyclestr)           #changes to Cycle(type, value)
+        vdate = pred.get_vdate_from_str(cycle, vdatestr)    #changes to Cycle(type, value)
+        
+Changes
+    pred.set_without_ids    #gets new param of type Cycle
+    pred.set_with_ids       #gets new param of type Cycle
+    pred.set_with_row       #need to build aand put in row

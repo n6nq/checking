@@ -1,0 +1,136 @@
+ACCOUNTS   list []
+    create  acc = []
+    add     .append(value)
+    len     len(self.accounts)
+
+CATEGORIES  dictionary  {}
+x    create  cat = {}
+x    add     cat[catstr] = Category()
+x    add     cat.add(Category(row))      sb cat[catstr] = Category(row)  in load_categories
+x    delete  del cat[catstr]
+x    access  cat[catstr][0]              sb cat[catstr].oid  or cat_to_oid[catstr] delete_override_only()
+x    access  for cat in categories
+x    access      cat.cat
+x    len     len(cat)
+x    
+ TRIGGERS  dict    {}
+x    create  triggers = {)
+x    create  triggers[row[1]] = (row[0], row[2])  sb triggers[row[1]) = Trigger(row[0],row[1],row[2]) in load_triggers()
+x    add     triggers[trig] = (id, cat)  sb Trigger(id, trig, cat)   in add_trigger()
+x    access  for trig, values in trig.item()  sb for trigstr, trig in triggers:  in cat_from_desc()
+x                return value                        return trig.cat
+x    access  trigtup = triggers[trig]    sb trigger = triggers[trig]  in delete_trigger_all()
+x                trig_id = trigtup[0]        trig_id = trigger.oid
+x    access  self.triggers[trig][0]      sb triggers[trigstr].oid    delete_trigger_only
+x    access  for trig, cat in triggers.items  sb for trig, trigger in triggers.items()  in find_all_related_to_cat
+x                cat[1] == catstr                    trigger.cat == catstr
+x    access  trigtup = triggers[cur_trig]    sb trigger = triggers[cur_trig]
+x                trig_id = trigtup[0]                trig_id = trigger.oid
+x                catstr = trigtup[1]                 catstr = trigger.cat
+x    access  trigvalues = triggers[trig]    sb trigobj = triggers[trigstr]  in make_cat_to_trigger_dict
+x                oid = trigvaules[0]             oid = trigobj.oid
+x    access  trigtup = triggers[trigstr]     sb trigobj = triggers[trigstr]  in rename_trigger_all()
+x                trig_id = trigtup[0]            trig_id = trigobj.oid
+x    access  for trig,cat in triggers.items):    sb for trig,trigobj in triggers.itms():  in sanity_check_db()
+x                if cat[1] in cat_to_oid:            if trigobj.cat in cat_to_oid:
+x    access  for trig, tcat in self.triggers.items(): sb for trig,trigobj in triggers.items():  in sanity_check_db()
+x                if cat.cat == tcat[1]                       if cat.cat == trigobj.cat
+x    access  for trig, cat in self.triggers.items():     sb for trig,trigobj in triggers.items():   in triggers_for_cat()
+x                if cat[1] == lookfor:                       if trigobj.at == lookfor:
+x    access  for trig, cat in self.triggers.items():  sb for trig, trigobj in self.triggers.items():  in update_triggers_cats()
+x                if cat[1] == curCat                         if trigobj.cat == curcat:
+x                    self.triggers[trig] = newCat                trigobj.cat = newcat
+x    access  trigtup = self.db.triggers[self.trigger_str]  sb trigobj = triggers[trigger_str]  in  delete_trigger()
+x                trigtup[1]   sb   trigobj.cat
+x    naming  triggers = []  sb  trig_list = [] in triggers_for_cat()
+x    add     self.triggers.selectAllSQL      sb self.selectAllTrigSQL  in get_all_triggers    
+x                trigs[row[1]] = row[2]          triggers[row[1]] = Trigger(row[0],row[1],row[2])  in get_all_triggers
+x    len     len(triggers)           
+    delete  del triggers[trig]
+    
+OVERRIDES   dict    {}
+x    create  self.overrides = {}
+    create  self.overrides[over] = (last_id, cat)   sb overrides[over] = Override(last_id, cat)  in add_override()
+x    access  for over, values in self.overrides.items():  sb  for over, overobj in self.overrides.items():  in  cat_from_desc()
+x                values[0] += 32000  ????  is this used anymore???
+x    access  self.overrides[over][0]  sb  self.overrides[over].oid  in delete_override_only
+x    access  overtup = self.overrides[over]  sb  overobj = self.overrides[over]  in  delete_override_all()
+x                over_id = overtup[0]                over_id = overobj.oid
+x    access  for over, cat in self.overrides.items():  sb  for over, overobj in self.overrides.items():  in find_all_related_to_cat()
+x                if cat[1] == catstr:                            if overobj.cat == catstr:
+x    access  overtup = self.overrides[cur_over]  sb  overobj = self.overrides[cur_over]  in  find_all_related_to_over()
+x                over_id = overtup[0]                    over_id = overobj.oid
+x    queston overrides.cache_loaded()    sb  is this used anymore  in get_all_overrides()
+x    create  overrides[row[1]] = row[2]  sb overrides[row[1]] = Override(row[0],row[1],row[2])  in  get_all_overrides()
+x    create  overrides[row[1]] = (row[0], row[2]) sb overrides[row[1]] = Override(row[0],row[1],row[2]) in load_overrides()
+x    access  overvalues = self.overrides[over]  sb  overobj = self.overrides[over]  in  make_cat_to_override_dict()
+x                oid = overvalues[0]
+x                cat_to_overrides[cat].append((oid, over))  sb  append(Override(overobj)
+x    access  for over, cat in self.overrides.items():  sb  for over, overobj in self.overrides.items():          
+x                if cat[1] == lookFor:                           if overobj.cat == lookFor:
+x                    append(over)                                    append(overobj)
+x    access  overtup = self.overrides[cur_over]  sb  overobj = self.overrides[cur_over]  in rename_override_all()
+x            over_id = overtup[0]                       over_id = overobj.oid
+x    access  for over, cat in self.overrides.items():  sb  for over, overobj in self.overrides.items():  in sanity_check_db()
+x                if cat[1] in self.cat_to_oid:                   if overobj.cat in self.cat_to_oid:
+x                    print('Override: '+over+' Category: '+cat[1]+' is GOOD.')  sb overobj.cat
+x    access  for over, ocat in self.overrides.items():  sb  for over, overobj in self.overrides.items():  in sanity_check_db()
+x                if cat.cat == ocat[1]:                          if cat.cat ==  overobj.cat:
+x    access  self.conn.execute(self.updateOverridesCatSQL, (newCat, curCat))  add cur =
+x            self.commit()
+x                                                        add last_id = cur.last_id
+x            for over, cat in self.overrides.items():    sb  for over, overobj in self.overrides.items():
+x                if cat[1] == curCat:                            if overobj.cat == curCat:
+x                                                                    overobj.cat = newCat
+x                    self.overrides[over] = newCat                   self.overrides[over] = overobj
+    access  cattup = self.db.overrides[self.override_str]  sb  overobj = self.db.overrides[self.override_str]  in delete_override()
+                
+cat_from_desc   sb returning catstr, cat_id, trig_id/0, over_id/0                
+
+_init_ 
+        self.listCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listCategorized))
+        self.listUnCategorized.customContextMenuRequested.connect(lambda: self.CategorizedPopUpHndlr(self, self.listUnCategorized))     #self.connect(self.customContextMenuRequested, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.CategorizedPopUp)
+CategorizedPopUpHndlr
+    def CategorizedPopUpHndlr(self, event, whichList):
+        """A right mouse click has happened in one of the Categorized list. If a Category
+        has been selected in the Category list, then find the entry that was clicked on,
+        set it's category to the selected one and then resort all the entries in the two
+        Categorized list. The list where the click happened is passed in as whichList.
+        This allows this code to function in either list with no list specific code."""
+        menu = QMenu(self)
+        newCatList = self.listCategories.selectedItems()
+        if len(newCatList) == 0:
+            str = 'None'
+        else:
+            str = newCatList[0].text()
+        
+        self.NewCatAct.setText(str)
+        menu.addAction(self.NewCatAct)
+        menu.addAction(self.NoneCatAct)
+        selectedEntryStr = whichList.currentItem().text()
+        self.newCatStr = str
+        self.selectedEntry = self.cf.find(selectedEntryStr)
+        #menu.addAction(copyAct)
+        #menu.addAction(pasteAct)
+        menu.show()
+        what = menu.exec_(PyQt5.QtGui.QCursor.pos())
+        if (what):
+            what.trigger()
+        pass
+CreatePopupActions
+    def CreatePopupActions(self):
+        self.NewCatAct = QAction("New&Cat")
+        self.NoneCatAct = QAction("&None")
+        #newAct->setShortcuts(QKeySequence::New);
+        self.NewCatAct.setStatusTip("Set entry's to this category");
+        self.NoneCatAct.setStatusTip("Set entry's category to None")
+        self.NewCatAct.triggered.connect(self.NewCatAction)
+        self.NoneCatAct.triggered.connect(self.NoneCatAction)
+NewCatAction        
+    def NewCatAction(self):
+        self.selectedEntry.category = self.newCatStr
+        self.ResortList()
+NoneCatAction      
+    def NoneCatAction(self):
+        self.selectedEntry.category = None
+        self.ResortList()

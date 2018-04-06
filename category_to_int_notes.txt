@@ -1,0 +1,17 @@
+category fixes
+====================================
+make 0 the 'None' category  >  CheckFileDialog::ReadFileClickHndlr,NoneCatAction,ResortList
+                                                SetCatHndlr, SteTrigHndlr,UnCatHndlr
+entry string print functions lookup category and trigger strings
+need a string to category int lookup function > CheckFileDialog::SetCatHndlr,NewCatAction
+change database.cat_from_desc to set cat_id and trig_id rather and return string
+    > CheckFileDialog::SetCatHndlr,SetTrigHndlr,UnCatHndlr
+change entry insert SQL to use cat_id, trig_id and cat str  > Database::add_entry
+change all sql to add cat_id and trig_id
+change entry searches to use cat_id and trig_id > Database::delete_trigger_all,delete_override_all
+make id equivalent of Category.no_category > Database::delete_trigger_all,delete_override_all
+change database::find_all_related_to_cat string parm to cat_id parm
+change override searches to use cat_id > Database::find_all_related_to_cat
+
+trigger fixes
+====================================

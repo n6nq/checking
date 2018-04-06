@@ -33,4 +33,5 @@ FORMS    += mainwindow.ui \
     categories.ui \
     warninglistdlg.ui \
     chart_test.ui \
-    manageepredictions.ui
+    manageepredictions.ui \
+    chart_window.ui

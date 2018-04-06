@@ -12,8 +12,8 @@
   </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-    <horstretch>20</horstretch>
-    <verstretch>20</verstretch>
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="baseSize">
@@ -22,8 +22,17 @@
     <height>400</height>
    </size>
   </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::ActionsContextMenu</enum>
+  </property>
   <property name="windowTitle">
    <string>Predicted Balances</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
   </property>
   <widget class="QGraphicsView" name="graph">
    <property name="geometry">

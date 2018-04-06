@@ -1,0 +1,76 @@
+Override: Wallburton Missing Cat: CatterWallee is BAD BAD.
+Override: Wallball Missing Cat: CatterWallee is BAD BAD.
+Override: CatFang Missing Cat: CatterBalls is BAD BAD.
+Override: CatClaw Missing Cat: CatterBalls is BAD BAD.
+Trigger: Wal-Mart Missing Cat: Catter is BAD BAD.
+Trigger: WIENERSCHNITZEL Missing Cat: Catter is BAD BAD.
+Trigger: Wally Missing Cat: CatterWallee is BAD BAD.
+Trigger: Walrus Missing Cat: CatterWallee is BAD BAD.
+Trigger: CatBalls Missing Cat: CatterBalls is BAD BAD.
+Trigger: CatBanana Missing Cat: CatterBalls is BAD BAD.
+Category: Gift has no triggers or overrides.  BAD BAD.
+Category: CatterPullee has no triggers or overrides.  BAD BAD.
+Category: Bus has no triggers or overrides.  BAD BAD.
+Category: Clothing has trig: HOT TOPIC GOOD.
+Category: Clothing has trig: FOREVER 21 GOOD.
+Category: Clothing has trig: TORRID GOOD.
+Category: Clothing has trig: MARSHALLS GOOD.
+Category: Clothing has trig: GEORGE'S CLEANERS GOOD.
+Category: Clothing has trig: DEVASKIN GOOD.
+Category: Clothing has trig: KOHL GOOD.
+Category: Hobby has trig: All Electronics GOOD.
+Category: Hobby has trig: KINOKUNIYA GOOD.
+Category: Hobby has trig: RADIOSHACK GOOD.
+Category: Hobby has trig: MICHAELS GOOD.
+Category: Hobby has trig: Craft Egg GOOD.
+Category: Hobby has trig: RADIO GOOD.
+Category: Misc has trig: USPS GOOD.
+Category: Misc has trig: IQMASTE GOOD.
+Category: Health has trig: CVS GOOD.
+Category: Health has trig: WEIGHTWATCHERS GOOD.
+Category: Health has trig: ZENNI GOOD.
+Category: Utility has trig: WASTE MANAGEMENT GOOD.
+Category: Utility has trig: SPRINT GOOD.
+Category: Utility has trig: WATERWOR GOOD.
+Category: Utility has trig: TWC GOOD.
+Category: Utility has trig: SOCALGAS GOOD.
+Category: Check has trig: CHECK GOOD.
+Category: Mortgage has trig: HOME MTG GOOD.
+Category: Card has trig: SYNCB GOOD.
+Category: Card has trig: AMAZON GOOD.
+Category: Card has trig: DRESSBARN GOOD.
+Category: Card has trig: CAPITAL ONE GOOD.
+Category: Card has trig: HC PROCESSING GOOD.
+Category: Card has trig: Kohls GOOD.
+Category: Card has trig: AMZ GOOD.
+Entry: Misc 02/27/17 -19.85 <1> PURCHASE AUTHORIZED ON 02/24 ENTREPRENEURACCELE 1300887337 AUS S387055601174072 CARD 4129
+ No trig or over. BAD BAD.
+Entry: Gift 02/06/17 -583.14 <1> PURCHASE AUTHORIZED ON 02/04 BIG LOTS STORES 1070 W LANCASTER CA P00467035640201574 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Misc 01/19/17 -15.4 <1> ALICE1101983 IAT PAYPAL 170119 1000512285959 JON CLARK
+ No trig or over. BAD BAD.
+Entry: Gift 12/30/16 -13.08 <1> PURCHASE AUTHORIZED ON 12/30 FICKLE WISH LOS ANGELES CA P00466365758892172 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Entertain 12/30/16 -21.79 <1> PURCHASE AUTHORIZED ON 12/30 ENTERTAINMENT HOBBY SH LOS ANGELES CA P00586365755793982 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Gift 12/27/16 -254.68 <1> PURCHASE AUTHORIZED ON 12/24 BEST BUY #106 PALMDALE CA P00000000172437398 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Gift 12/22/16 -250.0 <1> PURCHASE AUTHORIZED ON 12/21 FAST FIX JEWELRY PALMDALE CA P00306357083308092 CARD 4129
+ No trig or over. BAD BAD.
+Entry: Gift 12/22/16 -122.05 <1> PURCHASE AUTHORIZED ON 12/21 NINE WEST WEB 800-999-1877 PA S386356037454904 CARD 4129
+ No trig or over. BAD BAD.
+Entry: Home 12/21/16 -196.2 <1> PURCHASE AUTHORIZED ON 12/20 NOA*PARTS OR REPAI 800-255-3700 WA S586353685995590 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Gift 12/19/16 -37.67 <1> PURCHASE AUTHORIZED ON 12/17 KIRKLANDS #665 PALMDALE CA P00000000572463909 CARD 4129
+ No trig or over. BAD BAD.
+Entry: Gift 12/19/16 -161.0 <1> PURCHASE AUTHORIZED ON 12/17 SQ *THE MASSAGE CE LANCASTER CA S386352735024922 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Gift 03/20/17 -586.16 <1> PURCHASE AUTHORIZED ON 03/17 BLOCK BIKES LANCASTER CA S307076804846780 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Education 05/24/17 -15.0 <1> PURCHASE AUTHORIZED ON 05/23 HUMBLEBUNDLE.COM HUMBLEBUNDLE. CA S467143750617449 CARD 6858
+ No trig or over. BAD BAD.
+Entry: Bank 05/19/17 324.66 <1> CARD FINAL CREDIT 10514172869
+ No trig or over. BAD BAD.
+Entry: Misc 04/24/17 -2.76 <1> PURCHASE AUTHORIZED ON 04/22 BANDCAMP SATELLITE BANDCAMPCOM CA S587113162155560 CARD 4129
+ No trig or over. BAD BAD.
+Entry: Taxes 04/19/17 2342.0 <1> IRS TREAS 310 TAX REF 041917 569767084200989 CLARK No trig or over. BAD BAD.

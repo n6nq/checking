@@ -1,0 +1,2 @@
+edtCheckFileEntry->text entry not supported
+btnReadCheckFile->click

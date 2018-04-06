@@ -1,0 +1,253 @@
+mancat  db  db
+    mancat
+btnNewCategory
+    make_new_category
+        add_cat
+            insertCatSQL
+            categories.add
+btnNewTrigger
+    make_new_trigger
+        add_trigger
+            insertTrigsSQL
+            triggers[trig] = cat
+btnNewOverride
+    make_new_override
+        add_override
+            insertOverrideSQL
+            overrides[over] = cat
+btnRenameCategory
+    rename_category
+        find_all_related_to_cat
+            overrides
+            triggers
+            entries
+        rename_category
+            add_cat
+                insertCatSQL
+                categories.add()
+            change_trigs_for_cat    <<<<???? only doing memory, what about db
+                triggers            <<<<???? where's the database update
+                where's database
+            change_overs_for_cat    <<<<????
+                overrides
+                where's database
+            change_cat_of_entries   <<<<????
+                update_entries_cats()
+                    updateEntryCatSQL
+                    entries
+                entries done at both levels
+            change_cat_of_temp_entries
+                temp_entries        memory only is correct here
+            categories.remove
+btnRenameTrigger
+    rename_trigger
+        find_all_related_to_trig
+        rename_trigger todo         <<<<<<
+btnRenameOverride
+    rename_override
+        find_all_related_to_over todo
+        rename_override todo
+btnDeleteCategory
+    delete_category
+        find_all_related_to_cat
+        remove_category
+btnDeleteTrigger
+    delete_trigger
+        find_all_related_to_trigger todo
+        remove_trigger todo
+btnDeleteOverride
+    delete_override
+        find_all_related_to_over todo
+        remove_override todo
+
+
+NewCat - add_cat
+---------------------------------
+Overide>|---------|-Category[1]
+ +   M              |    | M[2]
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+1) execute(self.insertCatSQL, (catStr, None))
+2) categories.add(catStr)
+--------------------------------
+NewTrigger - add_trigger
+--------------------------------
+Overide>|---------|-Category
+ +   M              |    | M
+ |[1]Trigger>|------+    -
+ |    +  M[2]            |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+1)xecute(self.insertTrigsSQL, (trig, cat))
+2)triggers[trig] = cat
+-------------------------------------
+NewOvrride - add-override
+-------------------------------------
+Overide[1]>|------|-Category
+ +   M [2]          |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+1) execute(self.insertOverrideSQL, (over, cat))
+2) overrides[over] = cat
+--------------------------------------
+RenCat - rename_category
+--------------------------------------
+Overide>|-3a------|-Category [1a][5a]
+ +   M [3b]         |    | M [1b][5b]
+ |   Trigger>|-2a---+    -
+ |    +  M  [2b]         |
+ |    |                  |
+ |    +                  |
+ +---Entry>--4a----------+  
+      M [4b] ""-------TempEntry
+                        M [4c]
+1) add_cat(new_cat)
+1a)     insertCatSQL
+1b)     categories.add(catStr)
+3) update_overrides_cats(current_cat, new_cat)
+3a)     updateOverridesCatSQL
+3b)     overrides[over] = newCat
+2) update_triggers_cats(current_cat, new_cat)
+2a)     updateTriggersCatSQL
+2b)     triggers[trig] = newCat
+4) update_entries_cats(current_cat, new_cat)
+4a)     updateEntryCatSQL
+4b)     ent.category = newCat
+4c)     t_ent.category = newCat
+5) delete_category(current_cat)
+5a)     deleteCatSQL
+5b)     categories.discard()
+-------------------------------------
+RenTrig  --  rename_trigger_all
+-------------------------------------
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|1a6a--+    -
+ |    +  M    1b6b       |
+ |    |                  |
+ |    +                  |
+ +---Entry>-2)3)---------+  
+      M  4)""----tempEntry
+                        M 5)
+1) add_trigger(new_trig, cat)
+1a)     execute(self.insertTrigsSQL, (trig, cat))
+1b)     triggers[trig] = cat
+2) execute(self.findCatInEntriesSQL, (cat, ))
+3) execute(self.updateEntryCatSQL, (cat, category.Category.no_category()))
+4) for ent in entriee
+        if ent.desc has trig skip it
+5) for ent in temp_entries
+        if ent.dec has trig   skip  it
+6) remove_trigger_only(cur_trig)
+6a)     execute(self.deleteTrigSQL, (trig, ))
+6b)     del self.triggers[trig]
+--------------------------------------
+renOver -- rename_override_all
+--------------------------------------
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+Overide>|---------|-Category
+ +   M              |    | M
+ |   Trigger>|------+    -
+ |    +  M               |
+ |    |                  |
+ |    +                  |
+ +---Entry>--------------+  
+      M  ""-------TempEntry
+                        M
+
+                        
+                        
+                        
+ cat one
+ cat two
+ 
+ over red one
+ trig green two
+ 
+ change trig green -> orange
+ ------------------------
+ ent one red red  orange
+    override red keeps this one  if overrides true  skip it x
+ ent two green green orange
+    no overrides, green->orange, stays two  no over, has new trig, stays two
+ ent two green blue
+    green->orange makes this None  no over, no orange, change to None
+ ent one red green orange
+    override red keeps this one   has over, stays a one
+ ent one red green blue
+    override red keeps this one   has over, stays a one
+ ent three blue blue orange
+    no overs, has orange, cat three, two trigger error
+ 

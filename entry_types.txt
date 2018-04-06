@@ -1,0 +1,6 @@
+File    -> "03/14/2017","-3.02","*","","PURCHASE AUTHORIZED ON 03/14 VONS Store 2029 LANCASTER CA P00307074026074566 CARD 6858"
+DB Names-> oid,     category, sdate,         amount,   cleared,  checknum,  desc 
+DB Types-> INTEGER, varchar,  text,          int,      boolean,  int,      varchar
+Chk_File-> 0,       no_cat(), trans_date,    from_str, cleared(),prt[3]    prt[4]
+Chk Type-> int,     str,      str,           str,      str *,    str       str
+Entry      int      str       datetime.date  Money,    boolean,  int,      str
