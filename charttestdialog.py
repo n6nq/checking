@@ -64,7 +64,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         #oldMatrix = self.graph.transform()
         #self.graph.resetTransform()
         #self.graph.translate(oldMatrix.dx(), oldMatrix.dy());
-        self.graph.scale(1, -1)
+        self.graph.scale(1, -1) 
         #self.showRects(5.5)
         
         self.show()
