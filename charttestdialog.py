@@ -30,7 +30,9 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
             return
         
         self.get_chart_data(today, values[0])
-            
+
+        self.get_future_data(today)
+        
         self.scene = QGraphicsScene()
         self.graph.setScene(self.scene)
         self.showRects(1)
@@ -123,4 +125,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.balances.reverse()
         self.max_bal = max(self.balances)
         self.min_bal = min(self.balances)
+        
+    def get_future_data(self, today):
+        futures = self.db.get_next_three_months(today)
         

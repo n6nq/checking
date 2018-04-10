@@ -788,7 +788,13 @@ class Database(object):
             if ent.date >= start and ent.date <= today:
                 entries.append(ent)
         return entries
+    
+    def get_next_three_months(self, today):
+        futures = []
         
+#        for pred in self.predictions:
+#            if pred.
+            
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:
