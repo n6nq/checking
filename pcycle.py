@@ -145,6 +145,8 @@ class PCycle(object):
                 continue
             else:
                 assert(False)
+
+    def temp_promote(self, today):
     
     @classmethod
     def get_cycle_from_str(cls, str):

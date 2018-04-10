@@ -791,10 +791,20 @@ class Database(object):
     
     def get_next_three_months(self, today):
         futures = []
-        
-#        for pred in self.predictions:
-#            if pred.
-            
+
+        end = today + datetime.timedelta(weeks=13)
+        for pred in self.predictions:
+            cycle = pred.cycle
+            pcycle = PCycle(cycle.ctype, cycle.ddate, cycle.vdate)
+            dnext = today
+            while dnext <= end:
+                dnext = pcycle.promote(dnext)
+                if dnext <= end:
+                    row = (0, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount, '', '', pred.desc)
+                    pent = entry.Entry(self, row, False)
+                    futures.append(pent)
+
+
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:
