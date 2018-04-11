@@ -794,11 +794,13 @@ class Database(object):
 
         end = today + datetime.timedelta(weeks=13)
         for pred in self.predictions:
+            first = True
             cycle = pred.cycle
             pcycle = PCycle(cycle.ctype, cycle.ddate, cycle.vdate)
             dnext = today
             while dnext <= end:
-                dnext = pcycle.promote(dnext)
+                dnext = pcycle.promote_all(dnext, first)
+                first = False
                 if dnext <= end:
                     row = (0, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount, '', '', pred.desc)
                     pent = entry.Entry(self, row, False)

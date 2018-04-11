@@ -146,7 +146,34 @@ class PCycle(object):
             else:
                 assert(False)
 
-    def temp_promote(self, today):
+    def promote_all(self, today, first):
+        # Monthly=1, Weekly=2, Quarterly=3, Annual=4, BiWeekly=5, Adhoc=6
+        ctype = self.ctype
+        
+        if ctype == Cycles['Monthly']:
+            if today.day <= self.vdate and first:
+                new_date = today.replace(day=self.vdate)
+                first = False
+            else:
+                if today.month == 12:
+                    month = 1
+                    year = today.year + 1
+                else:
+                    month = today.month + 1
+                    year = today.year
+                new_date = today.replace(year=year, month=month, day=self.vdate)
+        elif ctype == Cycles['Weekly']:
+            self.ddate = today + timedelta(weeks=1)
+            self.ddate = self.ddate
+        elif ctype == Cycles['Quarterly']:
+            self.ddate += timedelta(91)
+        elif ctype == Cycles['Annual']:
+            self.ddate += timedelta(365)
+        elif ctype == Cycles['BiWeekly']:
+            self.ddate += timedelta(14)
+        else:
+            assert(False)
+        return new_date
     
     @classmethod
     def get_cycle_from_str(cls, str):
