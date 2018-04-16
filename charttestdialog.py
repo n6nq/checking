@@ -32,11 +32,14 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.get_chart_data(today, values[0])
 
         self.get_future_data(today)
+
+        self.max_bal = max(self.balances)
+        self.min_bal = min(self.balances)
         
         self.scene = QGraphicsScene()
         self.graph.setScene(self.scene)
         self.showRects(1)
-        scenewidth = (self.nEntries+100) * 4
+        scenewidth = (self.nEntries + self.nFutures) * 4
         sceneheight = (self.max_bal - self.min_bal) / 100
         self.scene.setSceneRect(QRectF(0, 0, scenewidth, sceneheight))
         self.showRects(2)
@@ -52,6 +55,10 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
     
         for i in range(0, self.nEntries-1):
             self.scene.addLine( QLineF( i * 4, self.balances[i]/100, (i+1) * 4, self.balances[i+1]/100), pen)
+
+        pen = QPen(Qt.red)
+        for j in range(0, self.nFutures-1):
+            self.scene.addLine( QLineF( i * 4, self.balances[i+j]/100, (i+j+1) * 4, self.balances[i+j+1]/100), pen)
             
         for liney in range(0, int(sceneheight)+200, 200):
             self.scene.addLine(QLineF(0.0, liney, scenewidth, liney), pen)
@@ -115,17 +122,20 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.nEntries = len(entries)
         reversed_entries = sorted(entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
         self.balances = []
-        running = int(float(starting_balance) * 100)
-        self.balances.append(running)
+        self.running = int(float(starting_balance) * 100)
+        self.balances.append(self.running)
 
         for ent in reversed_entries:
-            running -= ent.amount.value
-            self.balances.append(running)
+            self.running -= ent.amount.value
+            self.balances.append(self.running)
             
         self.balances.reverse()
-        self.max_bal = max(self.balances)
-        self.min_bal = min(self.balances)
         
     def get_future_data(self, today):
-        futures = self.db.get_next_three_months(today)
+        self.futures = self.db.get_next_three_months(today)
+        for ent in self.futures:
+            self.running -= ent.amount.value
+            self.balances.append(self.running)
+            
+        self.nFutures = len(self.futures)
         

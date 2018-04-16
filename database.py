@@ -520,7 +520,7 @@ class Database(object):
         affected = []
         for pred in self.predictions:
             if pred.amount.value == entry.amount.value:
-                affected.append('<Prediction>'+pred.as_str())
+                affected.append('<Prediction>'+pred.str())
         return affected
     
     def find_all_related_to_over(self, cur_over, new_over):
@@ -794,19 +794,17 @@ class Database(object):
 
         end = today + datetime.timedelta(weeks=13)
         for pred in self.predictions:
-            first = True
+            print(pred)
             cycle = pred.cycle
             pcycle = PCycle(cycle.ctype, cycle.ddate, cycle.vdate)
-            dnext = today
-            while dnext <= end:
-                dnext = pcycle.promote_all(dnext, first)
-                first = False
-                if dnext <= end:
-                    row = (0, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount, '', '', pred.desc)
-                    pent = entry.Entry(self, row, False)
-                    futures.append(pent)
-
-
+            next_dates = pcycle.future_dates(today, end)
+            for dnext in next_dates:
+                row = (0, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount.value, '', '', pred.desc)
+                pent = entry.Entry(self, row, False)    # pent = predicted entry
+                futures.append(pent)
+        futures = sorted(futures, key=lambda ent: ent.date.isoformat())
+        return futures
+    
     def load_accounts(self):
         if len(self.accounts) == 0:
             try:

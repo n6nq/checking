@@ -336,7 +336,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.comboDate.show()
             return
         elif cycle_choice == 'Weekly':
-            day_list = [DaysOfWeek.inv[1], DaysOfWeek.inv[2], DaysOfWeek.inv[3], DaysOfWeek.inv[4], DaysOfWeek.inv[5], DaysOfWeek.inv[6], DaysOfWeek.inv[7]]
+            day_list = [DaysOfWeek.inv[0], DaysOfWeek.inv[1], DaysOfWeek.inv[2], DaysOfWeek.inv[3], DaysOfWeek.inv[4], DaysOfWeek.inv[5], DaysOfWeek.inv[6]]
             self.comboDate.addItems(day_list)
             self.comboDate.show()
             return

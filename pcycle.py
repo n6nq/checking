@@ -48,7 +48,7 @@ from bidict import bidict
 Cycles = bidict({'None': 0, 'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
 
 
-DaysOfWeek = bidict({'None': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 7})
+DaysOfWeek = bidict({'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Sat': 5, 'Sun': 6})
 
 
 class PCycle(object):
@@ -96,7 +96,10 @@ class PCycle(object):
                 assert(False)
         else:
             assert(False)
-                
+            
+    def __str__(self):
+        return 'Type: ' + self.get_type_str() + ' ' + self.get_date_str()
+    
     def get_type_str(self):
         return Cycles.inv[self.ctype]
     
@@ -104,6 +107,8 @@ class PCycle(object):
         if Cycles.inv[self.ctype] == 'Monthly':
             return str(self.vdate)
         elif Cycles.inv[self.ctype] == 'Weekly':
+            if self.vdate >= 7:
+                return "Over"   #HACK
             return DaysOfWeek.inv[self.vdate]
         elif self.ctype in Cycles.inv:
             return str(self.ddate)
@@ -146,31 +151,127 @@ class PCycle(object):
             else:
                 assert(False)
 
-    def promote_all(self, today, first):
+    def future_dates(self, start, end):
         # Monthly=1, Weekly=2, Quarterly=3, Annual=4, BiWeekly=5, Adhoc=6
         ctype = self.ctype
         
         if ctype == Cycles['Monthly']:
-            if today.day <= self.vdate and first:
-                new_date = today.replace(day=self.vdate)
-                first = False
-            else:
-                if today.month == 12:
-                    month = 1
-                    year = today.year + 1
-                else:
-                    month = today.month + 1
-                    year = today.year
-                new_date = today.replace(year=year, month=month, day=self.vdate)
-        elif ctype == Cycles['Weekly']:
-            self.ddate = today + timedelta(weeks=1)
-            self.ddate = self.ddate
-        elif ctype == Cycles['Quarterly']:
-            self.ddate += timedelta(91)
+            return self.future_monthlies(start, end)
         elif ctype == Cycles['Annual']:
-            self.ddate += timedelta(365)
+            return self.future_annuals(start, end)
+        elif ctype == Cycles['Weekly']:
+            return self.future_weeklies(start, end)
         elif ctype == Cycles['BiWeekly']:
-            self.ddate += timedelta(14)
+            return self.future_biweeklies(start, end)
+        elif ctype == Cycles['Quarterly']:
+            return self.future_quarterlies(start, end)
+        elif ctype == Cycles['AdHoc']:
+            return self.future_adhoc(start, end)
+        else:
+            assert(False)
+
+    def future_quarterlies(self, start, end):
+        new_date = date(self.ddate.year, self.ddtae.month, self.ddate.day)
+        while new_date < start:
+            new_date += timedelta(days=91)
+        if new_date <= end:
+            return [new_date]
+        return []
+    
+    def future_adhoc(self, start, end):
+        if self.ddate >= start and self.ddate <= end:
+            return [date(self.ddate.year, self.ddate.month, self.ddate.day)]
+        return []
+    
+    def future_annuals(self, start, end):
+        new_date = date(self.ddate.year, self.ddate.month, self.ddate.day)
+        if new_date < start:
+            new_date = new_date.replace(year=(new_date.year+1))
+        if new_date >= start and new_date <= end:
+            print(new_date)
+            return [new_date]
+        else:
+            return[]
+            
+    def future_monthlies(self, start, end):
+        futures = []
+        d_next = start.replace(day=self.vdate)
+
+        if self.vdate >= start.day:
+            futures.append(d_next)
+            print(d_next)
+        while d_next < end:
+            n_month = d_next.month + 1
+            n_year = d_next.year
+            
+            if n_month > 12:
+                n_month = 1
+                n_year += 1
+            
+            d_next = d_next.replace(month=n_month, year=n_year)
+            if d_next <= end:
+                futures.append(d_next)
+                print(d_next)
+        return futures
+
+    def future_weeklies(self, start, end):
+        futures = []
+        dow = start.weekday()
+        want = self.vdate
+        addin = ((want - dow) + 7) % 7
+        d_next = start + timedelta(days=addin)
+        
+        while d_next >= start and d_next <= end:
+            print(d_next)
+            futures.append(d_next)
+            d_next = d_next + timedelta(days=7)
+        return futures
+    
+    def future_biweeklies(self, start, end):
+        futures = []
+        d_next = self.ddate
+        
+        while d_next <= end:
+            if d_next >= start:
+                print(d_next)
+                futures.append(d_next)
+            d_next = d_next + timedelta(days=14)
+        return futures
+    
+    def promote_all(self, today, dnext, first):
+        # Monthly=1, Weekly=2, Quarterly=3, Annual=4, BiWeekly=5, Adhoc=6
+        ctype = self.ctype
+        
+#        if self.ddate > today and first:
+#            return dnext
+        
+        if ctype == Cycles['Monthly']:
+            if first:
+                if self.vdate >= today.day:
+                    new_date = today.replace(day=self.vdate)
+                else:
+                    assert(dnext.day == self.vdate)
+                    month = dnext
+                    new_date = dnext
+            if self.vdate >= next.day <= self.vdate and first:
+                new_date = dnext.replace(day=self.vdate)
+            else:
+                if dnext.month == 12:
+                    month = 1
+                    year = dnext.year + 1
+                else:
+                    month = dnext.month + 1
+                    year = dnext.year
+                new_date = dnext.replace(year=year, month=month, day=self.vdate)
+        elif ctype == Cycles['Weekly']:
+            new_date = dnext + timedelta(weeks=1)
+        elif ctype == Cycles['Quarterly']:
+            new_date = self.ddate + timedelta(91)
+        elif ctype == Cycles['Annual']:
+            
+            new_date = self.ddate + timedelta(365)
+        elif ctype == Cycles['BiWeekly']:
+            new_date = self.ddate + timedelta(14)
         else:
             assert(False)
         return new_date
