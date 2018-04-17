@@ -42,9 +42,10 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.graph.setScene(self.scene)
         self.showRects(1)
         scenewidth = (self.nEntries + self.nFutures) * 4
-        sceneYmax = self.max_bal + (100 - (self.max_bal % 100))
-        = (self.max_bal - self.min_bal) / 100
-        self.scene.setSceneRect(QRectF(0, self.min_bal, scenewidth, self.max_bal))
+        sceneYmax = round((self.max_bal/100), -2)
+        sceneYmin = round((self.min_bal/100), -2)
+        #= (self.max_bal - self.min_bal) / 100
+        self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
         self.showRects(2)
         #self.graph.setSceneRect(QRectF(0, 0, width, height))
         viewrect = self.graph.rect()
@@ -66,7 +67,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
             
         pen.setColor(Qt.black)
         
-        for liney in range(0, int(sceneheight)+200, 200):
+        for liney in range(int(sceneYmin), int(sceneYmax+100), 200):
             self.scene.addLine(QLineF(0.0, liney, scenewidth, liney), pen)
             myText = self.scene.addText(str(liney), font)
             myText.moveBy(20, liney+100)
@@ -141,7 +142,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.futures = self.db.get_next_three_months(today)
         self.running = starting
         for ent in self.futures:
-            self.running -= ent.amount.value
+            self.running += ent.amount.value
             self.balances.append(self.running)
             
         self.nFutures = len(self.futures)
