@@ -29,9 +29,11 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         if values[1] == False:
             return
         
-        self.get_chart_data(today, values[0])
+        
+        self.starting_balance = int(float(values[0]) * 100)
+        self.get_chart_data(today, self.starting_balance)
 
-        self.get_future_data(today)
+        self.get_future_data(today, self.starting_balance)
 
         self.max_bal = max(self.balances)
         self.min_bal = min(self.balances)
@@ -40,8 +42,9 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.graph.setScene(self.scene)
         self.showRects(1)
         scenewidth = (self.nEntries + self.nFutures) * 4
-        sceneheight = (self.max_bal - self.min_bal) / 100
-        self.scene.setSceneRect(QRectF(0, 0, scenewidth, sceneheight))
+        sceneYmax = self.max_bal + (100 - (self.max_bal % 100))
+        = (self.max_bal - self.min_bal) / 100
+        self.scene.setSceneRect(QRectF(0, self.min_bal, scenewidth, self.max_bal))
         self.showRects(2)
         #self.graph.setSceneRect(QRectF(0, 0, width, height))
         viewrect = self.graph.rect()
@@ -56,10 +59,13 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         for i in range(0, self.nEntries-1):
             self.scene.addLine( QLineF( i * 4, self.balances[i]/100, (i+1) * 4, self.balances[i+1]/100), pen)
 
-        pen = QPen(Qt.red)
+        pen.setColor(Qt.red)
+
         for j in range(0, self.nFutures-1):
-            self.scene.addLine( QLineF( i * 4, self.balances[i+j]/100, (i+j+1) * 4, self.balances[i+j+1]/100), pen)
+            self.scene.addLine( QLineF( (i+j) * 4, self.balances[i+j]/100, (i+j+1) * 4, self.balances[i+j+1]/100), pen)
             
+        pen.setColor(Qt.black)
+        
         for liney in range(0, int(sceneheight)+200, 200):
             self.scene.addLine(QLineF(0.0, liney, scenewidth, liney), pen)
             myText = self.scene.addText(str(liney), font)
@@ -122,7 +128,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.nEntries = len(entries)
         reversed_entries = sorted(entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
         self.balances = []
-        self.running = int(float(starting_balance) * 100)
+        self.running = starting_balance
         self.balances.append(self.running)
 
         for ent in reversed_entries:
@@ -131,8 +137,9 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
             
         self.balances.reverse()
         
-    def get_future_data(self, today):
+    def get_future_data(self, today, starting):
         self.futures = self.db.get_next_three_months(today)
+        self.running = starting
         for ent in self.futures:
             self.running -= ent.amount.value
             self.balances.append(self.running)
