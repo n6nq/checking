@@ -165,7 +165,7 @@ class PCycle(object):
             return self.future_biweeklies(start, end)
         elif ctype == Cycles['Quarterly']:
             return self.future_quarterlies(start, end)
-        elif ctype == Cycles['AdHoc']:
+        elif ctype == Cycles['Adhoc']:
             return self.future_adhoc(start, end)
         else:
             assert(False)
