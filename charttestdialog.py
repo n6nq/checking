@@ -7,7 +7,21 @@ from database import Database
 import datetime
 from chart_window_auto import Ui_predictions
 
-#class ChartTestDialog(QDialog, Ui_predictions):
+class ChartScene(QGraphicsScene):
+    
+    def __init__(self, parent):
+        super(ChartScene, self).__init__()
+        self.parent = parent
+        
+    def mousePressEvent(self, mouseEvent):
+        super(ChartScene, self).mousePressEvent(mouseEvent)
+        x = mouseEvent.scenePos().x()
+        y = mouseEvent.scenePos().y()
+        print(x, y)
+        self.parent.sceneMousePressEvent(mouseEvent)
+
+XINC = 4
+
 class ChartTestDialog(QMainWindow, Ui_predictions):
     
     myresize = pyqtSignal('QSize')
@@ -38,10 +52,10 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.max_bal = max(self.balances)
         self.min_bal = min(self.balances)
         
-        self.scene = QGraphicsScene()
+        self.scene = ChartScene(self)
         self.graph.setScene(self.scene)
         self.showRects(1)
-        scenewidth = (self.nEntries + self.nFutures) * 4
+        scenewidth = (self.nEntries + self.nFutures) * XINC
         sceneYmax = round((self.max_bal/100), -2)
         sceneYmin = round((self.min_bal/100), -2)
         #= (self.max_bal - self.min_bal) / 100
@@ -58,12 +72,12 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         
     
         for i in range(0, self.nEntries-1):
-            self.scene.addLine( QLineF( i * 4, self.balances[i]/100, (i+1) * 4, self.balances[i+1]/100), pen)
+            self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
 
         pen.setColor(Qt.red)
 
         for j in range(0, self.nFutures-1):
-            self.scene.addLine( QLineF( (i+j) * 4, self.balances[i+j]/100, (i+j+1) * 4, self.balances[i+j+1]/100), pen)
+            self.scene.addLine( QLineF( (i+j) * XINC, self.balances[i+j]/100, (i+j+1) * XINC, self.balances[i+j+1]/100), pen)
             
         pen.setColor(Qt.black)
         
@@ -92,6 +106,23 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         sstr = "{} scene: {},{},{},{}".format(loc, sceneR.left(), sceneR.bottom(), sceneR.right(), sceneR.top())
         vstr = " view: {},{},{},{}".format(viewR.left(), viewR.bottom(), viewR.right(), viewR.top())
         print(sstr, vstr)
+
+    def sceneMousePressEvent(self, mouseEvent):
+
+        x = mouseEvent.scenePos().x()
+        y = mouseEvent.scenePos().y()
+        print('P', x, y)
+        index = int(round(x / XINC))
+        self.displayRangeAt(index, 5, 5)
+        #QGraphicsScene.mousePressEvent(self, mouseEvent)
+        
+    def displayRangeAt(self, index, before, after):
+        assert(index >= 0 and index < self.nEntries + self.nFutures)
+        rlist = self.entries + self.futures
+        l = len(rlist)
+        selected = rlist[(index-before):(index+after)]
+        for pent in selected:
+            print(pent.amount.value, pent.desc)
         
     def resizeEvent(self, evt):
         #self.graph.fitInView(self.graph.sceneRect())
@@ -107,7 +138,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
 #        self.view.scale(self.newScale, self.newScale)
         
     def resizeGraph(self, size):
- #       width = (self.nEntries+100) * 4
+ #       width = (self.nEntries+100) * XINC
  #       height = (self.max_bal - self.min_bal)
  #       self.scene.setSceneRect(QRectF(0, 0, width, height))
  #       viewport = self.graph.viewport()
@@ -125,9 +156,9 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         self.showRects(7)
 
     def get_chart_data(self, today, starting_balance):
-        entries = self.db.get_last_three_months(today)
-        self.nEntries = len(entries)
-        reversed_entries = sorted(entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
+        self.entries = self.db.get_last_three_months(today)
+        self.nEntries = len(self.entries)
+        reversed_entries = sorted(self.entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
         self.balances = []
         self.running = starting_balance
         self.balances.append(self.running)
@@ -140,10 +171,11 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         
     def get_future_data(self, today, starting):
         self.futures = self.db.get_next_three_months(today)
+        self.nFutures = len(self.futures)
+        
         self.running = starting
         for ent in self.futures:
             self.running += ent.amount.value
             self.balances.append(self.running)
             
-        self.nFutures = len(self.futures)
         
