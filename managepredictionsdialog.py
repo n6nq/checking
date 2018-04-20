@@ -183,7 +183,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             "All predictions listed below may be the same prediction you are about to define. They have the " + \
             "same amount: "+entry.amount.as_str()+", the same category: '"+entry.category+"' and the same trigger: '" + \
             self.db.trig_for_oid(entry.trig_id)+"'.\n\nIs this entry really a new prediction?", 
-            affected)
+            affected, True)
         if dl.reply == True:
             #selection = self.predictionsView.selectionModel()
             #indexes = selection.selectedIndexes()
@@ -423,7 +423,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         dl = WarningListDialog(
             "All entries listed below have the trigger string '"+pred.trig+"' or the override string '"+pred.over+"'.\n" + \
             "Similar entries will be potential matches to predictions when when new check files are read.", 
-            affected)
+            affected, True)
         if dl.reply == True:
             self.db.add_prediction(pred)
             self.set_list_model(self.db.predictions)

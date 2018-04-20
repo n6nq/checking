@@ -135,7 +135,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         dl = WarningListDialog(
             "All entries listed below have the new override string '"+self.override_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
-            affected)
+            affected, True)
         if dl.reply == True:
             self.db.add_override(self.override_str, cat)
             i = QListWidgetItem(self.override_str)
@@ -160,7 +160,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         dl = WarningListDialog(
             "All entries listed below have the new trigger string '"+self.trigger_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
-            affected)
+            affected, True)
         if dl.reply == True:
             self.db.add_trigger(self.trigger_str, cat)
             i = QListWidgetItem(self.trigger_str)
@@ -176,7 +176,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         dl = WarningListDialog(
             "All triggers, overrides and entries listed below are relatd to the category'"+current_cat+"'.\n" + \
             "They will have their categories change to the new category '"+new_cat+"'.\n", 
-            affected_list)
+            affected_list, True)
 
         if dl.reply == True:
             if self.db.rename_category_all(current_cat, new_cat) == False:
@@ -203,7 +203,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             "If they do not contain the new override string, their category will be set to None.\n" + \
             "If there are <Exising Entry> below,  they are already categorized, and you would create a " + \
             "conflict by proceeding. Find another way.", 
-            affected_list)
+            affected_list, True)
         if dl.reply == True:
             if self.db.rename_override_all(current_str, new_str) == False:
                 msgbox = Message('Rename of Override failed.')
@@ -229,7 +229,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             "If they do not contain the new trigger string, their category will be set to None.\n" + \
             "If there are <Exising Entry> below,  they are already categorized, and you would create a " + \
             "conflict by proceeding. Find another way.", 
-            affected_list)
+            affected_list, True)
 
         if dl.reply == True:
             if self.db.rename_trigger_all(current_str, new_str) == False:
@@ -254,7 +254,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         affected = self.db.find_all_related_to_over(self.override_str, None)
         dl = WarningListDialog(
             'All Entries listed below will have their category changed to None.', \
-            affected)
+            affected, True)
 
         if dl.reply == True:
             if self.db.delete_override_all(self.override_str, override.cat) == False:
@@ -277,7 +277,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         dl = WarningListDialog(
             'The Overrides and Triggers in the list below will be deleted!\n' + \
             'All Entries will have their category changed to None.', \
-            affected_list)
+            affected_list, True)
         
         if dl.reply == True:
             if self.db.delete_category_all(selected_cat) == False:
@@ -305,7 +305,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         affected = self.db.find_all_related_to_trig(self.trigger_str, None)
         dl = WarningListDialog(
             'All Entries listed below will have their category changed to None.', \
-            affected)
+            affected, True)
         
         if dl.reply == True:
             if self.db.delete_trigger_all(self.trigger_str, trigger.cat) == False:

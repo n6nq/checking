@@ -6,6 +6,8 @@ from PyQt5.QtCore import QLineF, QSize, QRectF, QPointF, pyqtSignal, Qt
 from database import Database
 import datetime
 from chart_window_auto import Ui_predictions
+from warninglistdlg_auto import Ui_warninglistdlg
+from warninglistdialog import WarningListDialog
 
 class ChartScene(QGraphicsScene):
     
@@ -113,16 +115,23 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         y = mouseEvent.scenePos().y()
         print('P', x, y)
         index = int(round(x / XINC))
-        self.displayRangeAt(index, 5, 5)
+        self.displayRangeAt(index, 10, 10)
         #QGraphicsScene.mousePressEvent(self, mouseEvent)
         
     def displayRangeAt(self, index, before, after):
         assert(index >= 0 and index < self.nEntries + self.nFutures)
         rlist = self.entries + self.futures
-        l = len(rlist)
         selected = rlist[(index-before):(index+after)]
+        showList = []
+
         for pent in selected:
-            print(pent.amount.value, pent.desc)
+            showList.append(pent.asCategorizedStr())
+            
+        dl = WarningListDialog(
+            "Here are the entries or predictions near your selection point.", 
+            showList, False)        
+        #for pent in selected:
+        #    print(pent.amount.value, pent.desc)
         
     def resizeEvent(self, evt):
         #self.graph.fitInView(self.graph.sceneRect())
