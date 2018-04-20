@@ -47,6 +47,11 @@
      <height>321</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Courier New</family>
+    </font>
+   </property>
    <property name="toolTip">
     <string>List of items that will be affected by this action.</string>
    </property>
