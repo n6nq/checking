@@ -21,7 +21,7 @@ class WarningListDialog(QDialog, Ui_warninglistdlg):
 
         self.btnProceed.clicked.connect(lambda: self.proceed())
         self.btnCancel.clicked.connect(lambda: self.cancel())
-        
+        javascript:submit()
         self.exec_()
         
     def proceed(self):
