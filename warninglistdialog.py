@@ -6,7 +6,7 @@ from warninglistdlg_auto import Ui_warninglistdlg
 
 class WarningListDialog(QDialog, Ui_warninglistdlg):
     
-    def __init__(self, msg, affected_items, sort):
+    def __init__(self, title, msg, affected_items, sort):
         super(WarningListDialog, self).__init__()
         
         if len(affected_items) == 0:
@@ -14,6 +14,7 @@ class WarningListDialog(QDialog, Ui_warninglistdlg):
             return
         self.setupUi(self)
         self.reply = False
+        self.setWindowTitle(title)
         self.edtWarning.setPlainText(msg)
         self.listAffected.setSortingEnabled(sort)
         for l_item in affected_items:

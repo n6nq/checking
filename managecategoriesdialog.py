@@ -132,7 +132,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.override_str = self.edtOverride.text()
         cat = self.listCategories.selectedItems()[0].text()
         affected = self.db.find_all_with_trigger(self.override_str)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All entries listed below have the new override string '"+self.override_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
             affected, True)
@@ -157,7 +157,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         cat = self.listCategories.selectedItems()[0].text()
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger(self.trigger_str)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All entries listed below have the new trigger string '"+self.trigger_str+"'.\n" + \
             "They will have their category changed to '"+cat+"'.", 
             affected, True)
@@ -173,7 +173,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         new_cat = self.edtCategory.text()
         row = self.listCategories.currentRow()
         affected_list = self.db.find_all_related_to_cat(current_cat)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All triggers, overrides and entries listed below are relatd to the category'"+current_cat+"'.\n" + \
             "They will have their categories change to the new category '"+new_cat+"'.\n", 
             affected_list, True)
@@ -197,7 +197,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_str = self.listOverrides.currentItem().text()
         new_str = self.edtOverride.text()
         affected_list = self.db.find_all_related_to_over(current_str, new_str)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All entries listed below are categorized by the override string '"+current_str+"'.\n" + \
             "If they have the new override string '"+new_str+"', they will keep their current category.\n"+ \
             "If they do not contain the new override string, their category will be set to None.\n" + \
@@ -223,7 +223,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         current_str = self.listTriggers.currentItem().text()
         new_str = self.edtTrigger.text()
         affected_list = self.db.find_all_related_to_trig(current_str, new_str)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All <Entry> listed below are categorized by trigger string '"+current_str+"'.\n" + \
             "If they have the new trigger string '"+new_str+"', they will keep their current category.\n"+ \
             "If they do not contain the new trigger string, their category will be set to None.\n" + \
@@ -252,7 +252,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         override = self.db.overrides[self.override_str]
         current = self.listOverrides.currentRow()
         affected = self.db.find_all_related_to_over(self.override_str, None)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             'All Entries listed below will have their category changed to None.', \
             affected, True)
 
@@ -274,7 +274,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         selected_cat = self.listCategories.selectedItems()[0].text()
         affected_list = self.db.find_all_related_to_cat(selected_cat)
 
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             'The Overrides and Triggers in the list below will be deleted!\n' + \
             'All Entries will have their category changed to None.', \
             affected_list, True)
@@ -303,7 +303,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         trigger = self.db.triggers[self.trigger_str]
         current = self.listTriggers.currentRow()
         affected = self.db.find_all_related_to_trig(self.trigger_str, None)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             'All Entries listed below will have their category changed to None.', \
             affected, True)
         

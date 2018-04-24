@@ -1,0 +1,11 @@
+Initial conditions
+first
+
+                Adhoc   Yearly  Quarterly   Monthly     BiWeekly    Weekly
+first=y
+    date>today? ret     ret     ret         ret         ret         ret
+    date<today? expired promote promote     promote     promote     promote
+    
+first=n
+                expired promote promote     promote     promote     promote
+                

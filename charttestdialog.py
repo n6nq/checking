@@ -127,7 +127,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         for pent in selected:
             showList.append(pent.asCategorizedStr())
             
-        dl = WarningListDialog(
+        dl = WarningListDialog("Predictions", 
             "Here are the entries or predictions near your selection point.", 
             showList, False)        
         #for pent in selected:

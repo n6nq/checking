@@ -179,7 +179,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         
     def make_new_prediction(self, entry):
         affected = self.db.find_pred_simiar_to(entry)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All predictions listed below may be the same prediction you are about to define. They have the " + \
             "same amount: "+entry.amount.as_str()+", the same category: '"+entry.category+"' and the same trigger: '" + \
             self.db.trig_for_oid(entry.trig_id)+"'.\n\nIs this entry really a new prediction?", 
@@ -420,7 +420,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         pred.set_with_list(aList)
         # check current entries for effect of new trigger
         affected = self.db.find_all_with_trigger_or_override(pred.trig, pred.over)
-        dl = WarningListDialog(
+        dl = WarningListDialog("Warning!", 
             "All entries listed below have the trigger string '"+pred.trig+"' or the override string '"+pred.over+"'.\n" + \
             "Similar entries will be potential matches to predictions when when new check files are read.", 
             affected, True)
