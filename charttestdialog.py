@@ -178,11 +178,14 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
             
         self.balances.reverse()
         
-    def get_future_data(self, today, starting):
+    def get_future_data(self, today, starting_bal):
+        """This function used the predictions to produce three months of predicted future
+           entries. today is the starting day or the period and starting_bal is the account
+           balance as of today. """
         self.futures = self.db.get_next_three_months(today)
         self.nFutures = len(self.futures)
         
-        self.running = starting
+        self.running = starting_bal
         for ent in self.futures:
             self.running += ent.amount.value
             self.balances.append(self.running)

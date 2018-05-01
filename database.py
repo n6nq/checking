@@ -798,10 +798,13 @@ class Database(object):
             cycle = pred.cycle
             pcycle = PCycle(cycle.ctype, cycle.ddate, cycle.vdate)
             next_dates = pcycle.future_dates(today, end)
+            pred_instance = 0
             for dnext in next_dates:
-                row = (0, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount.value, '', '', pred.desc)
+                oid = (pred.oid * 65336) + pred_instance
+                row = (oid, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount.value, '', '', pred.desc)
                 pent = entry.Entry(self, row, False)    # pent = predicted entry
                 futures.append(pent)
+                pred_instance += 1
         futures = sorted(futures, key=lambda ent: ent.date.isoformat())
         return futures
     
