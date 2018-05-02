@@ -17,8 +17,7 @@ proj.file-list = [loc('accounts.py'),
                   loc('categories_auto.py'),
                   loc('category.py'),
                   loc('charttestdialog.py'),
-                  loc('chart_test.ui'),
-                  loc('chart_test_auto.py'),
+                  loc('chart_window.ui'),
                   loc('chart_window_auto.py'),
                   loc('checkfiledialog.py'),
                   loc('Checking1.csv'),
@@ -47,6 +46,9 @@ proj.file-list = [loc('accounts.py'),
                   loc('trigger.py'),
                   loc('triggers.pckl'),
                   loc('warninglistdialog.py'),
-                  loc('warninglistdlg_auto.py')]
+                  loc('warninglistdlg_auto.py'),
+                  loc('what_if.ui'),
+                  loc('what_if_auto.py'),
+                  loc('what_if_main.py')]
 proj.file-type = 'shared'
 proj.main-file = 'entry:main.py'
