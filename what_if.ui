@@ -25,7 +25,14 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QGraphicsView" name="graphicsView"/>
+      <widget class="QGraphicsView" name="graphicsView">
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+       </property>
+       <property name="viewportUpdateMode">
+        <enum>QGraphicsView::SmartViewportUpdate</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

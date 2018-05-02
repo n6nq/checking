@@ -15,8 +15,9 @@ from enum import Enum
 # get the window
 import mainwindow_auto
 import chart_window_auto
-from checkfiledialog import CheckFileDialog
-from charttestdialog import ChartTestDialog
+from what_if_main import WhatIfMain
+#from checkfiledialog import CheckFileDialog
+#from charttestdialog import ChartTestDialog
 from managepredictionsdialog import ManagePredictionsDialog
 
 import readcheckfile_auto
@@ -367,7 +368,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.search_choice = choice
 
     def pressedChartBtn(self):
-        ChartTestDialog(self.db)
+        WhatIfMain(self.db)
+        #ChartTestDialog(self.db)
         
     def pressedReadCheckFileButton(self):
         readIt = CheckFileDialog(self.db)

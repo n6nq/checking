@@ -21,6 +21,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.graphicsView = QtWidgets.QGraphicsView(self.horizontalLayoutWidget)
+        self.graphicsView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContentsOnFirstShow)
+        self.graphicsView.setViewportUpdateMode(QtWidgets.QGraphicsView.SmartViewportUpdate)
         self.graphicsView.setObjectName("graphicsView")
         self.horizontalLayout.addWidget(self.graphicsView)
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(self.centralwidget)
