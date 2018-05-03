@@ -35,6 +35,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.min_bal = 9999.99
         self.max_bal = -9999.99
         today = datetime.date.today()
+        
         astr = 'Please import bank data up to today, {} and then enter the current balance.\nBalance:'.format(today.isoformat())
         values = QInputDialog.getText(self, 'Balance?', astr)
         if values[1] == False:
@@ -42,7 +43,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         
         self.starting_balance = int(float(values[0]) * 100)
-        self.get_chart_data(today, self.starting_balance)
+
+        self.entries = []
+        self.balances = []
+        self.nEntries = 0
+        self.nFutures = 0
+        
+        #self.get_chart_data(today, self.starting_balance)
 
         self.get_future_data(today, self.starting_balance)
 
@@ -65,7 +72,8 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         font = QFont()
         font.setPixelSize(16)
         
-    
+        i = j = 0
+        
         for i in range(0, self.nEntries-1):
             self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
 
@@ -88,7 +96,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         #oldMatrix = self.graphicsView.transform()
         #self.graphicsView.resetTransform()
         #self.graphicsView.translate(oldMatrix.dx(), oldMatrix.dy());
-        self.graphicsView.scale(.45, -.20) 
+        self.graphicsView.scale(1.4, -.20) 
         #self.showRects(5.5)
         #self.myresize.emit(QSize(viewrect.width(), viewrect.height()))
         
@@ -118,7 +126,6 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.entries = self.db.get_last_three_months(today)
         self.nEntries = len(self.entries)
         reversed_entries = sorted(self.entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
-        self.balances = []
         self.running = starting_balance
         self.balances.append(self.running)
 
@@ -163,12 +170,14 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         rlist = self.entries + self.futures
         selected = rlist[(index-before):(index+after)]
         showList = []
-
+        self.listWidget.clear()
+        
         for pent in selected:
-            showList.append(pent.asCategorizedStr())
+            self.listWidget.addItem(pent.asCategorizedStr())
+            #showList.append(pent.asCategorizedStr())
             
-        dl = WarningListDialog("Predictions", 
-            "Here are the entries or predictions near your selection point.", 
-            showList, False)        
+        #dl = WarningListDialog("Predictions", 
+        #    "Here are the entries or predictions near your selection point.", 
+        #    showList, False)        
         #for pent in selected:
         #    print(pent.amount.value, pent.desc)
