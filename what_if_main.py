@@ -28,9 +28,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
     def __init__(self, db):
         super(self.__class__, self).__init__()
         self.setupUi(self)        
-        #super(ChartTestDialog, self).__init__()
         self.db = db
-        #self.setupUi(self)
 
         self.myresize.connect(self.resizeGraph)
         
@@ -52,13 +50,11 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.min_bal = min(self.balances)
         
         self.scene = ChartScene(self)
-        self.graphicsView.setScene(self.scene)
         self.showRects(1)
         scenewidth = (self.nEntries + self.nFutures) * XINC
         sceneYmax = round((self.max_bal/100), -2)
         sceneYmin = round((self.min_bal/100), -2)
         #= (self.max_bal - self.min_bal) / 100
-        self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
         self.showRects(2)
         #self.graphicsView.setSceneRect(QRectF(0, 0, width, height))
         viewrect = self.graphicsView.rect()
@@ -92,10 +88,12 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         #oldMatrix = self.graphicsView.transform()
         #self.graphicsView.resetTransform()
         #self.graphicsView.translate(oldMatrix.dx(), oldMatrix.dy());
-        self.graphicsView.scale(4, -4) 
+        self.graphicsView.scale(.45, -.20) 
         #self.showRects(5.5)
-        self.myresize.emit(QSize(viewrect.width(), viewrect.height()))
+        #self.myresize.emit(QSize(viewrect.width(), viewrect.height()))
         
+        self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
+        self.graphicsView.setScene(self.scene)
         self.show()
         
     def resizeGraph(self, size):
