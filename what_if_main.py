@@ -96,7 +96,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         #oldMatrix = self.graphicsView.transform()
         #self.graphicsView.resetTransform()
         #self.graphicsView.translate(oldMatrix.dx(), oldMatrix.dy());
-        self.graphicsView.scale(1.4, -.20) 
+        self.graphicsView.scale(1.44, -.185) 
         #self.showRects(5.5)
         #self.myresize.emit(QSize(viewrect.width(), viewrect.height()))
         
@@ -156,11 +156,12 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
 
     def sceneMousePressEvent(self, mouseEvent):
 
-        x = mouseEvent.scenePos().x()
+        x = mouseEvent.scenePos().x() + (XINC / 2)
         y = mouseEvent.scenePos().y()
         print('P', x, y)
         index = int(round(x / XINC))
         self.displayRangeAt(index, 10, 10)
+        self.showRects(7)
         #QGraphicsScene.mousePressEvent(self, mouseEvent)
 
     def displayRangeAt(self, index, before, after):
@@ -175,7 +176,8 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         for pent in selected:
             self.listWidget.addItem(pent.asCategorizedStr())
             #showList.append(pent.asCategorizedStr())
-            
+          
+        self.listWidget.setCurrentRow(10)
         #dl = WarningListDialog("Predictions", 
         #    "Here are the entries or predictions near your selection point.", 
         #    showList, False)        
