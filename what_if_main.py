@@ -34,6 +34,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.listWidget.currentRowChanged.connect(self.listSelectionChanged)
         
         self.index = 0
+        self.lastSelected = -1
         self.before = 0
         self.after = 0
         
@@ -99,8 +100,23 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.show()
         
     def listSelectionChanged(self, currentRow):
-        seleted = (self.index - self.before) + currentRow
-        pass
+        if currentRow >= 0:
+            pen = QPen()
+            if self.lastSelected >= 0:
+                pen.setWidthF(4.0)
+                pen.setColor(Qt.white)
+                selected = self.lastSelected
+                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+                pen.setWidth(0)
+                pen.setColor(Qt.red)
+                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+            
+            selected = (self.index - self.before) + currentRow - 1
+            self.lastSelected = selected
+            pen.setColor(Qt.blue)
+            pen.setWidthF(4.0)
+            self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+        
 
     def resizeGraph(self, size):
         width = size.width()
