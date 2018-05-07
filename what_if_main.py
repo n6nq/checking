@@ -31,6 +31,11 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.db = db
 
         self.myresize.connect(self.resizeGraph)
+        self.listWidget.currentRowChanged.connect(self.listSelectionChanged)
+        
+        self.index = 0
+        self.before = 0
+        self.after = 0
         
         self.min_bal = 9999.99
         self.max_bal = -9999.99
@@ -41,7 +46,6 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         if values[1] == False:
             return
         
-        
         self.starting_balance = int(float(values[0]) * 100)
 
         self.entries = []
@@ -49,8 +53,6 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.nEntries = 0
         self.nFutures = 0
         
-        #self.get_chart_data(today, self.starting_balance)
-
         self.get_future_data(today, self.starting_balance)
 
         self.max_bal = max(self.balances)
@@ -61,9 +63,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         scenewidth = (self.nEntries + self.nFutures) * XINC
         sceneYmax = round((self.max_bal/100), -2)
         sceneYmin = round((self.min_bal/100), -2)
-        #= (self.max_bal - self.min_bal) / 100
         self.showRects(2)
-        #self.graphicsView.setSceneRect(QRectF(0, 0, width, height))
         viewrect = self.graphicsView.rect()
         
         pen = QPen(Qt.black)
@@ -91,28 +91,18 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             myText.setFlag(QGraphicsItem.ItemIgnoresTransformations, True)
         
         
-        #self.resizeGraph(QSize(viewrect.width(), viewrect.height()))
         self.showRects(4)        
-        #oldMatrix = self.graphicsView.transform()
-        #self.graphicsView.resetTransform()
-        #self.graphicsView.translate(oldMatrix.dx(), oldMatrix.dy());
         self.graphicsView.scale(1.44, -.185) 
-        #self.showRects(5.5)
-        #self.myresize.emit(QSize(viewrect.width(), viewrect.height()))
         
         self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
         self.graphicsView.setScene(self.scene)
         self.show()
         
+    def listSelectionChanged(self, currentRow):
+        seleted = (self.index - self.before) + currentRow
+        pass
+
     def resizeGraph(self, size):
- #       width = (self.nEntries+100) * XINC
- #       height = (self.max_bal - self.min_bal)
- #       self.scene.setSceneRect(QRectF(0, 0, width, height))
- #       viewport = self.graphicsView.viewport()
- #       #self.graphicsView.setScene(self.scene)
- #       self.graphicsView.centerOn(QPointF(width/2, height/2))
- #       self.graphicsView.scale(width/viewport.width(), height/viewport.height())
-        
         width = size.width()
         height = size.height()
         self.graphicsView.resize(QSize(width-40, height-40))
@@ -168,6 +158,10 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         if index < 0 or index >= (self.nEntries + self.nFutures):
             return
         
+        self.index = index
+        self.before = before
+        self.after = after
+        
         rlist = self.entries + self.futures
         selected = rlist[(index-before):(index+after)]
         showList = []
@@ -175,11 +169,5 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         for pent in selected:
             self.listWidget.addItem(pent.asCategorizedStr())
-            #showList.append(pent.asCategorizedStr())
           
         self.listWidget.setCurrentRow(10)
-        #dl = WarningListDialog("Predictions", 
-        #    "Here are the entries or predictions near your selection point.", 
-        #    showList, False)        
-        #for pent in selected:
-        #    print(pent.amount.value, pent.desc)
