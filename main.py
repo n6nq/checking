@@ -16,7 +16,7 @@ from enum import Enum
 import mainwindow_auto
 import chart_window_auto
 from what_if_main import WhatIfMain
-#from checkfiledialog import CheckFileDialog
+from checkfiledialog import CheckFileDialog
 #from charttestdialog import ChartTestDialog
 from managepredictionsdialog import ManagePredictionsDialog
 
