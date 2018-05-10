@@ -179,7 +179,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.after = after
         
         rlist = self.entries + self.futures
-        selected = rlist[(index-before):(index+after)]
+        selected = rlist[max((index-before), 0):(index+after)]
         showList = []
         self.listWidget.clear()
         
