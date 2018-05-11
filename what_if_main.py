@@ -33,13 +33,11 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.myresize.connect(self.resizeGraph)
         self.listWidget.currentRowChanged.connect(self.listSelectionChanged)
         
-        self.index = 0
-        self.lastSelected = -1
-        self.before = 0
-        self.after = 0
+        self.selectedIdx = 0        # which entry is currently selected
+        self.lastSelected = -1  #what
         
-        self.min_bal = 9999.99
-        self.max_bal = -9999.99
+        min_bal = 9999.99
+        max_bal = -9999.99
         today = datetime.date.today()
         
         astr = 'Please import bank data up to today, {} and then enter the current balance.\nBalance:'.format(today.isoformat())
@@ -50,20 +48,28 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.starting_balance = int(float(values[0]) * 100)
 
         self.entries = []
+        self.futures = []
         self.balances = []
         self.nEntries = 0
         self.nFutures = 0
+        past = False        #someday
         
+        if past:
+            self.get_past_data(today, self.starting_balance)
+            
         self.get_future_data(today, self.starting_balance)
+        
+        self.all_items = self.entries + self.futures
+        self.nItems = len(self.all_items)
 
-        self.max_bal = max(self.balances)
-        self.min_bal = min(self.balances)
+        max_bal = max(self.balances)
+        min_bal = min(self.balances)
         
         self.scene = ChartScene(self)
         self.showRects(1)
         scenewidth = (self.nEntries + self.nFutures) * XINC
-        sceneYmax = round((self.max_bal/100), -2)
-        sceneYmin = round((self.min_bal/100), -2)
+        sceneYmax = round((max_bal/100), -2)
+        sceneYmin = round((min_bal/100), -2)
         self.showRects(2)
         viewrect = self.graphicsView.rect()
         
@@ -77,11 +83,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         for i in range(0, self.nEntries-1):
             self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
-
+            self.listWidget.addItem(self.entries[i].asCategorizedStr())
+            
         pen.setColor(Qt.red)
 
         for j in range(0, self.nFutures-1):
             self.scene.addLine( QLineF( (i+j) * XINC, self.balances[i+j]/100, (i+j+1) * XINC, self.balances[i+j+1]/100), pen)
+            self.listWidget.addItem(self.futures[i+j].asCategorizedStr())
             
         pen.setColor(Qt.black)
         
@@ -97,8 +105,28 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
         self.graphicsView.setScene(self.scene)
+        self.setSelectionAt(self.selectedIdx)
         self.show()
+    
+    def setSelectionAt(self, index):
+        self.listWidget.setCurrentRow(index)
+        if index >= 0:
+            pen = QPen()
+            if self.lastSelected >= 0:
+                pen.setWidthF(4.0)
+                pen.setColor(Qt.white)
+                selected = self.lastSelected
+                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+                pen.setWidth(0)
+                pen.setColor(Qt.red)
+                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+            
+            self.lastSelected = selected
+            pen.setColor(Qt.blue)
+            pen.setWidthF(4.0)
+            self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
         
+    
     def listSelectionChanged(self, currentRow):
         if currentRow >= 0:
             pen = QPen()
@@ -111,7 +139,6 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
                 pen.setColor(Qt.red)
                 self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
             
-            selected = (self.index - self.before) + currentRow - 1
             self.lastSelected = selected
             pen.setColor(Qt.blue)
             pen.setWidthF(4.0)
@@ -128,7 +155,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.graphicsView.fitInView(self.scene.sceneRect())
         self.showRects(7)
 
-    def get_chart_data(self, today, starting_balance):
+    def get_past_data(self, today, starting_balance):
         self.entries = self.db.get_last_three_months(today)
         self.nEntries = len(self.entries)
         reversed_entries = sorted(self.entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
@@ -165,21 +192,22 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         x = mouseEvent.scenePos().x() + (XINC / 2)
         y = mouseEvent.scenePos().y()
         print('P', x, y)
-        index = int(round(x / XINC))
-        self.displayRangeAt(index, 10, 10)
+        selected = int(round(x / XINC))
+        self.displayRangeAt(selected, 10, 10)
         self.showRects(7)
         #QGraphicsScene.mousePressEvent(self, mouseEvent)
 
-    def displayRangeAt(self, index, before, after):
+    def displayRangeAt(self, selected, before, after):
         if index < 0 or index >= (self.nEntries + self.nFutures):
             return
         
         self.index = index
-        self.before = before
-        self.after = after
+  #fix      self.before = before
+  #fix      self.after = after
         
         rlist = self.entries + self.futures
-        selected = rlist[max((index-before), 0):(index+after)]
+ #fix       selected = rlist[(index-before):(index+after)]
+ #fix       selected = rlist[max((index-before), 0):(index+after)]
         showList = []
         self.listWidget.clear()
         
