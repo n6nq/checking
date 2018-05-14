@@ -33,7 +33,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.myresize.connect(self.resizeGraph)
         self.listWidget.currentRowChanged.connect(self.listSelectionChanged)
         
-        self.selectedIdx = 0        # which entry is currently selected
+        self.selectedIdx = -1        # only setSelectionAt sets this to real value, avoids loops I think
         self.lastSelected = -1  #what
         
         min_bal = 9999.99
@@ -105,44 +105,49 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
         self.graphicsView.setScene(self.scene)
-        self.setSelectionAt(self.selectedIdx)
+        self.setSelectionAt(0)      
         self.show()
     
     def setSelectionAt(self, index):
-        self.listWidget.setCurrentRow(index)
-        if index >= 0:
+        if index != self.selectedIdx:
             pen = QPen()
             if self.lastSelected >= 0:
                 pen.setWidthF(4.0)
                 pen.setColor(Qt.white)
-                selected = self.lastSelected
-                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+                lselected = self.lastSelected
+                self.scene.addLine( QLineF( lselected * XINC, self.balances[lselected]/100, (lselected+1) * XINC, self.balances[lselected+1]/100), pen)
                 pen.setWidth(0)
                 pen.setColor(Qt.red)
-                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+                self.scene.addLine( QLineF( lselected * XINC, self.balances[lselected]/100, (lselected+1) * XINC, self.balances[lselected+1]/100), pen)
             
-            self.lastSelected = selected
             pen.setColor(Qt.blue)
             pen.setWidthF(4.0)
-            self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+            x1 = index
+            if (x1 >= len(self.balances) - 1):
+                x1 = len(self.balances) - 2
+            x2 = x1 + 1
+            self.scene.addLine( QLineF( x1 * XINC, self.balances[x1]/100, x2 * XINC, self.balances[x2]/100), pen)
+            self.lastSelected = x1
+            self.listWidget.setCurrentRow(x1)
         
     
     def listSelectionChanged(self, currentRow):
-        if currentRow >= 0:
-            pen = QPen()
-            if self.lastSelected >= 0:
-                pen.setWidthF(4.0)
-                pen.setColor(Qt.white)
-                selected = self.lastSelected
-                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
-                pen.setWidth(0)
-                pen.setColor(Qt.red)
-                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
-            
-            self.lastSelected = selected
-            pen.setColor(Qt.blue)
-            pen.setWidthF(4.0)
-            self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+        if currentRow != self.lastSelected:
+            self.setSelectionAt(currentRow)
+#            pen = QPen()
+#            if self.lastSelected >= 0:
+#                pen.setWidthF(4.0)
+#                pen.setColor(Qt.white)
+#                selected = self.lastSelected
+#                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+#                pen.setWidth(0)
+#                pen.setColor(Qt.red)
+#                self.scene.addLine( QLineF( selected * XINC, self.balances[selected]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
+#            
+#            self.lastSelected = index
+#            pen.setColor(Qt.blue)
+#            pen.setWidthF(4.0)
+#            self.scene.addLine( QLineF( index * XINC, self.balances[index]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
         
 
     def resizeGraph(self, size):
@@ -176,6 +181,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.nFutures = len(self.futures)
         
         self.running = starting_bal
+        self.balances.append(starting_bal)  #we should only do this if not showing past
         for ent in self.futures:
             self.running += ent.amount.value
             self.balances.append(self.running)
@@ -193,8 +199,9 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         y = mouseEvent.scenePos().y()
         print('P', x, y)
         selected = int(round(x / XINC))
-        self.displayRangeAt(selected, 10, 10)
-        self.showRects(7)
+        self.setSelectionAt(selected)
+#        self.displayRangeAt(selected, 10, 10)
+#        self.showRects(7)
         #QGraphicsScene.mousePressEvent(self, mouseEvent)
 
     def displayRangeAt(self, selected, before, after):
