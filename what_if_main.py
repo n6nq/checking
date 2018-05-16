@@ -46,6 +46,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             return
         
         self.starting_balance = int(float(values[0]) * 100)
+        
+        for cat in sorted(self.db.cat_to_oid.keys()):
+            self.comboCat.addItem(cat)
+            
+            for trig in sorted(self.db.trig_to_oid.keys()):
+                self.comboTrig.addItem(trig)
+        
 
         self.entries = []
         self.futures = []
@@ -108,8 +115,49 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.setSelectionAt(0)      
         self.show()
     
+    def set_fields(self, index):
+        pred = self.all_items[index]
+        self.selected_oid = pred.oid
+        self.editAmount.setText(pred.amount.as_str())
+        self.chkboxIncome.setChecked(pred.amount.value > 0)
+        self.comboCat.setCurrentText(pred.category)
+        
+        triggers = self.db.triggers_for_cat(pred.category)
+        self.comboTrig.clear()
+        for trig in sorted(triggers, key=lambda trig: trig.trig): 
+            self.comboTrig.addItem(trig.trig)
+        if pred.trig_id >= 0:
+            self.comboTrig.setCurrentText(self.db.trig_for_oid(pred.trig_id))
+
+        overrides = sorted(self.db.overs_for_cat(pred.category))
+        self.comboOver.clear()
+        for over in overrides:
+            self.comboOver.addItem(over.over)
+        if pred.over_id >= 0:
+            self.comboOver.setCurrentText(self.db.over_for_oid(pred.over_id))
+        
+        #self.income = income
+        #self.cat = cat
+        #self.trig = trig
+        #self.over = over
+        #self.cat_id = cat_id
+        #self.trig_id = trig_id
+        #self.over_id = over_id
+        #comboType        self.p_type = p_type
+        #comboCycle        self.cycle = PCycle(cycle, ddate, vdate)
+        #editDate
+        #comboDate
+        #buttonAdd
+        #buttonUpdate
+        #chkboxIncome
+        #buttonDelete
+        #buttonClear
+        #editComment
+        #self.desc = desc
+        
     def setSelectionAt(self, index):
         if index != self.selectedIdx:
+            self.set_fields(index)
             pen = QPen()
             if self.lastSelected >= 0:
                 pen.setWidthF(4.0)

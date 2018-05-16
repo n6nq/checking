@@ -62,7 +62,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listCategories.setCurrentRow(0)
         selectedStr = self.listCategories.selectedItems()[0].text()
 
-        self.trigs = self.db.triggers_for_cat(selectedStr)
+        #self.trigs = self.db.triggers_for_cat(selectedStr)
         #for trig in self.trigs:
         #    self.listTriggers.addItem(trig)
         self.listTriggers.setCurrentRow(0)
@@ -113,8 +113,8 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         
         # don't do this here, an initial selection set forces it to happen later, 
         # don't need double entries
-        for trig in self.trigs:
-            self.listTriggers.addItem(trig)
+        for trig in sorted(self.trigs, key=lambda trig: trig.trig):
+            self.listTriggers.addItem(trig.trig)
             
         self.just_initialized = True
         self.listTriggers.setCurrentRow(0)

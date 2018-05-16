@@ -1214,7 +1214,7 @@ class Database(object):
         trig_list = []
         for trig, trigger in self.triggers.items():
             if trigger.cat == lookFor:
-                trig_list.append(trigger.trig)
+                trig_list.append(trigger)
                 
         return trig_list
     
