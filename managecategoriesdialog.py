@@ -1,6 +1,10 @@
 """ManageCategoriesDialog provides ui for manipulating overrides, categories
    and trigger strings"""
 
+""" NOTES:
+    TODOS: Remove type from predictions and UI
+"""
+
 from PyQt5.QtWidgets import (QDialog, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem

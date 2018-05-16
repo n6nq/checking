@@ -4,7 +4,15 @@ from PyQt5.QtGui import QPen, QFont
 import datetime
 
 from warninglistdialog import WarningListDialog
+from predicted import Prediction
+from pcycle import PCycle
 from what_if_auto import Ui_MainWindow
+
+""" NOTES:
+    TODOS: Remove type from predictions and UI
+    You can't change predictions into entries. Duh!
+    There is no holder for cycle. Remove entries from what_if.
+"""
 
 class ChartScene(QGraphicsScene):
     
@@ -50,9 +58,11 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         for cat in sorted(self.db.cat_to_oid.keys()):
             self.comboCat.addItem(cat)
             
-            for trig in sorted(self.db.trig_to_oid.keys()):
-                self.comboTrig.addItem(trig)
+        for trig in sorted(self.db.trig_to_oid.keys()):
+            self.comboTrig.addItem(trig)
         
+        self.cycleList = PCycle.get_cycle_list()
+        self.comboCycle.addItems(self.cycleList)
 
         self.entries = []
         self.futures = []
@@ -116,6 +126,9 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.show()
     
     def set_fields(self, index):
+        length = len(self.all_items)
+        if index >= length:
+            index = length - 1
         pred = self.all_items[index]
         self.selected_oid = pred.oid
         self.editAmount.setText(pred.amount.as_str())
@@ -135,6 +148,10 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             self.comboOver.addItem(over.over)
         if pred.over_id >= 0:
             self.comboOver.setCurrentText(self.db.over_for_oid(pred.over_id))
+        
+        #self.comboType.setCurrentText(pred.t) #entry doesn't have a type, get rid of type
+        
+        self.comboCycle.setCurrentText(pred.cycle)  #
         
         #self.income = income
         #self.cat = cat

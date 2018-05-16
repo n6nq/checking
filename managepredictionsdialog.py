@@ -13,6 +13,7 @@ from money import Money
 from enum import Enum
 import common_ui
 
+
 class MyTableModel(QAbstractTableModel):
     
     def __init__(self, datain, parent=None, *args): 

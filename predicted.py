@@ -8,6 +8,12 @@ type bill, prediction, subscription, monthly, elective
 cycle monthly, weekly, quarterly, annual, bi-weekly, ad-hoc
 date day-of-month, day-of-week, day/month, adhoc
 """
+
+""" NOTES:
+    TODOS: Remove type from predictions and UI
+    
+"""
+
 from enum import Enum
 from bidict import bidict
 from pcycle import PCycle, Cycles
