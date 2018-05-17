@@ -5,7 +5,7 @@ import datetime
 
 from warninglistdialog import WarningListDialog
 from predicted import Prediction
-from pcycle import PCycle
+from pcycle import PCycle, Cycles, DaysOfWeek
 from what_if_auto import Ui_MainWindow
 
 """ NOTES:
@@ -160,9 +160,26 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
             #self.comboType.setCurrentText(pred.t) #entry doesn't have a type, get rid of type
         
-            self.comboCycle.setCurrentText(pred.cycle.get_date_str())  #
-            set comboCycle with the cycle type
-            set editDate and comboDate
+            ctype = pred.cycle.ctype
+            cstr = Cycles.inv[pred.cycle.ctype]
+            self.comboCycle.setCurrentText(cstr) 
+            #set comboCycle with the cycle type
+            self.editDate.clear()
+            self.comboDate.clear()
+            if cstr == 'Monthly':
+                dom = []
+                for d in range(1, 31):
+                    dom.append(str(d))
+                self.comboDate.addItems(dom)
+                self.comboDate.setCurrentText(str(pred.cycle.vdate))
+                pass
+            elif cstr == 'Weekly':
+                self.comboDate.addItems(DaysOfWeek.keys())
+                self.comboDate.setCurrentText(DaysOfWeek.inv[pred.cycle.vdate])
+                pass
+            elif cstr == 'Quarterly' or cstr == 'Annual' or cstr == 'BiWeekly' or cstr == 'Adhoc':
+                pass
+            
         
         #self.income = income
         #self.cat = cat

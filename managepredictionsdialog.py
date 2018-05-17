@@ -140,8 +140,6 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
 
         self.sortDate.activated.connect(lambda: self.new_date_filter())
         self.sortDate.addItems(common_ui.date_sort)
-        #self.sortDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
-        #self.editDate.addItems(['Day-of-month', 'Day-of-week', 'Day/month', 'Adhoc'])
     
         # Setup comment combo
         self.sortComment.activated.connect(lambda: self.new_comment_filter())
