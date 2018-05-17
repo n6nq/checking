@@ -129,29 +129,40 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         length = len(self.all_items)
         if index >= length:
             index = length - 1
-        pred = self.all_items[index]
-        self.selected_oid = pred.oid
-        self.editAmount.setText(pred.amount.as_str())
-        self.chkboxIncome.setChecked(pred.amount.value > 0)
-        self.comboCat.setCurrentText(pred.category)
+        pent = self.all_items[index]
+        self.selected_oid = pent.oid
+        pred_oid = int(pent.oid /65336)
+        pred = self.db.find_pred_by_oid(pred_oid)
+        if pred is None:
+            self.editAmount.setText("None")
+            self.comboCat.setCurrentText("None")
+            self.comboTrig.setCurrentText("None")
+            self.comboOver.setCurrentText("None")
+            self.comboCycle.setCurrentText("None")
+        else:
+            self.editAmount.setText(pred.amount.as_str())
+            self.chkboxIncome.setChecked(pred.amount.value > 0)
+            self.comboCat.setCurrentText(pred.cat)
         
-        triggers = self.db.triggers_for_cat(pred.category)
-        self.comboTrig.clear()
-        for trig in sorted(triggers, key=lambda trig: trig.trig): 
-            self.comboTrig.addItem(trig.trig)
-        if pred.trig_id >= 0:
-            self.comboTrig.setCurrentText(self.db.trig_for_oid(pred.trig_id))
+            triggers = self.db.triggers_for_cat(pred.cat)
+            self.comboTrig.clear()
+            for trig in sorted(triggers, key=lambda trig: trig.trig): 
+                self.comboTrig.addItem(trig.trig)
+            if pred.trig_id >= 0:
+                self.comboTrig.setCurrentText(self.db.trig_for_oid(pred.trig_id))
 
-        overrides = sorted(self.db.overs_for_cat(pred.category))
-        self.comboOver.clear()
-        for over in overrides:
-            self.comboOver.addItem(over.over)
-        if pred.over_id >= 0:
-            self.comboOver.setCurrentText(self.db.over_for_oid(pred.over_id))
+            overrides = sorted(self.db.overs_for_cat(pred.cat))
+            self.comboOver.clear()
+            for over in overrides:
+                self.comboOver.addItem(over.over)
+            if pred.over_id >= 0:
+                self.comboOver.setCurrentText(self.db.over_for_oid(pred.over_id))
         
-        #self.comboType.setCurrentText(pred.t) #entry doesn't have a type, get rid of type
+            #self.comboType.setCurrentText(pred.t) #entry doesn't have a type, get rid of type
         
-        self.comboCycle.setCurrentText(pred.cycle)  #
+            self.comboCycle.setCurrentText(pred.cycle.get_date_str())  #
+            set comboCycle with the cycle type
+            set editDate and comboDate
         
         #self.income = income
         #self.cat = cat

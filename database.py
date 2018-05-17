@@ -523,6 +523,12 @@ class Database(object):
                 affected.append('<Prediction>'+pred.str())
         return affected
     
+    def find_pred_by_oid(self, oid):
+        for pred in self.predictions:
+            if pred.oid == oid:
+                return pred
+        return None
+    
     def find_all_related_to_over(self, cur_over, new_over):
         affected = []
         #Are we trying to rename an existing override to another override that exists?
