@@ -128,6 +128,20 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.graphicsView.setScene(self.scene)
         self.setSelectionAt(0)      
         self.show()
+        
+    def addPrediction(self):
+        pass
+    
+    def updatePrediction(self):
+        pass
+    
+    def deletePrediction(self):
+        pent = self.futures[self.lastSelected]
+        print(pent.asCategorizedStr())
+        del self.futures[self.lastSelected]
+    
+    def clearPrediction(self):
+        pass
     
     def set_fields(self, index):
         length = len(self.all_items)
