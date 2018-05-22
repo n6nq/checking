@@ -39,6 +39,10 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.db = db
 
         self.myresize.connect(self.resizeGraph)
+        self.buttonAdd.clicked.connect(self.addPrediction)
+        self.buttonUpdate.clicked.connect(self.updatePrediction)
+        self.buttonDelete.clicked.connect(self.deletePrediction)
+        self.buttonClear.clicked.connect(self.clearPrediction)
         self.listWidget.currentRowChanged.connect(self.listSelectionChanged)
         
         self.selectedIdx = -1        # only setSelectionAt sets this to real value, avoids loops I think
@@ -164,22 +168,25 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             cstr = Cycles.inv[pred.cycle.ctype]
             self.comboCycle.setCurrentText(cstr) 
             #set comboCycle with the cycle type
-            self.editDate.clear()
-            self.comboDate.clear()
+            self.editDate.hide()
+            self.comboDate.hide()
             if cstr == 'Monthly':
                 dom = []
                 for d in range(1, 31):
                     dom.append(str(d))
+                self.comboDate.show()
                 self.comboDate.addItems(dom)
                 self.comboDate.setCurrentText(str(pred.cycle.vdate))
-                pass
+    
             elif cstr == 'Weekly':
                 self.comboDate.addItems(DaysOfWeek.keys())
+                self.comboDate.show()
                 self.comboDate.setCurrentText(DaysOfWeek.inv[pred.cycle.vdate])
-                pass
             elif cstr == 'Quarterly' or cstr == 'Annual' or cstr == 'BiWeekly' or cstr == 'Adhoc':
-                pass
+                self.editDate.setDate(pent.date)
+                self.editDate.show()
             
+            self.editComment.setText(pred.desc)
         
         #self.income = income
         #self.cat = cat
