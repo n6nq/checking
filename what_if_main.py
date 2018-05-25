@@ -256,6 +256,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         font.setPixelSize(16)
         
         i = j = 0
+        self.listWidget.clear()
         
         for i in range(0, len(self.entries)-1):
             self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
