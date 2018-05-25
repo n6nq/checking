@@ -38,6 +38,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.setupUi(self)        
         self.db = db
 
+        self.scene = ChartScene(self)
         self.myresize.connect(self.resizeGraph)
         self.buttonAdd.clicked.connect(self.addPrediction)
         self.buttonUpdate.clicked.connect(self.updatePrediction)
@@ -48,8 +49,8 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.selectedIdx = -1        # only setSelectionAt sets this to real value, avoids loops I think
         self.lastSelected = -1  #what
         
-        min_bal = 9999.99
-        max_bal = -9999.99
+        #min_bal = 9999.99
+        #max_bal = -9999.99
         today = datetime.date.today()
         
         astr = 'Please import bank data up to today, {} and then enter the current balance.\nBalance:'.format(today.isoformat())
@@ -70,9 +71,6 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
 
         self.entries = []
         self.futures = []
-        self.balances = []
-        self.nEntries = 0
-        self.nFutures = 0
         past = False        #someday
         
         if past:
@@ -80,69 +78,40 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             
         self.get_future_data(today, self.starting_balance)
         
-        self.all_items = self.entries + self.futures
-        self.nItems = len(self.all_items)
+        self.refresh(True)
 
-        max_bal = max(self.balances)
-        min_bal = min(self.balances)
-        
-        self.scene = ChartScene(self)
-        self.showRects(1)
-        scenewidth = (self.nEntries + self.nFutures) * XINC
-        sceneYmax = round((max_bal/100), -2)
-        sceneYmin = round((min_bal/100), -2)
-        self.showRects(2)
-        viewrect = self.graphicsView.rect()
-        
-        pen = QPen(Qt.black)
-        pen.setWidth(0)
-        
-        font = QFont()
-        font.setPixelSize(16)
-        
-        i = j = 0
-        
-        for i in range(0, self.nEntries-1):
-            self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
-            self.listWidget.addItem(self.entries[i].asCategorizedStr())
-            
-        pen.setColor(Qt.red)
-
-        for j in range(0, self.nFutures-1):
-            self.scene.addLine( QLineF( (i+j) * XINC, self.balances[i+j]/100, (i+j+1) * XINC, self.balances[i+j+1]/100), pen)
-            self.listWidget.addItem(self.futures[i+j].asCategorizedStr())
-            
-        pen.setColor(Qt.black)
-        
-        for liney in range(int(sceneYmin), int(sceneYmax+100), 200):
-            self.scene.addLine(QLineF(0.0, liney, scenewidth, liney), pen)
-            myText = self.scene.addText(str(liney), font)
-            myText.moveBy(20, liney+100)
-            myText.setFlag(QGraphicsItem.ItemIgnoresTransformations, True)
-        
-        
-        self.showRects(4)        
-        self.graphicsView.scale(1.44, -.185) 
-        
-        self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
-        self.graphicsView.setScene(self.scene)
-        self.setSelectionAt(0)      
-        self.show()
-        
     def addPrediction(self):
         pass
     
-    def updatePrediction(self):
+    def clearPrediction(self):
         pass
     
     def deletePrediction(self):
         pent = self.futures[self.lastSelected]
         print(pent.asCategorizedStr())
         del self.futures[self.lastSelected]
-    
-    def clearPrediction(self):
+        self.doBalances(self.starting_bal)
+        self.refresh(False)
+        
+
+    def doBalances(self, starting_bal):
+        self.balances = []
+        self.starting_bal = starting_bal
+        running = starting_bal
+        self.balances.append(starting_bal)  #we should only do this if not showing past
+        for ent in self.futures:
+            running += ent.amount.value
+            self.balances.append(running)
+        
         pass
-    
+    def get_future_data(self, today, starting_bal):
+        """This function used the predictions to produce three months of predicted future
+           entries. today is the starting day or the period and starting_bal is the account
+           balance as of today. """
+        self.futures = self.db.get_next_three_months(today)
+        
+        self.doBalances(starting_bal)
+            
     def set_fields(self, index):
         length = len(self.all_items)
         if index >= length:
@@ -248,6 +217,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
     def listSelectionChanged(self, currentRow):
         if currentRow != self.lastSelected:
             self.setSelectionAt(currentRow)
+
 #            pen = QPen()
 #            if self.lastSelected >= 0:
 #                pen.setWidthF(4.0)
@@ -264,6 +234,57 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
 #            self.scene.addLine( QLineF( index * XINC, self.balances[index]/100, (selected+1) * XINC, self.balances[selected+1]/100), pen)
         
 
+    def refresh(self, first_time):
+        self.scene.clear()
+        self.all_items = self.entries + self.futures
+        self.nItems = len(self.all_items)
+
+        max_bal = max(self.balances)  #dependant on doBalances
+        min_bal = min(self.balances)
+
+        self.showRects(1)
+        scenewidth = (len(self.entries) + len(self.futures)) * XINC
+        sceneYmax = round((max_bal/100), -2)
+        sceneYmin = round((min_bal/100), -2)
+        self.showRects(2)
+        viewrect = self.graphicsView.rect()
+        
+        pen = QPen(Qt.black)
+        pen.setWidth(0)
+        
+        font = QFont()
+        font.setPixelSize(16)
+        
+        i = j = 0
+        
+        for i in range(0, len(self.entries)-1):
+            self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
+            self.listWidget.addItem(self.entries[i].asCategorizedStr())
+            
+        pen.setColor(Qt.red)
+
+        for j in range(0, len(self.futures)-1):
+            self.scene.addLine( QLineF( (i+j) * XINC, self.balances[i+j]/100, (i+j+1) * XINC, self.balances[i+j+1]/100), pen)
+            self.listWidget.addItem(self.futures[i+j].asCategorizedStr())
+            
+        pen.setColor(Qt.black)
+        
+        for liney in range(int(sceneYmin), int(sceneYmax+100), 200):
+            self.scene.addLine(QLineF(0.0, liney, scenewidth, liney), pen)
+            myText = self.scene.addText(str(liney), font)
+            myText.moveBy(20, liney+100)
+            myText.setFlag(QGraphicsItem.ItemIgnoresTransformations, True)
+        
+        
+        self.showRects(4)
+        if first_time:
+            self.graphicsView.scale(1.44, -.185) 
+        
+        self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
+        self.graphicsView.setScene(self.scene)
+        self.setSelectionAt(0)      
+        self.show()
+        
     def resizeGraph(self, size):
         width = size.width()
         height = size.height()
@@ -274,32 +295,6 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.graphicsView.fitInView(self.scene.sceneRect())
         self.showRects(7)
 
-    def get_past_data(self, today, starting_balance):
-        self.entries = self.db.get_last_three_months(today)
-        self.nEntries = len(self.entries)
-        reversed_entries = sorted(self.entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
-        self.running = starting_balance
-        self.balances.append(self.running)
-
-        for ent in reversed_entries:
-            self.running -= ent.amount.value
-            self.balances.append(self.running)
-            
-        self.balances.reverse()
-        
-    def get_future_data(self, today, starting_bal):
-        """This function used the predictions to produce three months of predicted future
-           entries. today is the starting day or the period and starting_bal is the account
-           balance as of today. """
-        self.futures = self.db.get_next_three_months(today)
-        self.nFutures = len(self.futures)
-        
-        self.running = starting_bal
-        self.balances.append(starting_bal)  #we should only do this if not showing past
-        for ent in self.futures:
-            self.running += ent.amount.value
-            self.balances.append(self.running)
-            
     def showRects(self, loc):
         sceneR = self.scene.sceneRect()
         viewR = self.graphicsView.rect()
@@ -308,6 +303,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         print(sstr, vstr)
 
     def sceneMousePressEvent(self, mouseEvent):
+    
 
         x = mouseEvent.scenePos().x() + (XINC / 2)
         y = mouseEvent.scenePos().y()
@@ -318,8 +314,14 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
 #        self.showRects(7)
         #QGraphicsScene.mousePressEvent(self, mouseEvent)
 
-    def displayRangeAt(self, selected, before, after):
-        if index < 0 or index >= (self.nEntries + self.nFutures):
+    def updatePrediction(self):
+        pass
+    
+
+#Deprecated below this line ====================================
+    def displayRangeAt(self, selected, before, after):  #deprecated
+        assert(False)
+        if index < 0 or index >= (len(self.entries) + len(self.futures)):
             return
         
         self.index = index
@@ -336,3 +338,16 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             self.listWidget.addItem(pent.asCategorizedStr())
           
         self.listWidget.setCurrentRow(10)
+    def get_past_data(self, today, starting_balance):  # deprecated
+        assert(False)
+        self.entries = self.db.get_last_three_months(today)
+        reversed_entries = sorted(self.entries, key=lambda ent: ent.date.isoformat(), reverse=True)        
+        self.running = starting_balance
+        self.balances.append(self.running)
+
+        for ent in reversed_entries:
+            self.running -= ent.amount.value
+            self.balances.append(self.running)
+            
+        self.balances.reverse()
+        

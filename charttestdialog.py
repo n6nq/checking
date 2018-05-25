@@ -47,7 +47,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):
         
         
         self.starting_balance = int(float(values[0]) * 100)
-        self.get_chart_data(today, self.starting_balance)
+        #self.get_chart_data(today, self.starting_balance)  #deprecated
 
         self.get_future_data(today, self.starting_balance)
 

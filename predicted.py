@@ -24,8 +24,8 @@ from datetime import datetime, timedelta
 DaysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 # Keep Types in alphabetical order so type combo will sort correctly
-#Types = bidict({'None': 0, 'Bill': 1, 'Elective': 2, 'Income': 3, 'Monthly': 4, 'Prediction': 5, 'Subscription': 6})
-
+Types = bidict({'None': 0, 'Bill': 1, 'Elective': 2, 'Income': 3, 'Monthly': 4, 'Prediction': 5, 'Subscription': 6})
+#TODO -- Get rid of types
 class Prediction(object):
     
     def __init__(self, db):
