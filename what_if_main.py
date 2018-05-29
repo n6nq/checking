@@ -7,6 +7,7 @@ from warninglistdialog import WarningListDialog
 from predicted import Prediction
 from pcycle import PCycle, Cycles, DaysOfWeek
 from what_if_auto import Ui_MainWindow
+from money import Money
 
 """ NOTES:
     TODOS: Remove type from predictions and UI
@@ -80,8 +81,38 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         self.refresh(True)
 
+    def list_from_fields(self, oid):
+        mny = Money.from_str(self.editAmount.text())
+        income = self.chkboxIncome.checkState()
+        amount = mny.value
+        if income and amount < 0:
+            amount = abs(amount)
+        elif not income and amount > 0:
+            amount = 0 - amount
+        cat = self.comboCat.currentText()
+        cat_id = self.db.cat_to_oid[cat]
+        trig = self.comboTrig.currentText()
+        trig_id = self.db.oid_for_trig(trig)
+        over = self.comboOver.currentText()
+        over_id = self.db.oid_for_over(over)
+        ptypestr = self.comboType.currentText()
+        ptype = Prediction.get_ptype_from_str(ptypestr)
+        cyclestr = self.comboCycle.currentText()
+        cycle = PCycle.get_cycle_from_str(cyclestr)
+        qdate = self.editDate.date()
+        ddate = date(qdate.year(), qdate.month(), qdate.day())
+        vdatestr = self.comboDate.currentText()
+        vdate = PCycle.get_vdate_from_str(cycle, vdatestr)
+        desc = self.editComment.text()
+        return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc]
+
     def addPrediction(self):
-        pass
+        aList = self.list_from_fields(0)
+        pred = Prediction(self.db)
+        pred.set_with_list(aList)
+        self.db.add_prediction(pred)
+        self.set_list_model(self.db.predictions)
+        self.show()
     
     def clearPrediction(self):
         pass
@@ -279,12 +310,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         self.showRects(4)
         if first_time:
-            self.graphicsView.scale(1.44, -.185) 
+            self.graphicsView.scale(1.57, -.081) 
         
         self.scene.setSceneRect(QRectF(QPointF(0, sceneYmin), QPointF(scenewidth, sceneYmax)))
         self.graphicsView.setScene(self.scene)
         self.setSelectionAt(0)      
         self.show()
+        self.showRects(5)
         
     def resizeGraph(self, size):
         width = size.width()
