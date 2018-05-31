@@ -45,6 +45,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.buttonUpdate.clicked.connect(self.updatePrediction)
         self.buttonDelete.clicked.connect(self.deletePrediction)
         self.buttonClear.clicked.connect(self.clearPrediction)
+        self.comboCat.currentIndexChanged.connect(self.catChanged)
         self.listWidget.currentRowChanged.connect(self.listSelectionChanged)
         
         self.selectedIdx = -1        # only setSelectionAt sets this to real value, avoids loops I think
@@ -114,6 +115,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.set_list_model(self.db.predictions)
         self.show()
     
+    def catChanged(self):
+        cat = self.comboCat.currentText()
+        triggers = self.db.triggers_for_cat(cat)
+        self.comboTrig.clear()
+        for trig in triggers:
+            self.comboTrig.addItem(trig.trig)
+        
     def clearPrediction(self):
         pass
     
