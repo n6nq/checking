@@ -1,8 +1,7 @@
 from PyQt5.QtCore import pyqtSignal, QLineF, QSize, QRectF, QPointF, Qt
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QGraphicsScene, QGraphicsItem  #(QDialog, QFileDialog, QMenu, QAction, QListWidgetItem, QGraphicsTextItem)
 from PyQt5.QtGui import QPen, QFont
-import datetime
-
+from datetime import date
 from warninglistdialog import WarningListDialog
 from predicted import Prediction
 from pcycle import PCycle, Cycles, DaysOfWeek
@@ -53,9 +52,9 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         #min_bal = 9999.99
         #max_bal = -9999.99
-        today = datetime.date.today()
+        self.today = date.today()
         
-        astr = 'Please import bank data up to today, {} and then enter the current balance.\nBalance:'.format(today.isoformat())
+        astr = 'Please import bank data up to today, {} and then enter the current balance.\nBalance:'.format(self.today.isoformat())
         values = QInputDialog.getText(self, 'Balance?', astr)
         if values[1] == False:
             return
@@ -76,9 +75,9 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         past = False        #someday
         
         if past:
-            self.get_past_data(today, self.starting_balance)
+            self.get_past_data(self.today, self.starting_balance)
             
-        self.get_future_data(today, self.starting_balance)
+        self.get_future_data(self.today, self.starting_balance)
         
         self.refresh(True)
 
@@ -96,8 +95,9 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         trig_id = self.db.oid_for_trig(trig)
         over = self.comboOver.currentText()
         over_id = self.db.oid_for_over(over)
-        ptypestr = self.comboType.currentText()
-        ptype = Prediction.get_ptype_from_str(ptypestr)
+        #ptypestr = self.comboType.currentText()
+        #ptype = Prediction.get_ptype_from_str(ptypestr)
+        ptype = 5
         cyclestr = self.comboCycle.currentText()
         cycle = PCycle.get_cycle_from_str(cyclestr)
         qdate = self.editDate.date()
@@ -112,8 +112,9 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         pred = Prediction(self.db)
         pred.set_with_list(aList)
         self.db.add_prediction(pred)
-        self.set_list_model(self.db.predictions)
-        self.show()
+        self.futures = self.db.get_next_three_months(self.today)
+        self.doBalances(self.starting_balance)
+        self.refresh(False)
     
     def catChanged(self):
         cat = self.comboCat.currentText()
