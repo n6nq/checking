@@ -45,7 +45,9 @@ from bidict import bidict
 #    BIWEEKLY = 5
 #    ADHOC = 6
 
-Cycles = bidict({'None': 0, 'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
+Cycles = bidict({
+    #'None': 0, 
+    'Monthly': 1, 'Weekly': 2, 'Quarterly': 3, 'Annual': 4, 'BiWeekly': 5, 'Adhoc': 6})
 
 
 DaysOfWeek = bidict({'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Sat': 5, 'Sun': 6})

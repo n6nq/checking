@@ -123,7 +123,14 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             self.comboTrig.addItem(trig.trig)
         
     def clearPrediction(self):
-        pass
+        self.editAmount.clear()
+        self.chkboxIncome.setChecked(False)
+        self.comboCat.clear()
+        self.comboTrig.clear()
+        self.comboCycle.clear()
+        self.comboDate.clear()
+        self.editDate.clear()
+        self.editComment.clear()
     
     def deletePrediction(self):
         pent = self.futures[self.lastSelected]
@@ -356,7 +363,12 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         #QGraphicsScene.mousePressEvent(self, mouseEvent)
 
     def updatePrediction(self):
-        pass
+        #TODO Do I want this to update the original prediction record 
+        # or just this projected entry.
+        pent = self.futures[self.lastSelected]
+        pent.amount = Money.from_str(self.editAmount.text())
+        self.doBalances(self.starting_bal)
+        self.refresh(False)
     
 
 #Deprecated below this line ====================================
