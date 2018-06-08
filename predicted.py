@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 DaysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 # Keep Types in alphabetical order so type combo will sort correctly
-Types = bidict({'None': 0, 'Bill': 1, 'Elective': 2, 'Income': 3, 'Monthly': 4, 'Prediction': 5, 'Subscription': 6})
+#Types = bidict({'None': 0, 'Bill': 1, 'Elective': 2, 'Income': 3, 'Monthly': 4, 'Prediction': 5, 'Subscription': 6})
 #TODO -- Get rid of types
 class Prediction(object):
     
@@ -35,8 +35,8 @@ class Prediction(object):
     def __str__(self):
         return str(self.cycle) + ' Amount: ' + self.amount.as_str() + ' cat: ' + self.cat + ' trig: ' + self.trig + ' desc: ' + self.desc
     
-    def get_typestr(self):
-        return Types.inv[self.p_type]
+    #def get_typestr(self):
+        #return Types.inv[self.p_type]
 
     
     def get_cyclestr(self):
@@ -171,17 +171,17 @@ class Prediction(object):
     def headers(cls):
         return ['Amount', 'Income', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
     
-    @classmethod
-    def get_type_list(cls):
-        keyList = []
-        for key in Types.keys():
-            keyList.append(key)
-        return keyList
+    #@classmethod
+    #def get_type_list(cls):
+        #keyList = []
+        #for key in Types.keys():
+            #keyList.append(key)
+        #return keyList
     
-    @classmethod
-    def get_ptype_from_str(cls, str):
-        assert(str in Types)
-        return Types[str]
+    #@classmethod
+    #def get_ptype_from_str(cls, str):
+        #assert(str in Types)
+        #return Types[str]
 
     @classmethod
     def get_cycle_from_str(cls, str):

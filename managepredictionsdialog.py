@@ -23,7 +23,7 @@ class MyTableModel(QAbstractTableModel):
         self.listdata = datain
         self.db = args[0]
         self.headers = Prediction.headers()
-        self.num_of_fields = 9
+        self.num_of_fields = 8  #9 - type
         self.last_role = None
         self.last_row = -1
         self.last_selected = -1
@@ -46,9 +46,9 @@ class MyTableModel(QAbstractTableModel):
                 self.last_selected = pred.oid
                 #print(self.last_selected)
                 if role == Qt.DisplayRole:
-                    self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+                    self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
                 elif role == Qt.EditRole:
-                    self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.get_typestr(), pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
+                    self.strings = [pred.amount.as_str(), pred.get_income_str(), pred.cat, pred.trig, pred.over, pred.cycle.get_type_str(), pred.cycle.get_date_str(), pred.desc]
                 else: 
                     return QVariant()
                 self.last_row = row
@@ -121,13 +121,13 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.sortOverride.addItem(over)
             self.comboOver.addItem(over)
 
-        # Setup type combos
-        self.sortType.activated.connect(lambda: self.new_type_filter())
-        self.sortType.addItems(common_ui.ascend_descend)
-        typeList = Prediction.get_type_list()
-        # Bill, Prediction, Subscription, Monthly, Elective, Income, None
-        self.sortType.addItems(typeList)
-        self.comboType.addItems(typeList)
+        ## Setup type combos
+        #self.sortType.activated.connect(lambda: self.new_type_filter())
+        #self.sortType.addItems(common_ui.ascend_descend)
+        #typeList = Prediction.get_type_list()
+        ## Bill, Prediction, Subscription, Monthly, Elective, Income, None
+        #self.sortType.addItems(typeList)
+        #self.comboType.addItems(typeList)
             
         # Setup Cycle combos
         self.sortCycle.activated.connect(lambda: self.new_cycle_filter())
@@ -161,7 +161,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboDate.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.VDATE))
         self.comboCat.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CAT))
         self.comboTrig.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TRIG))
-        self.comboType.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TYPE))
+        #self.comboType.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.TYPE))
         self.comboOver.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.OVER))
         self.comboCycle.currentIndexChanged.connect(lambda: self.set_dirty(Dirty.CYCLE))
         self.chkboxIncome.stateChanged.connect(lambda: self.set_dirty(Dirty.INCOME))
@@ -311,17 +311,17 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.set_list_model(filtered)
         self.show()
     
-    def new_type_filter(self):
-        ptype = self.sortType.currentText()
-        if ptype == 'Ascend':
-            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.p_type)
-        elif ptype == 'Descend':
-            filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.p_type, reverse=True)
-        else:
-            filtered = sorted(self.db.get_all_predictions_with_ptype(ptype), key=lambda pred: pred.amount.value)
+    #def new_type_filter(self):  #deprecated
+        #ptype = self.sortType.currentText()
+        #if ptype == 'Ascend':
+            #filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.p_type)
+        #elif ptype == 'Descend':
+            #filtered = sorted(self.db.get_all_predictions(), key=lambda pred: pred.p_type, reverse=True)
+        #else:
+            #filtered = sorted(self.db.get_all_predictions_with_ptype(ptype), key=lambda pred: pred.amount.value)
             
-        self.set_list_model(filtered)
-        self.show()
+        #self.set_list_model(filtered)
+        #self.show()
     
     def set_date_items(self):
         self.editDate.hide()
@@ -380,7 +380,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         trig_id = self.db.oid_for_trig(trig)
         over = self.comboOver.currentText()
         over_id = self.db.oid_for_over(over)
-        ptypestr = self.comboType.currentText()
+        assert(False)
+        #ptypestr = self.comboType(remove).currentText()
         ptype = Prediction.get_ptype_from_str(ptypestr)
         cyclestr = self.comboCycle.currentText()
         cycle = PCycle.get_cycle_from_str(cyclestr)
@@ -456,7 +457,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         self.comboCat.setCurrentText('None')
         self.comboTrig.setCurrentText('None')
         self.comboOver.setCurrentText('None')
-        self.comboType.setCurrentText('None')
+        #self.comboType.setCurrentText('None')
         self.comboCycle.setCurrentText('None')
         self.comboDate.setCurrentText('None')
         self.editDate.setDate(date.today())
@@ -495,7 +496,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
             self.comboOver.setCurrentText(value)
             return
         elif col == 5:
-            self.comboType.setCurrentText(value)
+            assert(False)   #deprecated
+            #self.comboType.setCurrentText(value)
             return
         elif col == 6:
             self.comboCycle.setCurrentText(value)

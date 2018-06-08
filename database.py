@@ -55,7 +55,7 @@ class Database(object):
         self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
         self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.deletePredictionSQL = 'delete from Predictions where oid = ?'
-        self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, ptype = ?, cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
+        self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, ptype = "na", cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
@@ -728,13 +728,13 @@ class Database(object):
                 requested.append(pred)
         return requested
 
-    def get_all_predictions_with_ptype(self, ptype):
-        requested = []
+    #def get_all_predictions_with_ptype(self, ptype):
+        #requested = []
             
-        for pred in self.predictions:
-            if pred.get_typestr() == ptype:
-                requested.append(pred)
-        return requested
+        #for pred in self.predictions:
+            #if pred.get_typestr() == ptype:
+                #requested.append(pred)
+        #return requested
                 
     def get_all_predictions_with_trig(self, trig):
         requested = []
