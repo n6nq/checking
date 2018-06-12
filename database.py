@@ -975,7 +975,7 @@ class Database(object):
                 self.commit()
                 return True
             elif old_version == 1:
-                self.conn.execute('drop table if exists NewPredictions2')
+                self.conn.execute('drop table if exists Predictions2')
                 self.conn.execute(self.createPredictions2SQL)
                 self.commit()
                 #'insert into Predictions(2amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -990,7 +990,11 @@ class Database(object):
                     newrow.append(row[6])
                     newrow.append(row[7])
                     newrow.append(row[8])
-                    newrow.append(row[10])
+                    if row[10] in Cycles:
+                        cycleType = Cycles[row[10]]
+                    else:
+                        cycleType = row[10]
+                    newrow.append(cycleType)
                     newrow.append(row[11])
                     newrow.append(row[12])
                     newrow.append(row[13])
