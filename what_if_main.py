@@ -105,7 +105,8 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         vdatestr = self.comboDate.currentText()
         vdate = PCycle.get_vdate_from_str(cycle, vdatestr)
         desc = self.editComment.text()
-        return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc]
+        return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle.type, ddate, vdatestr, desc]
+        #return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc]
 
     def addPrediction(self):
         aList = self.list_from_fields(0)

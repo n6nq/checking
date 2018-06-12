@@ -154,9 +154,8 @@ class Prediction(object):
         self.cat_id = lst[6]
         self.trig_id = lst[7]
         self.over_id = lst[8]
-        self.p_type = lst[9]
-        self.cycle = PCycle(lst[10], lst[11], lst[12])
-        self.desc = lst[13]
+        self.cycle = PCycle(lst[9], lst[10], lst[11])
+        self.desc = lst[12]
         
     def set_with_list(self, lst):
         self.oid = lst[0]
@@ -169,7 +168,7 @@ class Prediction(object):
     #---- CLASSMETHODS -------------------------------#
     @classmethod
     def headers(cls):
-        return ['Amount', 'Income', 'Category', 'Trigger', 'Override', 'Type', 'Cycle', 'Date', 'Desc']
+        return ['Amount', 'Income', 'Category', 'Trigger', 'Override', 'Cycle', 'Date', 'Desc']
     
     #@classmethod
     #def get_type_list(cls):

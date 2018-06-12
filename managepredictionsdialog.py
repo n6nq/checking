@@ -380,9 +380,8 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         trig_id = self.db.oid_for_trig(trig)
         over = self.comboOver.currentText()
         over_id = self.db.oid_for_over(over)
-        assert(False)
         #ptypestr = self.comboType(remove).currentText()
-        ptype = Prediction.get_ptype_from_str(ptypestr)
+        #ptype = Prediction.get_ptype_from_str(ptypestr)
         cyclestr = self.comboCycle.currentText()
         cycle = PCycle.get_cycle_from_str(cyclestr)
         qdate = self.editDate.date()
@@ -390,7 +389,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         vdatestr = self.comboDate.currentText()
         vdate = PCycle.get_vdate_from_str(cycle, vdatestr)
         desc = self.editComment.text()
-        return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cyclestr, ddate, vdatestr, desc]
+        return [oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cyclestr, ddate, vdatestr, desc]
         
     def add_prediction(self):
         aList = self.list_from_fields(0)
@@ -495,14 +494,14 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
         elif col == 4:
             self.comboOver.setCurrentText(value)
             return
+ #       elif col == 5:
+ #           assert(False)   #deprecated
+ #           #self.comboType.setCurrentText(value)
+ #           return
         elif col == 5:
-            assert(False)   #deprecated
-            #self.comboType.setCurrentText(value)
-            return
-        elif col == 6:
             self.comboCycle.setCurrentText(value)
             return
-        elif col == 7:
+        elif col == 6:
             mytype = type(value)
             if '-' in value:
                 date = QDate.fromString(value, 'yyyy-M-d')
@@ -516,7 +515,7 @@ class ManagePredictionsDialog(QDialog, Ui_PredictionsDialog):
                 self.editDate.hide()
                 self.comboDate.show()
                 return
-        elif col == 8:
+        elif col == 7:
             self.editComment.setText(value)
             return
         else:

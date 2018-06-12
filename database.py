@@ -52,8 +52,11 @@ class Database(object):
         self.load_accounts()
         
         self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype int, cycle int, ddate date, vdate int, desc varchar(128))'
+        self.createPredictions2SQL = 'create table if not exists Predictions2(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, cycle int, ddate date, vdate int, desc varchar(128))'
         self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
-        self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        self.insertPrediction1SQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        self.migrate2PredictionsSQL = 'insert into Predictions2(oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.deletePredictionSQL = 'delete from Predictions where oid = ?'
         self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, ptype = "na", cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
         
@@ -198,7 +201,8 @@ class Database(object):
     def add_prediction(self, pred):
         try:
             assert(type(pred.cycle) == PCycle)
-            row = (pred.amount.value, pred.income, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle.ctype, pred.cycle.ddate, pred.cycle.vdate, pred.desc)
+            #row = (pred.amount.value, pred.income, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle.ctype, pred.cycle.ddate, pred.cycle.vdate, pred.desc)
+            row = (pred.amount.value, pred.income, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.cycle.ctype, pred.cycle.ddate, pred.cycle.vdate, pred.desc)
             for mem in row:
                 print (type(mem))
                 print (mem)
@@ -849,8 +853,8 @@ class Database(object):
                 
     def load_predictions(self):
         try:
-            self.conn.execute(self.createPredictionsSQL)
-            for row in self.conn.execute(self.selectAllPredictionsSQL):
+            self.conn.execute(self.createPredictionsSQL)  #TODO remove type
+            for row in self.conn.execute(self.selectAllPredictionsSQL):  #TODO remove type
                 pred = Prediction(self)
                 pred.set_with_list(list(row))
                 self.predictions.append(pred)
@@ -907,7 +911,7 @@ class Database(object):
             self.conn.execute('create table if not exists Version(version_str varchar(30), version_int int)')
             for row in self.conn.execute('select * from Version'):
                 version = row[1]
-            if version == 0:
+            if version == 1:
                 self.migrate_entries(version)
             return True
         except sqlite3.Error as e:
@@ -970,6 +974,30 @@ class Database(object):
                 self.conn.execute('INSERT OR REPLACE INTO Version(version_str, version_int) VALUES ("V0.1", 1)')
                 self.commit()
                 return True
+            elif old_version == 1:
+                self.conn.execute('drop table if exists NewPredictions2')
+                self.conn.execute(self.createPredictions2SQL)
+                self.commit()
+                #'insert into Predictions(2amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                for row in self.conn.execute(self.selectAllPredictionsSQL):
+                    newrow = []
+                    newrow.append(row[0])
+                    newrow.append(row[1])
+                    newrow.append(row[2])
+                    newrow.append(row[3])
+                    newrow.append(row[4])
+                    newrow.append(row[5])
+                    newrow.append(row[6])
+                    newrow.append(row[7])
+                    newrow.append(row[8])
+                    newrow.append(row[10])
+                    newrow.append(row[11])
+                    newrow.append(row[12])
+                    newrow.append(row[13])
+                    #insert into Predictions(oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    self.conn.execute(self.migrate2PredictionsSQL, newrow)
+                    self.commit()
+                #renate the table
         except sqlite3.Error as e:
             self.error('Migration error 1: ', e.args[0])
             return False

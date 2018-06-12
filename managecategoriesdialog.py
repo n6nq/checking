@@ -115,7 +115,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             self.listOverrides.addItem(override.over)
         self.listOverrides.setCurrentRow(0)
         
-        # don't do this here, an initial selection set forces it to happen later, 
+        # TODO don't do this here, an initial selection set forces it to happen later, 
         # don't need double entries
         for trig in sorted(self.trigs, key=lambda trig: trig.trig):
             self.listTriggers.addItem(trig.trig)
