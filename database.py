@@ -51,14 +51,14 @@ class Database(object):
         self.accounts = []
         self.load_accounts()
         
-        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, ptype int, cycle int, ddate date, vdate int, desc varchar(128))'
+        self.createPredictionsSQL = 'create table if not exists Predictions(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, cycle int, ddate date, vdate int, desc varchar(128))'
         self.createPredictions2SQL = 'create table if not exists Predictions2(oid INTEGER PRIMARY KEY ASC, amount int, income int, cat varchar(20), trig varchar(30), over varchar(30), cat_id int, trig_id int, over_id int, cycle int, ddate date, vdate int, desc varchar(128))'
-        self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc from Predictions'
+        self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc from Predictions'
         self.insertPrediction1SQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, ptype, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.insertPredictionSQL = 'insert into Predictions(amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.migrate2PredictionsSQL = 'insert into Predictions2(oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.deletePredictionSQL = 'delete from Predictions where oid = ?'
-        self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, ptype = "na", cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
+        self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
         
         self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
         self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
@@ -910,7 +910,7 @@ class Database(object):
             version = 0
             self.conn.execute('create table if not exists Version(version_str varchar(30), version_int int)')
             for row in self.conn.execute('select * from Version'):
-                version = row[1]
+                version = max(row[1], version)
             if version == 1:
                 self.migrate_entries(version)
             return True
@@ -1001,7 +1001,12 @@ class Database(object):
                     #insert into Predictions(oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                     self.conn.execute(self.migrate2PredictionsSQL, newrow)
                     self.commit()
-                #renate the table
+                #renate the tables
+                self.conn.execute('ALTER TABLE Predictions RENAME TO OldPredictions')
+                self.conn.execute('ALTER TABLE Predictions2 RENAME TO Predictions')
+                self.conn.execute('INSERT OR REPLACE INTO Version(version_str, version_int) VALUES ("V0.2", 2)')
+                self.commit()
+                
         except sqlite3.Error as e:
             self.error('Migration error 1: ', e.args[0])
             return False

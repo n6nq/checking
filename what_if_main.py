@@ -97,7 +97,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         over_id = self.db.oid_for_over(over)
         #ptypestr = self.comboType.currentText()
         #ptype = Prediction.get_ptype_from_str(ptypestr)
-        ptype = 5
+        #ptype = 5
         cyclestr = self.comboCycle.currentText()
         cycle = PCycle.get_cycle_from_str(cyclestr)
         qdate = self.editDate.date()

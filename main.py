@@ -81,7 +81,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Setup the database
         curr = os.getcwd()
         self.db = database.Database(curr+'\\checking')
-        self.db.migrateVersion(0, 1)
 
         # Setup the buttons
         self.btnChart.clicked.connect(lambda: self.pressedChartBtn())
