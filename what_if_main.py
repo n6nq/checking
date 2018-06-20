@@ -133,6 +133,14 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.comboDate.clear()
         self.editDate.clear()
         self.editComment.clear()
+        for cat in sorted(self.db.cat_to_oid.keys()):
+            self.comboCat.addItem(cat)
+            
+        for trig in sorted(self.db.trig_to_oid.keys()):
+            self.comboTrig.addItem(trig)
+        
+        self.cycleList = PCycle.get_cycle_list()
+        self.comboCycle.addItems(self.cycleList)
     
     def deletePrediction(self):
         pent = self.futures[self.lastSelected]
@@ -367,11 +375,22 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
     def updatePrediction(self):
         #TODO Do I want this to update the original prediction record 
         # or just this projected entry.
+        aList = self.list_from_fields(0)
         pent = self.futures[self.lastSelected]
         pent.amount = Money.from_str(self.editAmount.text())
+        pred = Prediction(self.db)
+        pred.set_with_list(aList)
+        self.db.update_prediction(aList)
+        self.futures = self.db.get_next_three_months(self.today)
         self.doBalances(self.starting_bal)
         self.refresh(False)
     
+        #pred = Prediction(self.db)
+        #pred.set_with_list(aList)
+        #self.db.add_prediction(pred)
+        #self.futures = self.db.get_next_three_months(self.today)
+        #self.doBalances(self.starting_balance)
+        #self.refresh(False)    
 
 #Deprecated below this line ====================================
     def displayRangeAt(self, selected, before, after):  #deprecated
