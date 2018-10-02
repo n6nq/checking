@@ -159,7 +159,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             running += ent.amount.value
             self.balances.append(running)
         
-        pass
+
     def get_future_data(self, today, starting_bal):
         """This function used the predictions to produce three months of predicted future
            entries. today is the starting day or the period and starting_bal is the account
@@ -412,6 +412,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             self.listWidget.addItem(pent.asCategorizedStr())
           
         self.listWidget.setCurrentRow(10)
+        
     def get_past_data(self, today, starting_balance):  # deprecated
         assert(False)
         self.entries = self.db.get_last_three_months(today)

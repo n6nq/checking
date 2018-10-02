@@ -19,25 +19,25 @@ class Trigger(dbrow.DBRow):
         self.trig = row[1]
         self.cat = row[2]
 
-    def save(self, storage):
-        if storage == database.STORE_PCKL:
-            f = open(self.db.name()+'_triggers.pckl', 'wb')
-            pickle.dump(self.cache, f)
-            f.close()
-        elif storage == database.STORE_DB:
-            for trig, cat in self.cache.items():
-                self.db.addTrigger(trig, cat)
+    #def save(self, storage):
+        #if storage == database.STORE_PCKL:
+            #f = open(self.db.name()+'_triggers.pckl', 'wb')
+            #pickle.dump(self.cache, f)
+            #f.close()
+        #elif storage == database.STORE_DB:
+            #for trig, cat in self.cache.items():
+                #self.db.addTrigger(trig, cat)
 
-    def load(self, storage):
-        if storage == database.STORE_PCKL:
-            try:
-                f = open(self.db.name()+'_triggers.pckl', 'rb')
-                self.cache = pickle.load(f)
-                f.close()
-            except FileNotFoundError:
-                print('No triggers.pckl file.')
-        elif storage == database.STORE_DB:
-            self.cache = self.db.get_all_triggers()
+    #def load(self, storage):
+        #if storage == database.STORE_PCKL:
+            #try:
+                #f = open(self.db.name()+'_triggers.pckl', 'rb')
+                #self.cache = pickle.load(f)
+                #f.close()
+            #except FileNotFoundError:
+                #print('No triggers.pckl file.')
+        #elif storage == database.STORE_DB:
+            #self.cache = self.db.get_all_triggers()
         
 #    def fromDesc(self, desc):
 #        for over, cat in self.db.get_all_overrides():

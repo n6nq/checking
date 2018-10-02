@@ -33,17 +33,20 @@ class Overrides(object):
         #elif storage == database.STORE_DB:
             #self.cache = self.db.get_all_overrides()
 
-    def save(self, storage):
-        if storage == database.STORE_PCKL:
-            f = open(self.db.name()+'_overrides.pckl', 'wb')
-            pickle.dump(self.strings, f)
-            f.close()
-        elif storage == database.STORE_DB:
-            for over, cat in self.strings.items():
-                self.db.addOverride(over, cat)
+    #def save(self, storage):
+        #if storage == database.STORE_PCKL:
+            #f = open(self.db.name()+'_overrides.pckl', 'wb')
+            #pickle.dump(self.strings, f)
+            #f.close()
+        #elif storage == database.STORE_DB:
+            #for over, cat in self.strings.items():
+                #self.db.addOverride(over, cat)
         
 class Override(dbrow.DBRow):
-    
+    """Override -- An override is a search string that has prioritt over normal trigger strings. For
+    example: If an entry contained a description 'aaaa bbbbb ccccc' and there was a trigger named
+    B that triggered on the string 'bbbbb' setting this entries Category to 'Bee', that could be
+    overridden by defining and Override 'ccccc' therefore making the netries category 'See'."""
     def __init__(self, row):
         self.oid = row[0]
         self.over = row[1]

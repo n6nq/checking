@@ -1,14 +1,8 @@
 """databsae.py --- this module provides an application specific interface
    to a sqlite3 database for storage of application records. This module is
-   also responsible all table creation and maintenance."""
+   also responsible for all table creation and maintenance."""
 
-# tables to create
-#
-# accounts = id, name, current date range, bank url
-# entries = id, category, date, amount, check number, cleared, description
-# categories = id, name, super category
-# triggers = id, trigger string, category id
-# overrides = id override string, category id
+# todo -- delvelop a backup strategy
 
 import sqlite3
 import accounts
@@ -24,12 +18,14 @@ from money import Money
 from PyQt5.QtWidgets import QMessageBox
 from pcycle import PCycle, Cycles
 import common_ui
+
 # storage defines
-EMPTY = 0
-STORE_DB = 1
-STORE_PCKL = 2
+#EMPTY = 0
+#STORE_DB = 1
+#STORE_PCKL = 2
 
 class CompareOps(Enum):
+    """This class enumerates a set of ops for comparing entries."""
     MONEY_LESS_THAN = 1
     MONEY_MORE_THAN = 2
     MONEY_EQUALS = 3
@@ -37,9 +33,54 @@ class CompareOps(Enum):
     SEARCH_DESC = 5
     
 class Database(object):
-
+    """Database -- The Database class creates a Sqlite3 database file the first time it is instantiated,
+       if such a fie does not already exist. It then creates tables for entries, triggers, categories, etc.
+       if they do not exist in the file that has been opened. All of this creation should only happen once,
+       when you run this application for the first time.
+       Member varibles:
+       dbname -- Not used at this time (8/29/18)
+       start_date -- Used by load entries to determiine which entries to load.
+       end_date   -- ditto
+       conn -- This is our connction to the Sqlite database. It is used by all database functions that
+               perform any operations on the database.
+       accounts -- A list of thw accounts read from the database.
+       categories -- A dictionary of category string to super category strings. Super categories has not been
+                     implemented as of 8/13/18.
+       cat_to_oid -- A bi-directional dictionary equting cat strings to cat numbers and vice-vrsus.
+       overrides -- A dictionary of override strings that defines the category of an entry. If the overrides
+                    exist in an entry, its category tkes the place of any any category defined by a trigger.
+       over_to_oid -- A bi-directional dictionary that equates override strings to the numbers.
+       triggers -- A dictionary of trigger strings to category strings.
+       trig_to_oid -- A bi-direcional dictionary of trigger strings to trigger numbers.
+       filtered_entries -- A list of ntries that meet some search criteria. Typically used bby the main window
+                        for doing list subsetting based on some column value.
+       ncf_entries -- A list of new check file entries. They ususally come to the Database module from the CheckFileDialog
+                      to be merged into the Entry database table.
+       entries --  A list of all check entries that this program has received from check files from the bank.
+       predictions -- A list of Predictions. A prediction is a checking account transaction that hasn't happened yet. A
+                      Prediction is almost the same as an Entry except the date is a futture starting date and there
+                      is an extra value to indicate the repetition rate. Predictions are used in the Predicted window to
+                      plot a future balance graph.
+       num_entries -- An integer indicating the number of entries read from the database. Only used by get_recent_entries().
+       num_predictions -- An integer indicting the number of predictions read from the database. Not used at this time.
+       xxxxSQL -- There are numerous SQL strings to supply all the required data access t the rest of
+               this program. They include createAcctsSQL, selectAllAcctsSQL, createCatsSQL, createEntriesSQL,
+               createOversSQL, createPredictionsSQL, createPredictions2SQL, createTrigsSQL, deleteCatSQL,
+               deleteOverSQL, deletePredictionSQL, deleteTrigSQL, findCatInEntriesSQL, findCatInOverridesSQL,
+               findCatInTriggersSQL, findEntryCatForTrigSQL, findEntryCatForTrigSQLOld, get_yrmo_groups_by_catSQL,
+               get_yrmo_groups_by_monSQL, insertCatSQL, insertEntrySQL, insertMigratedEntrySQL, insertNoneCatSQL,
+               insertOverrideSQL, insertPrediction1SQL, insertPredictionSQL, insertTrigsSQL, migrateEntriesTableSQL,
+               migrate2PredictionsSQL, selectAllCatsSQL, selectAllOversSQL, selectAllEntriesSQL,
+               selectAllPredictionsSQL, selectAllTrigsSQL, updateEntryCatByOverOnlySQL, updateEntryCatByOverOnlySQL,
+               updateEntryCatByTrigOnlySQL, updateEntryCatByTrigOnlySQL, updateEntryCatByOidSQL,
+               udateEntryCatForOverSQL, updateEntryCatForOverSQLOld, updateEntryCatForTrigSQL,
+               updateEntryCatForTrigSQLOld, updateEntryCatSQL, updateEntryCatSQLOld, updateOverridesCatSQL,
+               updatePredictionSQL, updateTriggersCatSQL.
+               """
     def __init__(self, name):
-        
+        """A single instance of the Database class is created by the Main window. A reference is passed to all
+           other parts of the program. This constructor checks o see if the database file already exist and creates
+           it and all the tables if it does not."""
         self.dbname = name
         self.start_date = datetime.date(9999, 1, 1)  # these will be set by load_entries()
         self.end_date = datetime.date(1, 1, 1)
@@ -138,6 +179,8 @@ class Database(object):
         self.sanity_check_db()  # todo remove after dev is done
         
     def add_account(self, name):
+        """This function add new account records. This function is not used yet. We'll see if I
+           ever decide to support more that one account."""
         try:
             self.conn.execute(self.insertAccountSQL, (name, today, today, ''))
             self.commit()
@@ -148,6 +191,7 @@ class Database(object):
             return False
         
     def add_cat(self, catStr):
+        """Add a new category to the list of categories."""
         try:
             if catStr in self.cat_to_oid:
                 self.error("Failed to add Category '{0}'".format(catStr), 'It already exists.')
@@ -155,7 +199,7 @@ class Database(object):
             else:
                 cur = self.conn.execute(self.insertCatSQL, (catStr, None))
                 self.commit()
-                last_id = cur.lastrowid
+                last_id = cur.lastrowid     # use the last rowid to set entry in cat_to_oid dictionary
                 self.categories[catStr] = Category((last_id, catStr, None ))
                 self.cat_to_oid[catStr] = last_id                     
                 return True
@@ -165,6 +209,7 @@ class Database(object):
             
         
     def add_entry(self, ent):
+        """Add a new entry to the list of entries."""
         try:
             self.conn.execute(self.insertEntrySQL, (ent.category, ent.cat_id, ent.trig_id, ent.over_id, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
             self.commit()
@@ -174,15 +219,10 @@ class Database(object):
             self.error('Could not save entries in Entries table:\n', e.args[0])
             return False
        
-    #def add_entry_list(self, entryList):
-    #    try:
-    #        for entry in self.entrylist:
-    #            cur = self.db.conn.cursor()
-    #            cur.execute(self.insertEntrySQL, (entry.category, entry.date, entry.amount.value, entry.checknum, entry.cleared, entry.desc))
-    #    except sqlite3.Error as e:
-    #        self.error('Could not save entries in EntryList table:\n', e.args[0])
             
     def add_override(self, over, cat):
+        """Add an override to the to the override list. Also add an entry for this override to the
+        over_to_oid dictionary."""
         try:
             if over in self.over_to_oid:
                 self.error("Failed to add Override '{0}'".format(over), 'It already exists.')
@@ -199,6 +239,7 @@ class Database(object):
             return False
             
     def add_prediction(self, pred):
+        """Add a prediction to the predictions table and the list."""
         try:
             assert(type(pred.cycle) == PCycle)
             #row = (pred.amount.value, pred.income, pred.cat, pred.trig, pred.over, pred.cat_id, pred.trig_id, pred.over_id, pred.p_type, pred.cycle.ctype, pred.cycle.ddate, pred.cycle.vdate, pred.desc)
@@ -214,13 +255,16 @@ class Database(object):
             self.error('Could not save prediction in Predictions table:\n', e.args[0])
             return False
        
-    def add_filtered_entry(self, ent):
-        self.filtered_entries.append(ent)
+    #def add_filtered_entry(self, ent):
+    #    self.filtered_entries.append(ent)
     
     def add_ncf_entry(self, ent):
+        """Adds a new entry just read from a checkfile in the checkfile dialog. Entries are held in this
+        'New Check File' list until accepted bythe user."""
         self.ncf_entries.append(ent)
         
     def add_trigger(self, trig, cat):
+        """Add a new trigger string to the trigger list and make a new oid for it."""
         try:
             if trig in self.trig_to_oid:
                 self.error("Failed to add Trigger '{0}'".format(catStr), 'It already exists.')                
@@ -236,23 +280,26 @@ class Database(object):
             return False
             
         
-    def backup(self, name):  #deprecated
-        self.dbname = name
-        #todo: develop strategy for managing backup and restore naming
-        conn = sqlite3.connect(name+'.db')
-        self.conn = conn
-        self.accts = accounts.AccountList(self, STORE_DB)
-        self.accts.save(STORE_PCKL)
-        self.entries = entry.EntryList(self, STORE_DB)
-        self.entries.save(STORE_PCKL)
-        self.categories = Category(self, STORE_DB)
-        self.categories.save(STORE_PCKL)
-        self.triggers = trigger.Trigger(self, STORE_DB)
-        self.triggers.save(STORE_PCKL)
-        self.overrides = override.Override(self, STORE_DB)
-        self.overrides.save(STORE_PCKL)
+    #def backup(self, name):  #deprecated
+        #assert(False)
+        #self.dbname = name
+        ##todo: develop strategy for managing backup and restore naming
+        #conn = sqlite3.connect(name+'.db')
+        #self.conn = conn
+        #self.accts = accounts.AccountList(self, STORE_DB)
+        #self.accts.save(STORE_PCKL)
+        #self.entries = entry.EntryList(self, STORE_DB)
+        #self.entries.save(STORE_PCKL)
+        #self.categories = Category(self, STORE_DB)
+        #self.categories.save(STORE_PCKL)
+        #self.triggers = trigger.Trigger(self, STORE_DB)
+        #self.triggers.save(STORE_PCKL)
+        #self.overrides = override.Override(self, STORE_DB)
+        #self.overrides.save(STORE_PCKL)
 
     def cat_from_desc(self, desc):
+        """Scan the overrides and the triggers to see if any of them are matched in the passed description
+        string. We scan the overrides first to give them priority over ny matches from th trigger list."""
         for over, override in self.overrides.items():
             if over in desc:
                 return (override.cat, self.cat_to_oid[override.cat], 0, self.over_to_oid[override.over])
@@ -299,14 +346,17 @@ class Database(object):
                 
         #self.overrides = newd
 
-    def clear_fltered(self):
-        self.filtered_entries = []
+    #def clear_fltered(self):
+    #    self.filtered_entries = []
         
     
     def clear_ncf_entries(self):
+        """Remove any entries from the ncf list. Called from the checkfile dialog just
+        before reading a new file."""
         self.ncf_entries = []
         
     def commit(self):
+        """Used by are functions that perform an operation on the SQLite database."""
         self.conn.commit()
         
     #def convert_pickles_to_DB(self):  #deprecated
@@ -319,7 +369,7 @@ class Database(object):
         #self.entries.load(STORE_PCKL)
         #self.entries.save(STORE_DB)
 
-    def create_table(self, sql, tableName):  #move
+    def create_table(self, sql, tableName):  #deprecated
         try:
             self.conn.execute(sql)
             return True
@@ -341,10 +391,13 @@ class Database(object):
     #        return False
         
     def create_account(self, name):
+        """Future. Not used."""
         self.accts.createAccount(name)
         
     
     def delete_category_only(self, lose_cat):
+        """Remove only the requested category. Used by other fuction that chase category relationships
+        as well."""
         try:
             self.conn.execute(self.deleteCatSQL, (lose_cat, ))
             self.commit()
@@ -367,6 +420,9 @@ class Database(object):
         self.delete_category_only(cat)
 
     def delete_trigger_all(self, trig, catstr):
+        """This function changes the category of all entries in db that match the passed trigger and cat string
+        to 'None'. It also changes that cat_id and trig_id of all matching entries in the entries list and
+        filtered entry list. Finally, it deletes the trigger from the db and the triggers list."""
         if trig not in self.triggers:
             return False
         try:
@@ -399,6 +455,7 @@ class Database(object):
             return False
         
     def delete_override_only(self, overstr, catstr):
+        """This function deletes an override from the override table and the override list."""
         if overstr not in self.overrides:
             return False
         try:
@@ -411,6 +468,9 @@ class Database(object):
             return False
 
     def delete_override_all(self, over, catstr):
+        """This function changes the category of all entries in db that match the passed override and cat string
+        to 'None'. It also changes that cat_id and over_id of all matching entries in the entries list and
+        filtered entry list. Finally, it deletes the override from the db and the override list."""
         if over not in self.overrides:
             return False
         try:
@@ -443,6 +503,7 @@ class Database(object):
             return False
         
     def delete_trigger_only(self, trig, cat):
+        """delete_trigger_only -- Deletes the passed trigger from the trigger table and trigger list."""
         if trig not in self.triggers:
             return False
         try:
@@ -455,16 +516,13 @@ class Database(object):
             return False
             
     def dump_predictions(self):
+        """Debug function. Prints the predictions list."""
         for pred in self.predictions:
             pred.dump()
-            
-    def entry_is_dupe(self, newEtry):
-        for entry in self.entrylist:
-            if entry.compare(newEtry):
-                return True
-        return False
-    
+
     def error(self, msg, reason):
+        """error -- common error display function used by most database functions. Simply puts up
+        a message box for now. Could add logging here."""
         msgBox = QMessageBox()
         msgBox.setWindowTitle('Error!')
         msgBox.setText(msg+'\n'+reason)
@@ -476,6 +534,9 @@ class Database(object):
         
     
     def find_all_related_to_cat(self, catstr):
+        """Finds all overrides, triggers that define a category and all entries that have been
+        set to this category. Used by the delete and change category feature of the manage
+        categories dialog."""
         affected = []
         
         for over, override in self.overrides.items():
@@ -493,6 +554,8 @@ class Database(object):
         return affected
     
     def find_all_related_to_trig(self, current_trig, new_trig):
+        """Finds all entries that have been categorized by this trigger. Used by the change and delete
+        functions of the manage categories dialog."""
         affected = []
         #Are we trying to rename an existing trigger to another trigger that exists?
         if new_trig and new_trig in self.trig_to_oid:
@@ -521,19 +584,26 @@ class Database(object):
         return affected
     
     def find_pred_simiar_to(self, entry):
+        """Search for existing predictions that are similar to the pne we are about to create."""
         affected = []
         for pred in self.predictions:
-            if pred.amount.value == entry.amount.value:
+            if pred.amount.value == entry.amount.value and pred.category == entry.category and \
+               pred.trigger == entry.trigger:
                 affected.append('<Prediction>'+pred.str())
         return affected
     
     def find_pred_by_oid(self, oid):
+        """SEarch the predictions list for a prediction with the requested oid."""
         for pred in self.predictions:
             if pred.oid == oid:
                 return pred
         return None
     
     def find_all_related_to_over(self, cur_over, new_over):
+        """Find any entries that have the passed current override's id and categry. Also find any entries
+        whose description contains the new override string. Also check that the new override string is
+        not already defined as an override. The sum of these is to total effect of creating the new
+        override."""
         affected = []
         #Are we trying to rename an existing override to another override that exists?
         if new_over and new_over in self.over_to_oid:
@@ -562,6 +632,7 @@ class Database(object):
         return affected
         
     def find_all_with_trigger(self, trig):
+        """Returns a list of all entries that contain the passed trig string. Used in manage preditions dialog."""
         affected = []
         for entry in self.entries:
             if trig in entry.desc:
@@ -569,6 +640,7 @@ class Database(object):
         return affected
 
     def find_all_with_trigger_or_override(self, trigger, override):
+        """Returns a list of entries that contain either the passed trigger string or override string."""
         affected = []
         
         if override:
@@ -581,6 +653,7 @@ class Database(object):
         return affected
         
     def get_all_accounts(self):
+        """Not currently used. Perhaps accounts will become important later."""
         acct_list = []
         try:
             for row in self.conn.execute(self.accts.selectAllSQL):
@@ -590,11 +663,14 @@ class Database(object):
         return acct_list
     
     def get_all_cats(self):
+        """Used in the main window and the check file dialog to populate the category listboxes."""
         if len(self.categories) == 0:
             self.load_categories()
         return self.categories
     
     def get_all_entries(self, which):
+        """Return either the list of all entries or the Results list, create by th last search predicate.
+        The passed 'which' indicated which list to return."""
         if which == common_ui.All:
             self.filtered_entries = self.entries
             return self.entries
@@ -602,6 +678,9 @@ class Database(object):
             return self.filtered_entries
         
     def get_all_entries_meeting(self, which, op, value):
+        """This is the main way the Results list gets built. The op and value define the comparison
+        criteria for this search. This search can be run all entries or the set of entries produced by
+        the last seach. That feature is controlled by which."""
         requested = []
         if which == 'All':
             search_list = self.entries
@@ -630,6 +709,7 @@ class Database(object):
         return requested
     
     def get_all_entries_with_cat(self, which, cat):
+        """Search results list or the all entries list, returning entries having the requested cat."""
         requested = []
         if which == 'All':
             search_list = self.entries
@@ -644,6 +724,7 @@ class Database(object):
     
     
     def get_all_entries_with_date_range(self, which, date1, date2):
+        """Search all entries or current result list for entries in the requested data range."""
         requested = []
         if which == 'All':
             search_list = self.entries
@@ -661,9 +742,11 @@ class Database(object):
     
     
     def get_all_predictions(self):
+        """Return all predictions in the predictions list."""
         return self.predictions
     
     def get_all_predictions_with_date_filter(self, filter_str):
+        """Return a list of preditions meeting the requested date filter."""
         requested = []
         today = datetime.date.today()
         for pred in self.predictions:
@@ -685,6 +768,7 @@ class Database(object):
         return requested
     
     def get_all_predictions_meeting(self, op, value):
+        """Return a list of prdictions that the comparison predict decribed by op and value."""
         requested = []
         
         for pred in self.predictions:
@@ -709,6 +793,7 @@ class Database(object):
         return requested
 
     def get_all_predictions_with_cat(self, cat):
+        """Return a list of predictions that have the requested category."""
         requested = []
             
         for pred in self.predictions:
@@ -717,6 +802,7 @@ class Database(object):
         return requested
 
     def get_all_predictions_with_cycle(self, cycle):
+        """Return a list of predictions that hace the requested cycle value."""
         requested = []
             
         for pred in self.predictions:
@@ -725,6 +811,7 @@ class Database(object):
         return requested
 
     def get_all_predictions_with_over(self, over):
+        """Return a list of predictions witht requested override."""
         requested = []
             
         for pred in self.predictions:
@@ -741,6 +828,7 @@ class Database(object):
         #return requested
                 
     def get_all_predictions_with_trig(self, trig):
+        """Return a list of predictions with the requested trigger."""
         requested = []
             
         for pred in self.predictions:
@@ -749,6 +837,7 @@ class Database(object):
         return requested
                 
     def get_all_triggers(self):
+        """Return a dictionary of all triggers in the database."""
         triggers = {}
         try:
             for row in self.conn.execute(self.triggers.selectAllTrigSQL):
@@ -758,6 +847,9 @@ class Database(object):
         return triggers
         
     def yrmo(self, d):
+        """Returns the year and month from the passed date string. The database init function creates a
+        SQL function by this name. This function can be embedded in SQL statements. See the SQLite3 doc
+        at python.org. """
         return d[:7]
     
     def get_cat_by_month(self):
@@ -776,22 +868,28 @@ class Database(object):
         
 
     def get_ncf_entries(self):
+        """Return the new check file entry list."""
         return self.ncf_entries
 
-    def get_predictions_column_count(self):
-        #oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
-        return 8
+    #def get_predictions_column_count(self):
+    #    """Return the number columns in a prediction. Deprecated."""
+    #    #oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
+    #    return 8
     
-    def get_recent_entries(self, limit):
-        if self.num_entries <= limit:
-            return self.get_all_entries(which)
-        today = datetime.date.today()
-        trial = today - datetime.timedelta(months = 2)
-        for ent in self.entries:
-            if ent.date > previous:
-                howmany += 1
+    #def get_recent_entries(self, limit):
+    #    assert(False)   # This funcion
+    #    if self.num_entries <= limit:
+    #        return self.get_all_entries(which)
+    #    result = []
+    #    today = datetime.date.today()
+    #    trial = today - datetime.timedelta(months = 2)
+    #    for ent in self.entries:
+    #        if ent.date > previous:
+    #            howmany += 1
         
     def get_last_three_months(self, today):
+        """Returns a list of all entries with dates between today and three months ago.
+        Used by the What If window."""
         entries = []
         start = today - datetime.timedelta(weeks=13)
         for ent in self.entries:
@@ -800,6 +898,8 @@ class Database(object):
         return entries
     
     def get_next_three_months(self, today):
+        """Returns a list of the predicted entries that will occur betweeen today and three months
+        from now."""
         futures = []
 
         end = today + datetime.timedelta(weeks=13)
@@ -819,6 +919,9 @@ class Database(object):
         return futures
     
     def load_accounts(self):
+        """Loads the accounts list from the database. Called by the datbase init function. But there
+        are no entries in the account table yet bc there is no UI to create them and no other code
+        cares about accounts yet."""
         if len(self.accounts) == 0:
             try:
                 self.conn.execute(self.createAcctsSQL)
@@ -828,6 +931,9 @@ class Database(object):
                 self.error('Error loading memory from the Accounts table:\n', e.args[0])
 
     def load_categories(self):
+        """Loads all categories from the category table into the category dicionary and the cat_to_oid
+        dictionary. Called from database init, the main window if it gets going before the database class.
+        Also called by the migration functions."""
         if len(self.categories) == 0:
             try:
                 self.conn.execute(self.createCatsSQL)
@@ -839,6 +945,7 @@ class Database(object):
                 self.error('Error loading memory from the Categries table:\n', e.args[0])
                 
     def load_entries(self):
+        """Loads all entries from the Entries table into the Entries list. Cslled by the dtabase init."""
         try:
             self.conn.execute(self.createEntriesSQL)
             for row in self.conn.execute(self.selectAllEntriesSQL):
@@ -852,6 +959,7 @@ class Database(object):
             self.error('Error loading memory from the Entries table:\n', e.args[0])
                 
     def load_predictions(self):
+        """Load all predictions from database table to predictins list."""
         try:
             self.conn.execute(self.createPredictionsSQL)  #TODO remove type
             for row in self.conn.execute(self.selectAllPredictionsSQL):  #TODO remove type
@@ -863,6 +971,8 @@ class Database(object):
             self.error('Error loading memory from the Predictions table:\n', e.args[0])
                 
     def load_overrides(self):
+        """Load all overrides from table to ovverrides dictionary and over_to_oid bidict. Called by
+        database init and migrate functions."""
         if len(self.overrides) == 0:
             try:
                 self.conn.execute(self.createOversSQL)
@@ -873,6 +983,8 @@ class Database(object):
                 self.error('Error loading memory from the Overrides table:\n', e.args[0])
                 
     def load_triggers(self):
+        """Load all triggers from table to ovverrides dictionary and over_to_oid bidict. Called by
+        database init and migrate functions."""
         if len(self.triggers) == 0:
             try:
                 self.conn.execute(self.createTrigsSQL)
@@ -883,12 +995,15 @@ class Database(object):
                 self.error('Error loading memory from the Triggers table:\n', e.args[0])
                 
     def merge_ncf_entries(self):
+        """Move categorized entries from the new check file list to the entries list and update the
+        the database. Uncategorized entries are returned to the new check file."""
         #As entries grows in size, make the search smarter, more code but faster
         not_cats = []
         entry_set = set(self.entries)
         self.ncf_entries.reverse()
         while len(self.ncf_entries):
             temp = self.ncf_entries.pop()
+            assert(temp.oid != 0)
             if temp.category == None:
                 not_cats.append(temp)
             else:
@@ -919,6 +1034,7 @@ class Database(object):
             return False
     
     def make_cat_to_override_dict(self):
+        """Return a dictionary of categories to override oids. Ued by migrate functions only."""
         self.cat_to_overrides = {}
         for override in self.overrides:
             #override = self.overrides[over]
@@ -930,6 +1046,7 @@ class Database(object):
                 self.cat_to_overrides[cat] = [override]
 
     def make_cat_to_trigger_dict(self):
+        """Retrn a dictionary of cat to triggers. Used by migrate_entries."""
         self.cat_to_triggers = {}
         for trigger in self.triggers:
             oid = trigger.oid
@@ -940,6 +1057,10 @@ class Database(object):
                 self.cat_to_triggers[cat] = [(oid, trigger.trig)]
         
     def migrate_entries(self, old_version):
+        """When the database is initialized, the latest version is read from the version table. If this version
+        has a match in this function, then appropriate changes are ade to the database. So far, there is a
+        migration from 0->1 and 1->2. 0->1 agjusts columns in tth entries tabe and 1->2 adjust columns in the
+        predictions table."""
         try:
             if old_version == 0:
                 self.load_categories()
@@ -1001,7 +1122,7 @@ class Database(object):
                     #insert into Predictions(oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                     self.conn.execute(self.migrate2PredictionsSQL, newrow)
                     self.commit()
-                #renate the tables
+                #rename the tables
                 self.conn.execute('ALTER TABLE Predictions RENAME TO OldPredictions')
                 self.conn.execute('ALTER TABLE Predictions2 RENAME TO Predictions')
                 self.conn.execute('INSERT OR REPLACE INTO Version(version_str, version_int) VALUES ("V0.2", 2)')
@@ -1012,40 +1133,48 @@ class Database(object):
             return False
         
     def name(self):
+        """Returns the database's name. Used to create the file name for the database."""
         return self.dbname
     
     def oid_for_over(self, over):
+        """Returns an override's oid, if it is in the dictionary, else returns -1. Used for columns
+        values in the main window and the what if window."""
         if over in self.over_to_oid:
             return self.over_to_oid[over]
         else:
             return -1
         
     def oid_for_trig(self, trig):
+        """Returns a trigger's oid, if it is in the dictionary, else returns -1. Used for columns
+        values in the main window and the what if window."""
         if trig in self.trig_to_oid:
             return self.trig_to_oid[trig]
         else:
             return -1
         
     def trig_for_oid(self, oid):
+        """Given an oid, return the trigger with that oid. Used in the main window and th what if window."""
         if oid in self.trig_to_oid.inv:
             return self.trig_to_oid.inv[oid]
         else:
             assert(False)
             
-    def open(self, name, deprecated):  #deprecated
-        self.dbname = name
-        conn = sqlite3.connect(name+'.db')
-        self.conn = conn
-        self.accts = accounts.AccountList(self)
-        self.entries = entry.EntryList(self)
-        self.categories = Category(self)
-        self.triggers = trigger.Trigger(self)
-        self.overrides = override.Override(self)
-        #self.createTables()
-        self.convertPicklesToDB()
-        self.conn.commit()
+    #def open(self, name, deprecated):  #deprecated
+        #self.dbname = name
+        #conn = sqlite3.connect(name+'.db')
+        #self.conn = conn
+        #self.accts = accounts.AccountList(self)
+        #self.entries = entry.EntryList(self)
+        #self.categories = Category(self)
+        #self.triggers = trigger.Trigger(self)
+        #self.overrides = override.Override(self)
+        ##self.createTables()
+        #self.convertPicklesToDB()
+        #self.conn.commit()
         
     def overs_for_cat(self, lookFor):
+        """Return a list overrides that have the requested cat. Most of the time this will be an EMPTY
+        list, as there are not that many overrides."""
         overs = []
         for over, override in self.overrides.items():
             if override.cat == lookFor:
@@ -1054,6 +1183,9 @@ class Database(object):
         return overs
 
     def rename_category_all(self, current_cat, new_cat):
+        """Renames an existing category in all places where categories are recorded. That includes
+        overrides, triggers and entries. The new category is add to the cat table and list and the
+        old name is removed."""
         if self.add_cat(new_cat) == False or \
            self.update_overrides_cats(current_cat, new_cat) == False or \
            self.update_triggers_cats(current_cat, new_cat) == False or \
@@ -1065,6 +1197,7 @@ class Database(object):
             return True
         
     def rename_override_all(self, cur_over, new_over):
+        """Rename an existing ovrride to a new string in all places it is recorded. This includes """
         #We will not rename override to another existing, too complicated, delete override
         if new_over in self.overrides:
             return False
@@ -1100,6 +1233,10 @@ class Database(object):
             return False
 
     def rename_trigger_all(self, cur_trig, new_trig):
+        """Change a trigger from one string to another string. This requires that entries with the
+        old trigger string be checked for the new trigger string. If the entry has the new string, then its
+        category remains the same. If the entry does not have the new string, then it's category is changed
+        to 'None'."""
         #We will not rename trig to another existing, too complicated, delete trigger
         if new_trig in self.triggers:
             return False
@@ -1137,25 +1274,27 @@ class Database(object):
             self.error('Error updating triggers in Entries table:\n', e.args[0])
             return False
     
-    def restore(self, name):  #deprecated
-        self.dbname = name
-        #todo: develop strategy for managing backup and restore naming
-        conn = sqlite3.connect(name+'.db')
-        self.conn = conn
-        self.accts = accounts.AccountList(self, STORE_PCKL)
-        self.accts.save(STORE_DB)
-        self.entries = entry.EntryList(self, STORE_PCKL)
-        self.entries.save(STORE_DB)
-        self.categories = Category(self, STORE_PCKL)
-        self.categories.save(STORE_DB)
-        self.triggers = trigger.Trigger(self, STORE_PCKL)
-        self.triggers.save(STORE_DB)
-        self.overrides = override.Override(self, STORE_PCKL)
-        self.overrides.save(STORE_DB)
-        self.conn.commit()
+    #def restore(self, name):  #deprecated
+        #assert(False)
+        #self.dbname = name
+        ##todo: develop strategy for managing backup and restore naming
+        #conn = sqlite3.connect(name+'.db')
+        #self.conn = conn
+        #self.accts = accounts.AccountList(self, STORE_PCKL)
+        #self.accts.save(STORE_DB)
+        #self.entries = entry.EntryList(self, STORE_PCKL)
+        #self.entries.save(STORE_DB)
+        #self.categories = Category(self, STORE_PCKL)
+        #self.categories.save(STORE_DB)
+        #self.triggers = trigger.Trigger(self, STORE_PCKL)
+        #self.triggers.save(STORE_DB)
+        #self.overrides = override.Override(self, STORE_PCKL)
+        #self.overrides.save(STORE_DB)
+        #self.conn.commit()
         
     
-    def save(self, storage):
+    def save(self, storage):  #deprecated
+        assert(False)
         print("Database.save is OBSOLETE")
         #self.categories.save(storage)
         #self.triggers.save(storage)
@@ -1163,19 +1302,28 @@ class Database(object):
         #self.entries.save(storage)
 
     def sanity_check_db(self):
+        """When the database is initialized, this function is called. The followig hecks are made:
+        1) First check that every override refers to a category that exists.
+        2) Check that all triggers refer to a category that exists.
+        3) Check that all categories have a least one trigger or overrides
+        4) Check that all entries have a category that exist and that their description contains a trigger
+           or override that belongs to that category. Remember, overrides first.
+        """
         # first check that every override refers to a category that exists
         for over, override in self.overrides.items():
             if override.cat in self.cat_to_oid:
                 print('Override: '+override.over+' Category: '+override.cat+' is GOOD.')
             else:
-                print('Override: '+override.over+' Missing Cat: '+override.cat+' is BAD BAD.')      
+                print('Override: '+override.over+' Missing Cat: '+override.cat+' is BAD BAD.')
+                assert(False)
                 
         # check that all triggers refer to a category that exists
         for trig, trigger in self.triggers.items():
             if trigger.cat in self.cat_to_oid:
                 print('Trigger: '+trigger.trig+' Category: '+trigger.cat+' is GOOD.')
             else:
-                print('Trigger: '+trigger.trig+' Missing Cat: '+trigger.cat+' is BAD BAD.')      
+                print('Trigger: '+trigger.trig+' Missing Cat: '+trigger.cat+' is BAD BAD.')
+                assert(False)
             
         # check that all categories have a least one trigger or overrides
         for cat, category in self.categories.items():
@@ -1191,13 +1339,14 @@ class Database(object):
                     print("Category: "+category.cat+" has trig: "+trigger.trig+" GOOD.")
             if trig_count == 0 and over_count == 0:
                 print("Category: "+category.cat+" has no triggers or overrides.  BAD BAD.")
-                
+                assert(False)
         # check that all entries have a category that exist and that their description contains a trigger
         # or override that belongs to that category. Remember, overrides first.
         for ent in self.entries:
             got_one = False
             if ent.category not in self.cat_to_oid:
                 print("Entry: "+ent.asCategorizedStr() + " No category. BAD BAD.")
+                assert(False)
                 continue
             for over, override in self.overrides.items():
                 if override.over in ent.desc:
@@ -1213,7 +1362,8 @@ class Database(object):
                 continue
             else:
                 print("Entry: "+ent.asCategorizedStr() + " No trig or over. BAD BAD.")
-                
+                #assert(False)
+
     def set_cat_for_all_with_over(self, cat, over):
         try:
             self.conn.execute(self.updateEntryCatByOverOnlySQL, (cat, over))

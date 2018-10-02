@@ -1,4 +1,3 @@
-"""This is the check_file class. All aspects of handling the file from the bank are here"""
 import datetime
 from money import Money
 from entry import Entry
@@ -9,17 +8,24 @@ from override import Override
 import database
 
 class CheckFile(object):
-    
+    """ CheckFile -- This is the check_file class. All aspects of handling the file from the bank are here.
+        Member variables:
+        db -- reference to the single instance of Database class for storage and retrieval of all persistant data.
+    """
+
     def __init__(self, db):
-        """Read the check file into memory"""
+        """Creates a instance of the CheckFile class. Used by the CheckFileDialog"""
         self.db = db
         
     def open(self, filename):
+        """Open file by provided name and read check entries to ncf(new check file) list.
+           Used by CheckFileDialog."""
         self.db.clear_ncf_entries()
         f = open(filename, 'r')
         line = f.readline()
         
         while len(line) > 1:
+            # Remove all quotes and linefeeds
             line = line.replace('"', '')
             line = line.replace('\n', '')
             prt = line.split(',')
@@ -33,15 +39,22 @@ class CheckFile(object):
         f.close 
     
     def check_num(self, check_str):
+        """Returns an integer, representing the checks number or a 0 if the entry did not hav a check number.
+           Used by open in this class."""
         if check_str == '':
             return 0
         else:
             return int(check_str)
         
     def cleared(self, cleared_str):
+        """Returns a boolean to indicate whether the line in the check had an '*' in it.
+           Wells Fargo uses this to indicate that a chck has cleared.
+           Used by open in this class."""
         return cleared_str == '*'
     
     def find(self, line):
+        """Returns an entry from the new checks list that matches the str(s) in 'line'.
+           Used by the CheckFileDialog to find entries based on strings selected in lists."""
         for anEntry in self.db.get_ncf_entries():
             if anEntry.isMatch(line):
                 return anEntry

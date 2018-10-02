@@ -5,13 +5,45 @@ from managecategoriesdialog import ManageCategoriesDialog
 import database
 import accounts
 import trigger
-from category import Category
+#from category import Category
 import override
-import check_file
+import check_file   #defines and handles files from the bank
 import entry
 
 class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
-
+    """CheckFileDialog -- This class provides the UI and code for reading .csv files from the
+    bank. It provides automatic categorization and has facilities for defining new trigger strings
+    and their associated categories.
+    Member variables:
+    db -- a reference to a single instance of the Database class, which provides all to our stored data.
+    cf -- File. This is a file opened on the .csv file that is being imported.
+    btnReadCheckFile -- Action button that triggers the file open dialog.
+    listCategorized -- A list that contains entries that we found trigger strings in and
+                       therefore set their categories.
+    listUnCategorized -- A list that contains those entries that we recognized 
+                        no trigger strings in and therefore could not categorize.
+    edtSelectTrigger -- A text edit box, provides for selection of the string that will
+                        became the trigger for the next created category.
+    btnSetTrigger -- Action button that creates a new trigger, using the selected trigger string
+                     and the selected category.
+    btnSetCat -- Sets category of selected entry in uncategorized list to the category that is
+                 selected in the category list. This is a manual category set. Most entries are
+                 automatically categorized when the file is first read.
+    edtNewCat -- An edit box for entry of new category names.
+    btnAddCat -- Action button adds the current content of edtNewCat as a new catergory to the
+                 category list and table.
+    btnUnCat  -- Marks category of selected entry in the categorized list to 'None'. Repaints both
+                 the categorized and uncategorized lists to show the move.
+    btnAccept -- Merges the current state of the entries in the categorized list into the database
+                 and clears the categorized list.
+    btnCancel -- Closes this dialog without saving any of the new entries that were categorized. It
+                 be the same as if you hadn't read this checkfile. It does not remove entries that have
+                 already been accepted.
+    btnManageCats -- Opens the Manage Categories dialog for modifying, deleting or creating new categories.
+    Methods:
+    setupUi
+    """
+    
     def __init__(self, db):
         super(CheckFileDialog, self).__init__()
         
@@ -39,10 +71,13 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.btnCancel.clicked.connect(lambda: self.RejectChanges())
         self.btnManageCats.clicked.connect(lambda: self.OpenManageCats())
         
-    
+        # Fill the categories list
         for cat, category in self.db.get_all_cats().items():
             self.listCategories.addItem(cat)
 
+        # Retrieve any entries from th database that have not been categorized yet and add them to
+        # the uncategorized list so will be considered for categorization with the new entries fromDesc
+        # the checkfile that haven't been categorized yet.
         self.db.set_ncf_entries(self.db.get_all_entries_with_cat('All', 'None'))
         for ent in self.db.get_ncf_entries():
             self.listUnCategorized.addItem(ent.asNotCatStr())
@@ -53,13 +88,12 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.selectedTriggerStr = ''
         self.exec_()
         
-        #self.db.save()
-        #Trigger.save()
-        #Category.save()
         
     #---------- Event handlers ---------------------------
     def AcceptChanges(self):
-        print('Accepted')
+        """Merges the current state of the entries in the categorized list into the database
+           and clears the categorized list."""
+        #print('Accepted')
         self.db.merge_ncf_entries()
         if len(self.db.ncf_entries) > 0:
             self.listCategorized.clear()
@@ -113,6 +147,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.newCatStr = self.edtNewCat.selectedText()
 
     def OpenManageCats(self):
+        """Open the Manage Categories dialog"""
         mc = ManageCategoriesDialog(self.db)
         self.ResortList()
         
@@ -148,13 +183,18 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 self.listCategorized.addItem(check.asCategorizedStr())
 
     def RejectChanges(self):
+        """Close the dialog and discard all changes. If the Accept button was pushed prior to this
+        acction, then those entries that were in the ctegorized list have been saved."""
         print('Rejected')
         self.close()
         
     def SetCatHndlr(self):
         """The Set Cat button has been pushed. Set the Category of the
         entry that is the current selection in the UnCategorized list.
-        No new trigger will be defined."""
+        No new trigger will be defined and therefore no new entries like
+        this one will be recognized in the future. This is a manual
+        category set for entries that do not contain repeating trigger
+        strings."""
         #trgStr = self.selectedTriggerStr
         #if trgStr == '':
         #    raise EOFError
@@ -169,16 +209,13 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #if self.db.add_trigger(trgStr, selectedCatStr) == False:
         #    raise EOFError
         selectedEntryStr =  self.listUnCategorized.currentItem().text()
-       # selectedEntries = self.listUnCategorized.selectedItems()
+
         selectedEntry = self.cf.find(selectedEntryStr)
         selectedEntry.category = selectedCatStr
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         
-        #selectedEntryStr = whichList.currentItem().text()
-        #self.newCatStr = str
-        #self.selectedEntry = self.cf.find(selectedEntryStr)        
         # repopulate
         for check in self.db.get_ncf_entries():
             if check.category == 'None':
@@ -284,14 +321,18 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.NoneCatAct.triggered.connect(self.NoneCatActionFunc)
         
     def NewCatActionFunc(self):
+        """Set the current selected entries category wiyh the category that was previously
+        selected in the category list."""
         self.selectedEntry.category = self.newCatStr
         self.ResortList()
         
     def NoneCatActionFunc(self):
+        """Set the current selected entry's category to None"""
         self.selectedEntry.category = None
         self.ResortList()
         
-    def ResortList(self):    
+    def ResortList(self):
+        """Used mostly to move newly categorized entries to their place in the categorized list."""
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         # repopulate

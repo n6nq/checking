@@ -24,16 +24,16 @@ class Entries(object):
     def del_cat(self, cat):
         pass
     
-    def load(self, storage):
-        if storage == database.STORE_PCKL:
-            try:
-                f = open(self.db.name()+'_entrylist.pckl', 'rb')
-                self.cache = pickle.load(f)
-                f.close()
-            except FileNotFoundError:
-                print('No entrylist.pckl file.')
-        elif storage == database.STORE_DB:
-            self.cache = self.db.get_all_entries()
+    #def load(self, storage):
+        #if storage == database.STORE_PCKL:
+            #try:
+                #f = open(self.db.name()+'_entrylist.pckl', 'rb')
+                #self.cache = pickle.load(f)
+                #f.close()
+            #except FileNotFoundError:
+                #print('No entrylist.pckl file.')
+        #elif storage == database.STORE_DB:
+            #self.cache = self.db.get_all_entries()
             
     #def createTable(self):
     #    try:
@@ -50,13 +50,13 @@ class Entries(object):
                 return True
         return False
         
-    def save(self, storage):
-        if storage == database.STORE_PCKL:
-            f = open(self.db.name()+'_entrylist.pckl', 'wb')
-            pickle.dump(self.strings, f)
-            f.close()
-        elif storage == database.STORE_DB:
-            self.db.addEntryList(self.entrylist)
+    #def save(self, storage):
+        #if storage == database.STORE_PCKL:
+            #f = open(self.db.name()+'_entrylist.pckl', 'wb')
+            #pickle.dump(self.strings, f)
+            #f.close()
+        #elif storage == database.STORE_DB:
+            #self.db.addEntryList(self.entrylist)
         
 class Entry(dbrow.DBRow):
     """Entry --- An entry in the check register"""

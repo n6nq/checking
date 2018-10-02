@@ -24,12 +24,13 @@ class ChartScene(QGraphicsScene):
 
 XINC = 4
 
-class ChartTestDialog(QMainWindow, Ui_predictions):
+class ChartTestDialog(QMainWindow, Ui_predictions):     #deprecated
     
     myresize = pyqtSignal('QSize')
     
     def __init__(self, db):
         super(self.__class__, self).__init__()
+        assert(False)                               # This class is deprecated
         self.setupUi(self)        
         #super(ChartTestDialog, self).__init__()
         self.db = db
