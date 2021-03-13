@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1032</width>
+    <width>1040</width>
     <height>630</height>
    </rect>
   </property>
@@ -139,8 +139,8 @@
    <widget class="QCalendarWidget" name="calendar1">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>0</y>
+      <x>110</x>
+      <y>60</y>
       <width>312</width>
       <height>183</height>
      </rect>
@@ -149,8 +149,8 @@
    <widget class="QCalendarWidget" name="calendar2">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>0</y>
+      <x>420</x>
+      <y>60</y>
       <width>312</width>
       <height>183</height>
      </rect>
@@ -228,6 +228,32 @@
      <string>Manage Predictions</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btnBackup">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>550</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Backup DB</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnCleanDB">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>550</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clean DB</string>
+    </property>
+   </widget>
    <zorder>listEntries</zorder>
    <zorder>btnChart</zorder>
    <zorder>btnReadFile</zorder>
@@ -243,13 +269,15 @@
    <zorder>cbGroupBy</zorder>
    <zorder>calendar2</zorder>
    <zorder>btnMngPredict</zorder>
+   <zorder>btnBackup</zorder>
+   <zorder>btnCleanDB</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1032</width>
+     <width>1040</width>
      <height>21</height>
     </rect>
    </property>

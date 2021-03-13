@@ -13,7 +13,10 @@ class Money(object):
     @classmethod
     def from_str(cls, amount_str):
         obj = cls()
-        obj.value = int(float(amount_str) * 100)
+        if amount_str == '' or amount_str == None:
+            obj.value = 0
+        else:
+            obj.value = int(float(amount_str) * 100)
         return obj
     
     @classmethod

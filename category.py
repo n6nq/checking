@@ -1,5 +1,5 @@
 """ Category class """
-
+import index
 import dbrow
 import database
 import accounts
@@ -21,9 +21,9 @@ class Category(dbrow.DBRow):
            The category list in Database is used where ever entries exist"""
     
     def __init__(self, row):
-        self.id = row[0]
-        self.cat = row[1]
-        self.super_cat = row[2]
+        self.id = row[index.CAT_OID]    # TODO
+        self.cat = row[index.CAT_NAME]
+        self.super_cat = row[index.CAT_SUPER]
         
         
 #    def save(self, storage):    #deprecated

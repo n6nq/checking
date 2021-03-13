@@ -3,7 +3,7 @@
 All = 'All'
 Results = 'Results'
 
-amount_sort = ['Ascend', 'Descend', 'Find', '>100', '<100', 'Deposit']
+amount_sort = ['Ascend', 'Descend', 'Find', '>100', '<100', 'Deposit']  #TODO  label indexes
 ascend_descend  = ['Ascend', 'Descend']
 ascend_descend_find  = ['Ascend', 'Descend', 'Find']
 all_results = ['All', 'Results']

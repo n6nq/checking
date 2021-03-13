@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-
+import index
 import database
 import datetime
 from enum import Enum
@@ -33,6 +33,7 @@ class DateState(Enum):
     GOT_SECOND = 2
 
 class MyListModel(QAbstractListModel): 
+
     def __init__(self, datain, parent=None, *args): 
         """ datain: a list where each item is a row
         """
@@ -48,7 +49,10 @@ class MyListModel(QAbstractListModel):
             if type(ent) is Entry:
                 return QVariant(ent.asCategorizedStr())
             elif type(ent) is tuple:
-                return QVariant(ent[0]+'\t'+ent[1]+'\t'+str(ent[2]))
+                astr = ''
+                for field in ent:
+                    astr += field+'\t'
+                return QVariant(astr)
         else: 
             return QVariant()
 
@@ -58,8 +62,6 @@ class MyListModel(QAbstractListModel):
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     """ The main window of the checking app"""
 
-
-
     # access variables inside the UI's file
     def __init__(self):
                 
@@ -67,6 +69,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.setupUi(self)
 
         self.PredDlg = None
+    
+        self.dbname = '\\checking'
              
         # Setup calenders
         self.default_dates()
@@ -80,15 +84,17 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         # Setup the database
         curr = os.getcwd()
-        self.db = database.Database(curr+'\\checking')
+        self.db = database.DB(curr+self.dbname)
 
-        # Setup the buttons
+        # Setup the button
         self.btnChart.clicked.connect(lambda: self.pressedChartBtn())
         self.btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
         self.btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton())
+        self.btnBackup.clicked.connect(lambda: self.pressedBackupButton())
+        self.btnCleanDB.clicked.connect(lambda: self.pressedCleanDB())
 
         # Setup the entry list
-        self.search_choice = common_ui.all_results[0]  #'All'
+        self.search_choice = common_ui.all_results[0]  #'All' Start with 'All' searching
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
         self.set_list_model(list_data)
         self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
@@ -131,7 +137,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def default_dates(self):
         self.second_date = datetime.date.today()
-        self.first_date = self.second_date - datetime.timedelta(days=365)
+        self.first_date = self.second_date - datetime.timedelta(days=365 * 5)
         
     def mousePressed(self, modelindex):
         self.selectedRow = modelindex.row()
@@ -219,9 +225,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             return
 
         self.set_list_model(filtered)
-        #self.listEntries.clear()
-        #for ent in filtered:
-            #self.listEntries.addItem(ent.asCategorizedStr())
+
         
     def new_checknum_filter(self):
         choice = self.cbCheckNum.currentText()
@@ -233,14 +237,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         elif choice == labels[2]:  #'Find'
             op = database.CompareOps.CHECKNUM_EQUALS
             value = QInputDialog.getText(self, 'Check Number to search for:', 'Check Number:')
-            if value[0] != '' and value[0] != None:
-                filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
+            if value[0] == '' or value[0] == None:
+                return
+            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
         else:    
             return
         self.set_list_model(filtered)
-        #self.listEntries.clear()
-        #for ent in filtered:
-            #self.listEntries.addItem(ent.asCategorizedStr())
 
     def new_calender_filter(self):
         self.calendar1.hide()
@@ -258,7 +260,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
     def new_category_filter(self):
         cat = self.cbCategory.currentText()
-        self.set_search_filter(common_ui.all_results[0])  #'All'
+        #self.set_search_filter(common_ui.all_results[0])  #'All'   TODO removed for search experiment
         labels = common_ui.ascend_descend
         if cat == labels[0]:  #'Ascend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
@@ -268,7 +270,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
             
         self.set_list_model(filtered)
-        self.set_search_filter(common_ui.all_results[1])  #'Results'
+        #self.set_search_filter(common_ui.all_results[1])  #'Results'  TODO removed for search experiment
         self.show()
         
     def new_date_filter(self):
@@ -315,30 +317,27 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, 
                                     self.second_date), key=lambda ent: ent.date.strftime('%m-%d-%Y'))
         self.set_list_model(filtered)
-        #self.listEntries.clear()
-        #for ent in filtered:
-            #self.listEntries.addItem(ent.asCategorizedStr())
-                
 
     def new_description_filter(self):
         choice = self.cbDescription.currentText()
         labels = common_ui.ascend_descend_find
         if choice == labels[0]:  #'Ascend'
-            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.desc)
+            all_entries = self.db.get_all_entries(self.search_choice)
+            filtered = sorted(all_entries, key=lambda ent: ent.desc)
         elif choice == labels[1]:  #'Descend'
-            filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.desc, reverse=True)
+            all_entries = self.db.get_all_entries(self.search_choice)
+            #filtered = sorted(all_entries, key=lambda ent: ent.desc)
+            filtered = sorted(all_entries, key=lambda ent: ent.desc, reverse=True)
         elif choice == labels[2]:  #'Find'
             op = database.CompareOps.SEARCH_DESC
             value = QInputDialog.getText(self, 'String to search for:', 'String:')
-            filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.checknum)
+            meeting = self.db.get_all_entries_meeting(self.search_choice, op, value[0])
+            filtered = sorted(meeting, key=lambda ent: ent.checknum)
         else:    
             return
 
         self.set_list_model(filtered)        
-        #self.listEntries.clear()
-        #for ent in filtered:
-            #self.listEntries.addItem(ent.asCategorizedStr())
-        
+  
     def new_group_by_filter(self):
         """Display totals, grouping in different ways. For now we'll do:
         None = Normal check by check Display
@@ -356,8 +355,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             return
         for i in range(len(filtered)):
             row = filtered[i]
-            value = Money.from_number(row[2])
-            filtered[i] = (row[0], row[1], value.as_str())
+            value = Money.from_number(row[4])
+            filtered[i] = (row[0], row[1], row[2], row[3], value.as_str())  #TODO
         self.set_list_model(filtered)        
         
     def new_search_filter(self):
@@ -370,7 +369,16 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def pressedChartBtn(self):
         WhatIfMain(self.db)
         #ChartTestDialog(self.db)
-        
+    
+    def pressedBackupButton(self):
+        curr = os.getcwd()
+        d = datetime.date.today()
+        backup_name = curr+self.dbname+str(d.year)+'{:02d}{:02d}'.format(d.month, d.day)+'.db'
+        self.db.backup(backup_name)
+
+    def pressedCleanDB(self):
+        self.db.cleanup()
+
     def pressedReadCheckFileButton(self):
         readIt = CheckFileDialog(self.db)
         # refresh the lists

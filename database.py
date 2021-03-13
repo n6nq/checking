@@ -3,7 +3,7 @@
    also responsible for all table creation and maintenance."""
 
 # todo -- delvelop a backup strategy
-
+import index
 import sqlite3
 import accounts
 import entry
@@ -18,11 +18,13 @@ from money import Money
 from PyQt5.QtWidgets import QMessageBox
 from pcycle import PCycle, Cycles
 import common_ui
+from shutil import copyfile
 
 # storage defines
 #EMPTY = 0
 #STORE_DB = 1
 #STORE_PCKL = 2
+
 
 class CompareOps(Enum):
     """This class enumerates a set of ops for comparing entries."""
@@ -32,7 +34,7 @@ class CompareOps(Enum):
     CHECKNUM_EQUALS = 4
     SEARCH_DESC = 5
     
-class Database(object):
+class DB(object):
     """Database -- The Database class creates a Sqlite3 database file the first time it is instantiated,
        if such a fie does not already exist. It then creates tables for entries, triggers, categories, etc.
        if they do not exist in the file that has been opened. All of this creation should only happen once,
@@ -48,7 +50,7 @@ class Database(object):
                      implemented as of 8/13/18.
        cat_to_oid -- A bi-directional dictionary equting cat strings to cat numbers and vice-vrsus.
        overrides -- A dictionary of override strings that defines the category of an entry. If the overrides
-                    exist in an entry, its category tkes the place of any any category defined by a trigger.
+                    exist in an entry, its category takes the place of any any category defined by a trigger.
        over_to_oid -- A bi-directional dictionary that equates override strings to the numbers.
        triggers -- A dictionary of trigger strings to category strings.
        trig_to_oid -- A bi-direcional dictionary of trigger strings to trigger numbers.
@@ -76,17 +78,25 @@ class Database(object):
                udateEntryCatForOverSQL, updateEntryCatForOverSQLOld, updateEntryCatForTrigSQL,
                updateEntryCatForTrigSQLOld, updateEntryCatSQL, updateEntryCatSQLOld, updateOverridesCatSQL,
                updatePredictionSQL, updateTriggersCatSQL.
-               """
+    """
+
+    # The rows come back as lists. The following defined values provide names for the columns
+    # rather than using numbers. Keep the numbers matching the create statements below as the table 
+    # definitions change and the accessing code won't need to change.
+
     def __init__(self, name):
         """A single instance of the Database class is created by the Main window. A reference is passed to all
            other parts of the program. This constructor checks o see if the database file already exist and creates
            it and all the tables if it does not."""
-        self.dbname = name
+        self.dbname = name+'.db'
         self.start_date = datetime.date(9999, 1, 1)  # these will be set by load_entries()
         self.end_date = datetime.date(1, 1, 1)
-        conn = sqlite3.connect(name+'.db', detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
+        conn = sqlite3.connect(self.dbname, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
         self.conn = conn
         
+        # WARNING If you modify any of the column declarations in the create table statements below, then change the corresponding indexes
+        # in index.py
+
         self.createAcctsSQL = 'create table if not exists Accounts(id integer primary key, name varchar(30) unique, start date, last date, bankurl varchar(255))'
         self.selectAllAcctsSQL = 'select oid, name, start, last, bankurl from Accounts'
         self.accounts = []
@@ -107,6 +117,7 @@ class Database(object):
         self.insertEntrySQL = 'insert into Entries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)'
         self.insertMigratedEntrySQL = 'insert into NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)' 
         self.findCatInEntriesSQL = 'select * from Entries where cat_id = ?'
+        self.deleteOldEntriesSQL = "delete from Entries where sdate < date('now','-12 months')"
 
         self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?'
         self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
@@ -126,9 +137,9 @@ class Database(object):
         self.updateEntryCatByTrigOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
 
-        self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by ym, category'
+        self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, trig_id, over_id, sum(amount) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id'
 
-        self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, sum(amount) from Entries group by ym, category order by category, ym'
+        self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, trig_id, over_id, sum(amount) from Entries group by ym, category, trig_id, over_id order by category, trig_id, over_id, ym'
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
@@ -168,6 +179,8 @@ class Database(object):
         self.migrate_database()
         
         self.conn.create_function('yrmo', 1, self.yrmo)
+        self.conn.create_function('trigfromid', 1, self.trigfromid)
+        self.conn.create_function('overfromid', 1, self.overfromid)
         self.num_entries = 0
         self.num_predictions = 0
         self.load_entries()
@@ -280,22 +293,8 @@ class Database(object):
             return False
             
         
-    #def backup(self, name):  #deprecated
-        #assert(False)
-        #self.dbname = name
-        ##todo: develop strategy for managing backup and restore naming
-        #conn = sqlite3.connect(name+'.db')
-        #self.conn = conn
-        #self.accts = accounts.AccountList(self, STORE_DB)
-        #self.accts.save(STORE_PCKL)
-        #self.entries = entry.EntryList(self, STORE_DB)
-        #self.entries.save(STORE_PCKL)
-        #self.categories = Category(self, STORE_DB)
-        #self.categories.save(STORE_PCKL)
-        #self.triggers = trigger.Trigger(self, STORE_DB)
-        #self.triggers.save(STORE_PCKL)
-        #self.overrides = override.Override(self, STORE_DB)
-        #self.overrides.save(STORE_PCKL)
+    def backup(self, backup_name):
+        copyfile(self.dbname, backup_name)
 
     def cat_from_desc(self, desc):
         """Scan the overrides and the triggers to see if any of them are matched in the passed description
@@ -355,6 +354,15 @@ class Database(object):
         before reading a new file."""
         self.ncf_entries = []
         
+    def cleanup(self):
+        try:
+            self.conn.execute(self.deleteOldEntriesSQL)
+            self.commit()
+            return True
+        except sqlite3.Error as e:
+            self.error("An error occurred when deleting from "+tableName+" table:\n", e.args[0])
+            return False  
+
     def commit(self):
         """Used by are functions that perform an operation on the SQLite database."""
         self.conn.commit()
@@ -441,7 +449,7 @@ class Database(object):
                     ent.trig_id = 0
                     
             for ent in self.filtered_entries:
-                if ent.category == trigup[1] and trig in ent.desc:
+                if ent.category == trigup[1] and trig in ent.desc:  # TODO
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
                     ent.trig_id = 0
@@ -583,7 +591,7 @@ class Database(object):
  
         return affected
     
-    def find_pred_simiar_to(self, entry):
+    def find_pred_similar_to(self, entry):
         """Search for existing predictions that are similar to the pne we are about to create."""
         affected = []
         for pred in self.predictions:
@@ -841,7 +849,7 @@ class Database(object):
         triggers = {}
         try:
             for row in self.conn.execute(self.triggers.selectAllTrigSQL):
-                triggers[row[1]] = trigger(row[0], row[1], row[2])
+                triggers[row[1]] = trigger(row[0], row[1], row[2])  # TODO
         except sqlite3.Error as e:
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         return triggers
@@ -851,19 +859,35 @@ class Database(object):
         SQL function by this name. This function can be embedded in SQL statements. See the SQLite3 doc
         at python.org. """
         return d[:7]
+
+    def trigfromid(self, id):
+        if id in self.trig_to_oid.inv:
+            return self.trig_to_oid.inv[id]
+        else:
+            return 'None'
     
+    def overfromid(self, id):
+        if id in self.over_to_oid.inv:
+            return self.over_to_oid.inv[id]
+        else:
+            return 'None'
+
     def get_cat_by_month(self):
         """Get totals of all categories grouped by month"""
         requested = []
         for row in self.conn.execute(self.get_yrmo_groups_by_monSQL):
-            requested.append(row)
+            trig = self.trigfromid(row[2])
+            over = self.overfromid(row[3])
+            requested.append((row[0],row[1],trig,over,row[4]))
         return requested
     
     def get_month_by_cat(self):
         """Get totals for all months grouped by category"""
         requested = []
         for row in self.conn.execute(self.get_yrmo_groups_by_catSQL):
-            requested.append(row)
+            trig = self.trigfromid(row[2])
+            over = self.overfromid(row[3])
+            requested.append((row[0],row[1],trig,over,row[4]))
         return requested
         
 
@@ -939,13 +963,13 @@ class Database(object):
                 self.conn.execute(self.createCatsSQL)
                 self.conn.execute(self.insertNoneCatSQL, ('None', 'None'))
                 for row in self.conn.execute(self.selectAllCatsSQL):
-                    self.categories[row[1]] = Category(row)
-                    self.cat_to_oid[row[1]] = row[0]
+                    self.categories[row[1]] = Category(row) # TODO
+                    self.cat_to_oid[row[index.CAT_NAME]] = row[index.CAT_OID]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Categries table:\n', e.args[0])
                 
     def load_entries(self):
-        """Loads all entries from the Entries table into the Entries list. Cslled by the dtabase init."""
+        """Loads all entries from the Entries table into the Entries list. Called by the database init."""
         try:
             self.conn.execute(self.createEntriesSQL)
             for row in self.conn.execute(self.selectAllEntriesSQL):
@@ -977,8 +1001,8 @@ class Database(object):
             try:
                 self.conn.execute(self.createOversSQL)
                 for row in self.conn.execute(self.selectAllOversSQL):
-                    self.overrides[row[1]] = Override(row)
-                    self.over_to_oid[row[1]] = row[0]
+                    self.overrides[row[index.OVER_OVER]] = Override(row)  # TODO
+                    self.over_to_oid[row[index.OVER_OVER]] = row[index.OVER_OID]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Overrides table:\n', e.args[0])
                 
@@ -988,9 +1012,9 @@ class Database(object):
         if len(self.triggers) == 0:
             try:
                 self.conn.execute(self.createTrigsSQL)
-                for row in self.conn.execute(self.selectAllTrigsSQL):
-                    self.triggers[row[1]] = Trigger(row)
-                    self.trig_to_oid[row[1]] = row[0]
+                for row in self.conn.execute(self.selectAllTrigsSQL):  # TODO
+                    self.triggers[row[index.TRIG_TRIGGER]] = Trigger(row)
+                    self.trig_to_oid[row[index.TRIG_TRIGGER]] = row[index.TRIG_OID]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Triggers table:\n', e.args[0])
                 
@@ -1003,7 +1027,7 @@ class Database(object):
         self.ncf_entries.reverse()
         while len(self.ncf_entries):
             temp = self.ncf_entries.pop()
-            assert(temp.oid != 0)
+            assert(temp.oid == 0)
             if temp.category == None:
                 not_cats.append(temp)
             else:
@@ -1252,6 +1276,8 @@ class Database(object):
             
             #All entries with old but not new trigger are set to None 
             for ent in self.conn.execute(self.findEntryCatForTrigSQL, (cat_id, trig_id)):
+                if type(ent[6]) != int:
+                    self.error("ent[6] is not str", ent[6])
                 if new_trig not in ent[6]:
                     #cat_id and what trig_id
                     self.conn.execute(self.updateEntryCatSQL, (cat, cat_id, Category.no_category()))
@@ -1427,7 +1453,7 @@ class Database(object):
                     
             for ent in self.filtered_entries:
                 if ent.cat_id == cur_id:
-                    ent.category = new_id
+                    ent.category = new_id  #TODO: looks like a type mis-match here
             return True
         except sqlite3.Error as e:
             self.error('Error updating categories in Entries table:\n', e.args[0])

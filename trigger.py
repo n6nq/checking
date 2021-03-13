@@ -3,7 +3,7 @@
     known string returns a cooresponding category value string. Descriptions
     with no known trigger strings return the category string 'None'
     a signal to the caller that a new category must be defined."""
-
+import index
 import database
 import dbrow
 import accounts
@@ -15,9 +15,9 @@ import pickle
 class Trigger(dbrow.DBRow):
     
     def __init__(self, row):
-        self.oid = row[0]
-        self.trig = row[1]
-        self.cat = row[2]
+        self.oid = row[index.TRIG_OID]
+        self.trig = row[index.TRIG_TRIGGER]
+        self.cat = row[index.TRIG_CATEGORY]
 
     #def save(self, storage):
         #if storage == database.STORE_PCKL:

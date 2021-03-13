@@ -13,7 +13,7 @@ date day-of-month, day-of-week, day/month, adhoc
     TODOS: Remove type from predictions and UI
     
 """
-
+import index
 from enum import Enum
 from bidict import bidict
 from pcycle import PCycle, Cycles
@@ -146,23 +146,23 @@ class Prediction(object):
         self.desc = desc
 
     def set_without_oid(self, lst):
-        self.amount = Money.from_number(lst[1])
-        self.income = lst[2]
-        self.cat = lst[3]
-        self.trig = lst[4]
-        self.over = lst[5]
-        self.cat_id = lst[6]
-        self.trig_id = lst[7]
-        self.over_id = lst[8]
-        self.cycle = PCycle(lst[9], lst[10], lst[11])
-        self.desc = lst[12]
+        self.amount = Money.from_number(lst[index.PRED_AMOUNT])  # TODO
+        self.income = lst[index.PRED_INCOME]
+        self.cat = lst[index.PRED_CAT]
+        self.trig = lst[index.PRED_TRIG]
+        self.over = lst[index.PRED_OVER]
+        self.cat_id = lst[index.PRED_CAT_ID]
+        self.trig_id = lst[index.PRED_TRIG_ID]
+        self.over_id = lst[index.PRED_OVER_ID]
+        self.cycle = PCycle(lst[index.PRED_CYCLE], lst[index.PRED_DDATE], lst[index.PRED_VDATE])
+        self.desc = lst[index.PRED_DESC]
         
     def set_with_list(self, lst):
-        self.oid = lst[0]
+        self.oid = lst[0] # TODO
         self.set_without_oid(lst)
         
     def update_with_list(self, lst):
-        assert(self.oid == lst[0])
+        assert(self.oid == lst[0])  # TODO
         self.set_without_oid(lst)
         
     #---- CLASSMETHODS -------------------------------#

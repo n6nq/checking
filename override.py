@@ -6,7 +6,7 @@
    Category 'Credit Card', but 'Overdraft' signifies that thi charge is actually
    a Bank Fee. Overrides are searched for first, before normal Categories, reating
    a one level hierarchy."""
-
+import index
 import dbrow
 import database
 import sqlite3
@@ -48,9 +48,9 @@ class Override(dbrow.DBRow):
     B that triggered on the string 'bbbbb' setting this entries Category to 'Bee', that could be
     overridden by defining and Override 'ccccc' therefore making the netries category 'See'."""
     def __init__(self, row):
-        self.oid = row[0]
-        self.over = row[1]
-        self.cat = row[2]
+        self.oid = row[index.OVER_OID]     # TODO
+        self.over = row[index.OVER_OVER]
+        self.cat = row[index.OVER_CAT]
         
     def del_cat(self, cat):
         pass

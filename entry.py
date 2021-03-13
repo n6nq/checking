@@ -1,4 +1,5 @@
 """Check entry --- one entry for each transaction on the account"""
+import index
 import database
 import dbrow
 import datetime
@@ -61,17 +62,18 @@ class Entries(object):
 class Entry(dbrow.DBRow):
     """Entry --- An entry in the check register"""
     def __init__(self, db, row, how_to_cat):
-        self.db = db
-        self.oid = row[0]
-        self.category = row[1]
-        self.cat_id = row[2]
-        self.trig_id = row[3]
-        self.over_id = row[4]
-        self.date = row[5]
-        self.amount = Money.from_number(row[6])
-        self.cleared = row[7]
-        self.checknum = row[8]
-        self.desc = row[9].replace('\n', '')
+        self.db = db     # TODO
+        self.oid = row[index.ENTRY_OID]
+        self.category = row[index.ENTRY_CATEGORY]
+        self.cat_id = row[index.ENTRY_CAT_ID]
+        self.trig_id = row[index.ENTRY_TRIG_ID]
+        self.over_id = row[index.ENTRY_OVER_ID]
+        self.date = row[index.ENTRY_SDATE]
+        self.amount = Money.from_number(row[index.ENTRY_AMOUNT])
+        self.cleared = row[index.ENTRY_CLEARED]
+        self.checknum = row[index.ENTRY_CHECKNUM]
+        self.desc = row[index.ENTRY_DESC].replace('\n', '')
+
         if how_to_cat == Entry.categorize():
             cat_tuple = self.db.cat_from_desc(self.desc)
             self.category = cat_tuple[0]

@@ -208,6 +208,13 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         selectedCatStr = selectedCat.text()    
         #if self.db.add_trigger(trgStr, selectedCatStr) == False:
         #    raise EOFError
+        selectedEntry =  self.listUnCategorized.currentItem()
+        if selectedEntry == None:
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Can't do it!")
+            msgBox.setText("Please select an entry in the UnCategorized list.")
+            msgBox.exec_()
+            return
         selectedEntryStr =  self.listUnCategorized.currentItem().text()
 
         selectedEntry = self.cf.find(selectedEntryStr)
@@ -219,7 +226,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.db.get_ncf_entries():
             if check.category == 'None':
-                cat_tuple = self.db.cat_from_desc(check.desc)
+                cat_tuple = self.db.cat_from_desc(check.desc)    # TODO
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
@@ -257,7 +264,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.db.get_ncf_entries():
             if check.category == 'None':
-                cat_tuple = self.db.cat_from_desc(check.desc)
+                cat_tuple = self.db.cat_from_desc(check.desc)    # TODO
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
@@ -297,11 +304,11 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         
         for check in self.db.get_ncf_entries():
             if check.category == None:
-                cat_tuple = self.db.cat_from_desc(check.desc)
-                check.category = cat_tuple[0]
-                check.cat_id = cat_tuple[1]
-                check.trig_id = cat_tuple[2]
-                check.over_id = cat_tuple[3]
+                #cat_tuple = self.db.cat_from_desc(check.desc)   # TODO
+                #check.category = cat_tuple[0]
+                check.cat_id = 0  #cat_tuple[1]
+                check.trig_id = 0  #cat_tuple[2]
+                check.over_id = 0  #cat_tuple[3]
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr())
             else:
                 self.listCategorized.addItem(check.asCategorizedStr())

@@ -1,0 +1,53 @@
+N self.selectAllAcctsSQL = 'select oid, name, start, last, bankurl from Accounts' (db:144)
+N	load_accounts(self) (db.py:974)
+N		self.load_accounts() (db:146)
+	self.accounts <- (db:982)
+self.selectAllPredictionsSQL = 'select oid, amount, income, cat, trig, over, cat_id, trig_id, over_id, cycle, ddate, vdate, desc from Predictions' (db:150)
+	load_predictions(self) (db:1014)
+		self.load_predictions()(db:230)
+	self.predictions.append(pred) (db:1021)
+n		add_prediction() (db:294) n
+n			what_if.addPrediction
+n			mang_pred.add_prediction
+n		dump_predictions() (db:571)
+			pred.dump() (db:574)
+n		find_pred_similar_to() (db:642) ret list of pred
+n		find_pred_by_oid() (db:648) ret 1 pred
+n			what_if.set_fields
+n		get_all_predictions() (db:797) ret list of pred
+n		get_all_predictions_with_date_filter() (db:801) ret list of pred
+n			mang_pred.new_date_filter
+n		get_all_predictions_meeting() (db:823( ret list of pred
+n			mang_pred.new_amount_filter
+n			mang_pred.new_comment_filter
+n		get_all_predictions_with_cat() (db:848) ret list of pred
+n			mang_pred.new_category_filter
+n		get_all_predictions_with_cycle() (db:857) ret list of pred
+n			mang_pred.new_category_filter
+n		get_all_predictions_with_over() (db:866) ret list of pred
+n			mang_pred.new_override_filter
+n		get_all_predictions_with_trig() (db:883) ret list of pred
+n			mang_pred.new_trigger_filter
+n		get_next_three_months() (db:953) ret list of ent
+n			what_if.addPrediction
+n			what_if.updatePrediction
+n			what_if.get_future_data
+self.selectAllEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries' (db:159)
+	load_entries() (db:1000)
+	migrate_entries() (db:1112)
+	self.entries.append(ent) (db:1006)
+		get_all_entries(self, which): (db:724) ret list of ents
+n			main.__init__
+n			main.new_amount_filter
+n			main.new_category_filter
+n			main.new_checknum_filter
+n			main.new_description_filter
+n			main.new_date_filter
+		get_all_entries_meeting() (db:733) ret list of ents
+		get_all_entries_with_cat() (db:764) ret list of ents
+		get_all_entries_with_date_range() (db:779) ret list of ents
+		get_last_three_months() (db:943) ret list of ents
+		rename_override_all() (db:1252) uses ent[6]
+		rename_trigger_all() (db:1310) uses ent[6]
+		update_entries_cats() (db:1469)  may be a type mismatch here
+		

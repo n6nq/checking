@@ -1,0 +1,76 @@
+QMainWindow		
+Ui_MainWindow 	
+	setupUi(MainWindow)
+MainWindow
+	__init__
+	createPopUpActions
+	default_dates
+	entryPopUpMenuHndlr(entryList)
+	mousePressed(modelindex)
+	new_amount_filter
+	new_calender_filter
+	new_category_filter
+	new_checknum_filter
+	new_date_filter
+	new_description_filter
+	new_group_by_filter
+	new_search_filter
+	NewCatActionFunc
+	NewPredActionFunc
+	NoneCatActionFunc
+	pressedChartBtn
+	pressedManagePredictionsButton
+	pressedReadCheckFileButton
+	select_first_date
+	select_second_date
+	set_list_model(listOfEnts)
+	set_search_filter
+	
+	
+cbCategory.activated.connect(lambda: self.new_category_filter()
+		filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
+        filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
+        filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
+        self.set_list_model(filtered)
+        self.set_search_filter(common_ui.all_results[1])  #'Results'
+
+cbDate.activated.connect(lambda: self.new_date_filter())
+		filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, self.second_date), key=lambda ent: ent.date.isoformat())
+		filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, self.second_date), key=lambda ent: ent.date.isoformat(), reverse=True)
+		filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, self.second_date), key=lambda ent: ent.date.isoformat())
+		filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, self.second_date), key=lambda ent: ent.date.isoformat())
+		filtered = sorted(self.db.get_all_entries_with_date_range(self.search_choice, self.first_date, self.second_date), key=lambda ent: ent.date.strftime('%m-%d-%Y')
+        self.set_list_model(filtered)
+        missing self.set_search_filter(common_ui.all_results[1])  #'Results'
+
+cbAmount.activated.connect(lambda: self.new_amount_filter()
+		filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value)
+		filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.amount.value, reverse=True)
+		filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value[0]), key=lambda ent: ent.amount.value)
+		filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+		filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, value), key=lambda ent: ent.amount.value, reverse=True)
+		self.set_list_model(filtered)
+		missing self.set_search_filter(common_ui.all_results[1])  #'Results'
+		
+cbCheckNum.activated.connect(lambda: self.new_checknum_filter()
+		filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum)
+		filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.checknum, reverse=True)
+		filtered = sorted(self.db.get_all_entries_meeting(self.search_choice, op, int(value[0])), key=lambda ent: ent.checknum)
+		self.set_list_model(filtered)
+		missing self.set_search_filter(common_ui.all_results[1])  #'Results'
+		
+cbDescription.activated.connect(lambda: self.new_description_filter()
+		missing self.set_search_filter(common_ui.all_results[1])  #'Results'
+		
+cbSearchIn.activated.connect(lambda: self.new_search_filter()
+		self.search_choice = self.cbSearchIn.currentText()
+
+cbGroupBy.activated.connect(lambda: self.new_group_by_filter()
+
+listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries)
+listEntries.pressed.connect(lambda index:  self.mousePressed(index)
+calendar1.clicked.connect(lambda: self.select_first_date()
+calendar2.clicked.connect(lambda: self.select_second_date()
+btnChart.clicked.connect(lambda: self.pressedChartBtn()
+btnReadFile.clicked.connect(lambda: self.pressedReadCheckFileButton())
+btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton()

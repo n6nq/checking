@@ -196,25 +196,29 @@ class PCycle(object):
             return[]
             
     def future_monthlies(self, start, end):
-        futures = []
-        d_next = start.replace(day=self.vdate)
+        try:
+            futures = []
+            d_next = start.replace(day=self.vdate)
 
-        if self.vdate >= start.day:
-            futures.append(d_next)
-            print(d_next)
-        while d_next < end:
-            n_month = d_next.month + 1
-            n_year = d_next.year
-            
-            if n_month > 12:
-                n_month = 1
-                n_year += 1
-            
-            d_next = d_next.replace(month=n_month, year=n_year)
-            if d_next <= end:
+            if self.vdate >= start.day:
                 futures.append(d_next)
                 print(d_next)
-        return futures
+            while d_next < end:
+                n_month = d_next.month + 1
+                n_year = d_next.year
+            
+                if n_month > 12:
+                    n_month = 1
+                    n_year += 1
+            
+                d_next = d_next.replace(month=n_month, year=n_year)
+                if d_next <= end:
+                    futures.append(d_next)
+                    print(d_next)
+        except ValueError:
+            print('Whoops')
+        finally:
+            return futures
 
     def future_weeklies(self, start, end):
         futures = []
