@@ -254,6 +254,19 @@
      <string>Clean DB</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btnListToFile">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>550</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>List To File</string>
+    </property>
+   </widget>
    <zorder>listEntries</zorder>
    <zorder>btnChart</zorder>
    <zorder>btnReadFile</zorder>
@@ -271,6 +284,7 @@
    <zorder>btnMngPredict</zorder>
    <zorder>btnBackup</zorder>
    <zorder>btnCleanDB</zorder>
+   <zorder>btnListToFile</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

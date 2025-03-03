@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSignal, QLineF, QSize, QRectF, QPointF, Qt
-from PyQt5.QtWidgets import QMainWindow, QInputDialog, QGraphicsScene, QGraphicsItem  #(QDialog, QFileDialog, QMenu, QAction, QListWidgetItem, QGraphicsTextItem)
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QInputDialog, QGraphicsScene, QGraphicsItem  #(QDialog, QFileDialog, QMenu, QAction, QListWidgetItem, QGraphicsTextItem)
 from PyQt5.QtGui import QPen, QFont
 from datetime import date
 from warninglistdialog import WarningListDialog
@@ -78,6 +78,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
             self.get_past_data(self.today, self.starting_balance)
             
         self.get_future_data(self.today, self.starting_balance)
+        if (len(self.futures) <= 0):
+            msgBox = QMessageBox()
+            msgBox.setWindowTitle("Can't do it!")
+            msgBox.setText('You can\'t display predicted transactions until you have defined some predictions!\nPlease try the "Manage Predictions" button.')
+            msgBox.exec_()            
+            return  
+            
         
         self.refresh(True)
 

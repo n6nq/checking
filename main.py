@@ -51,7 +51,10 @@ class MyListModel(QAbstractListModel):
             elif type(ent) is tuple:
                 astr = ''
                 for field in ent:
-                    astr += field+'\t'
+                    if type(field) is str:
+                        astr += field+'\t'
+                    else:
+                        astr += 'what\t'
                 return QVariant(astr)
         else: 
             return QVariant()
@@ -92,6 +95,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnMngPredict.clicked.connect(lambda: self.pressedManagePredictionsButton())
         self.btnBackup.clicked.connect(lambda: self.pressedBackupButton())
         self.btnCleanDB.clicked.connect(lambda: self.pressedCleanDB())
+        self.btnListToFile.clicked.connect(lambda: self.pressedListToFile())
 
         # Setup the entry list
         self.search_choice = common_ui.all_results[0]  #'All' Start with 'All' searching
@@ -354,9 +358,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         else:
             return
         for i in range(len(filtered)):
+            #"select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id"
             row = filtered[i]
             value = Money.from_number(row[4])
-            filtered[i] = (row[0], row[1], row[2], row[3], value.as_str())  #TODO
+            filtered[i] = (row[0], row[1], row[2], row[3], str(row[4]), str(row[5]), str(row[6]))  #TODO
+            #filtered[i] = (row[0], row[1], row[2], row[3], value.as_str())  #TODO
         self.set_list_model(filtered)        
         
     def new_search_filter(self):
@@ -378,6 +384,31 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def pressedCleanDB(self):
         self.db.cleanup()
+
+    def pressedListToFile(self):
+        td = datetime.datetime.today()
+        filename = 'list'+td.strftime('%Y%m%d_%H%M%S.txt')
+        f = open(filename, 'w')
+        lm = self.list_model.listdata
+        for ent in lm:
+            row = ent
+            if type(ent) is Entry:
+                astr = ent.asCategorizedStr()+'\n'
+                print(astr)
+                f.write(astr)
+            elif type(ent) is tuple:
+                astr = ''
+                for field in ent:
+                    if type(field) is str:
+                        astr += field+', '
+                    else:
+                        astr += 'what, '
+                print(astr)
+                f.write(astr+'\n')
+            else: 
+                print('What????\n')
+                f.write('What????\n')
+        f.close()
 
     def pressedReadCheckFileButton(self):
         readIt = CheckFileDialog(self.db)
@@ -429,7 +460,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def NoneCatActionFunc(self):
         self.selectedEntry.category = None
-        self.ResortList()
+        #self.ResortList()      #TODO
         
        
 def main():

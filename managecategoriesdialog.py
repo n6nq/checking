@@ -78,11 +78,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         
         self.exec_()
         
-    #def accept_changes(self):
+    def accept_changes(self):
         #self.db.save(database.STORE_DB)
-        ##Trigger.save()
-        ##Category.save()
-        ##Override.save()
+        trigger.Trigger.save()
+        category.Category.save()
+        override.Override.save()
     
     def reject_changes(self):
         print('Burp!')      #todo change accept/reject buttons to a done button
@@ -190,7 +190,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             return False
 
         self.listCategories.takeItem(row)
-        #cat = Category[current_cat]
+        #cat = category.Category[current_cat]
         self.category_str = new_cat
         i = QListWidgetItem(new_cat)
         self.listCategories.addItem(i)

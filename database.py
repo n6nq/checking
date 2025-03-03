@@ -22,7 +22,7 @@ from shutil import copyfile
 
 # storage defines
 #EMPTY = 0
-#STORE_DB = 1
+STORE_DB = 1
 #STORE_PCKL = 2
 
 
@@ -137,9 +137,11 @@ class DB(object):
         self.updateEntryCatByTrigOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
 
-        self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, trig_id, over_id, sum(amount) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id'
+#        self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, trig_id, over_id, sum(amount) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id'
+        self.get_yrmo_groups_by_monSQL = "select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id"
+                                          #select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id;
 
-        self.get_yrmo_groups_by_catSQL = 'select yrmo(sdate) ym, category, trig_id, over_id, sum(amount) from Entries group by ym, category, trig_id, over_id order by category, trig_id, over_id, ym'
+        self.get_yrmo_groups_by_catSQL = "select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by category, ym, trig_id, over_id"
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
@@ -280,8 +282,8 @@ class DB(object):
         """Add a new trigger string to the trigger list and make a new oid for it."""
         try:
             if trig in self.trig_to_oid:
-                self.error("Failed to add Trigger '{0}'".format(catStr), 'It already exists.')                
-                return False
+                self.error("Failed to add Trigger '{0}'".format(trig), 'It already exists.')                
+                return False    #TODO If we forgot to select the trigger string, don't crash
             cur = self.conn.execute(self.insertTrigsSQL, (trig, cat))
             self.commit()
             last_id = cur.lastrowid
@@ -305,6 +307,7 @@ class DB(object):
             
         for trig, trigger in self.triggers.items():
             if trig in desc:
+                print(trigger.cat, self.cat_to_oid[trigger.cat], self.trig_to_oid[trigger.trig], 0)
                 return (trigger.cat, self.cat_to_oid[trigger.cat], self.trig_to_oid[trigger.trig], 0)
         
         return ('None', 0, 0, 0)
@@ -878,7 +881,7 @@ class DB(object):
         for row in self.conn.execute(self.get_yrmo_groups_by_monSQL):
             trig = self.trigfromid(row[2])
             over = self.overfromid(row[3])
-            requested.append((row[0],row[1],trig,over,row[4]))
+            requested.append((row[0],row[1],trig,over,row[4],row[5],row[6]))
         return requested
     
     def get_month_by_cat(self):
@@ -887,7 +890,7 @@ class DB(object):
         for row in self.conn.execute(self.get_yrmo_groups_by_catSQL):
             trig = self.trigfromid(row[2])
             over = self.overfromid(row[3])
-            requested.append((row[0],row[1],trig,over,row[4]))
+            requested.append((row[0],row[1],trig,over,row[4],row[5],row[6]))
         return requested
         
 
@@ -1027,7 +1030,7 @@ class DB(object):
         self.ncf_entries.reverse()
         while len(self.ncf_entries):
             temp = self.ncf_entries.pop()
-            assert(temp.oid == 0)
+            #assert(temp.oid == 0)  #TODO  doesn't allow for entries that get bc already in db and got modified
             if temp.category == None:
                 not_cats.append(temp)
             else:
@@ -1353,6 +1356,8 @@ class DB(object):
             
         # check that all categories have a least one trigger or overrides
         for cat, category in self.categories.items():
+            if cat == 'None':
+                continue
             trig_count = 0
             over_count = 0
             for over, override in self.overrides.items():
@@ -1364,8 +1369,9 @@ class DB(object):
                     trig_count += 1
                     print("Category: "+category.cat+" has trig: "+trigger.trig+" GOOD.")
             if trig_count == 0 and over_count == 0:
-                print("Category: "+category.cat+" has no triggers or overrides.  BAD BAD.")
-                assert(False)
+                print("Category: "+category.cat+" has no triggers or overrides.  BAD BAD. Adding Nada trigger")
+                self.add_trigger('None', cat)
+                #assert(False)   #TODO  Have it put in a NADA trigger
         # check that all entries have a category that exist and that their description contains a trigger
         # or override that belongs to that category. Remember, overrides first.
         for ent in self.entries:

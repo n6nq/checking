@@ -257,7 +257,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             return            
         selectedCatStr = selectedItems[0].text()
         if self.db.add_trigger(trgStr, selectedCatStr) == False:
-            raise EOFError
+            pass
+            #return   # raise EOFError  #TODO
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()

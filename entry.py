@@ -120,7 +120,7 @@ class Entry(dbrow.DBRow):
 
     def asNotCatStr(self):
         if self.checknum == 0:
-            checknum_str = '{:<10} '.format('  ')
+            checknum_str = '{:<10} '.format('+ ')
         else:
             checknum_str = '{:<10} '.format(self.checknum) 
 
