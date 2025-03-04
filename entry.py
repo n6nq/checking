@@ -96,8 +96,8 @@ class Entry(dbrow.DBRow):
 #        self.category = self.db.triggers.fromDesc(desc)
         
     def __eq__(self, other):
-        #print(self.asNotCatStr())
-        #print(other.asNotCatStr())
+        #print(self.asNotCatStr(''))
+        #print(other.asNotCatStr(''))
         if (self.date - other.date).total_seconds() != 0:
             return False
         if self.amount.value != other.amount.value:
@@ -118,35 +118,38 @@ class Entry(dbrow.DBRow):
         assert(False)   #deprecated
         return self.amount.as_str()
 
-    def asNotCatStr(self):
+    def asNotCatStr(self, sep):
         if self.checknum == 0:
             checknum_str = '{:<10} '.format('+ ')
         else:
             checknum_str = '{:<10} '.format(self.checknum) 
 
-        retstr = '{:<10} '.format(self.date.strftime("%m/%d/%y")) + \
-            '{:<10} '.format(self.amount.as_str()) + \
-            checknum_str + \
-            self.desc
+        retstr = '{}{:<10} '.format(sep, self.date.strftime("%m/%d/%y"))
+        retstr += '{}{:<10} '.format(sep, self.amount.as_str())
+        retstr += sep+checknum_str
+        retstr += sep+self.desc
             #retstr = self.date.strftime("%m/%d/%y") + '\t' + \
             #    self.amount.as_str() + '\t' + \
             #    checknum_str + '\t' + \
             #    self.desc
         return retstr
     
-    def asCategorizedStr(self):
+    def asCategorizedStr(self, sep):
         if self.category == None:
             cat_str = 'None'
         else:
             cat_str = self.category
-            
-        return '{:<10} '.format(cat_str) + self.asNotCatStr()
+        if sep == ',':    
+            return '{}'.format(cat_str) + self.asNotCatStr(sep)
+        else:
+            return '{:<10}'.format(cat_str) + sep + self.asNotCatStr(sep)
     
     def get_category(self):
         return self.category
     
     def isMatch(self, line):
-        thisStr = self.asNotCatStr()
+        assert(False)
+        thisStr = self.asNotCatStr('')
         if thisStr in line:
             return True
         return False

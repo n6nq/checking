@@ -47,7 +47,7 @@ class MyListModel(QAbstractListModel):
         if modelindex.isValid() and role == Qt.DisplayRole:
             ent = self.listdata[modelindex.row()]
             if type(ent) is Entry:
-                return QVariant(ent.asCategorizedStr())
+                return QVariant(ent.asCategorizedStr(''))
             elif type(ent) is tuple:
                 astr = ''
                 for field in ent:
@@ -99,7 +99,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         # Setup the entry list
         self.search_choice = common_ui.all_results[0]  #'All' Start with 'All' searching
-        list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr())
+        list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr(''))
         self.set_list_model(list_data)
         self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
         self.listEntries.pressed.connect(lambda index:  self.mousePressed(index))
@@ -258,7 +258,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.set_list_model(filtered)
         #self.listEntries.clear()
         #for ent in filtered:
-            #self.listEntries.addItem(ent.asCategorizedStr())
+            #self.listEntries.addItem(ent.asCategorizedStr(''))
 
         self.got_first_date = self.got_second_date = False
         
@@ -271,7 +271,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         elif cat == labels[1]:  #'Descend'
             filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
         else:
-            filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
+            filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr(''))
             
         self.set_list_model(filtered)
         #self.set_search_filter(common_ui.all_results[1])  #'Results'  TODO removed for search experiment
@@ -393,7 +393,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         for ent in lm:
             row = ent
             if type(ent) is Entry:
-                astr = ent.asCategorizedStr()+'\n'
+                astr = ent.asCategorizedStr(',')+'\n'
                 print(astr)
                 f.write(astr)
             elif type(ent) is tuple:

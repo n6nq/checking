@@ -80,7 +80,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # the checkfile that haven't been categorized yet.
         self.db.set_ncf_entries(self.db.get_all_entries_with_cat('All', 'None'))
         for ent in self.db.get_ncf_entries():
-            self.listUnCategorized.addItem(ent.asNotCatStr())
+            self.listUnCategorized.addItem(ent.asNotCatStr(''))
         # Setup popup menu actions
         self.CreatePopupActions()
         
@@ -168,7 +168,7 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         dupes = []
         new_sorted = sorted(self.db.get_ncf_entries(), key=lambda ent: ent.date.isoformat())
         for check in new_sorted:
-            print(check.asNotCatStr())
+            print(check.asNotCatStr(''))
             if check in current:
                 dupes.append(check)
             else:
@@ -178,9 +178,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         #iterate remaining checks and load list widgets here
         for check in self.db.get_ncf_entries():
             if check.cat_id == 0 and check.category == 'None':
-                self.listUnCategorized.addItem('\t'+check.asNotCatStr())
+                self.listUnCategorized.addItem('\t'+check.asNotCatStr(''))
             else:
-                self.listCategorized.addItem(check.asCategorizedStr())
+                self.listCategorized.addItem(check.asCategorizedStr(''))
 
     def RejectChanges(self):
         """Close the dialog and discard all changes. If the Accept button was pushed prior to this
@@ -231,9 +231,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
                 check.over_id = cat_tuple[3]
-                self.listUnCategorized.addItem('\t'+check.asNotCatStr())
+                self.listUnCategorized.addItem('\t'+check.asNotCatStr(''))
             else:
-                self.listCategorized.addItem(check.asCategorizedStr())
+                self.listCategorized.addItem(check.asCategorizedStr(''))
         self.listCategorized.repaint()
         self.listUnCategorized.repaint()
         
@@ -272,9 +272,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 check.over_id = cat_tuple[3]
                 
             if check.category == 'None':
-                self.listUnCategorized.addItem('/t'+check.asNotCatStr())
+                self.listUnCategorized.addItem('/t'+check.asNotCatStr(''))
             else:
-                self.listCategorized.addItem(check.asCategorizedStr())
+                self.listCategorized.addItem(check.asCategorizedStr(''))
         self.listCategorized.repaint()
         self.listUnCategorized.repaint()
         
@@ -310,9 +310,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 check.cat_id = 0  #cat_tuple[1]
                 check.trig_id = 0  #cat_tuple[2]
                 check.over_id = 0  #cat_tuple[3]
-                self.listUnCategorized.addItem('/t'+check.asNotCatStr())
+                self.listUnCategorized.addItem('/t'+check.asNotCatStr(''))
             else:
-                self.listCategorized.addItem(check.asCategorizedStr())
+                self.listCategorized.addItem(check.asCategorizedStr(''))
         self.listCategorized.repaint()
         self.listUnCategorized.repaint()
         
@@ -347,9 +347,9 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         for check in self.db.entries:
             #check.category = Trigger.fromDesc(check.desc)
             if check.category == 'None':
-                self.listUnCategorized.addItem(check.asCategorizedStr())
+                self.listUnCategorized.addItem(check.asCategorizedStr(''))
             else:
-                self.listCategorized.addItem(check.asCategorizedStr())
+                self.listCategorized.addItem(check.asCategorizedStr(''))
         self.listCategorized.repaint()
         self.listUnCategorized.repaint()
 

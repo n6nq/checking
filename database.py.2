@@ -268,7 +268,7 @@ class Database(object):
         
         for entry in self.entries:
             if entry.category == catstr:
-                affected.append('<Entry>'+entry.asCategorizedStr())
+                affected.append('<Entry>'+entry.asCategorizedStr(''))
             
         return affected
     

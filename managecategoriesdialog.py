@@ -79,10 +79,11 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.exec_()
         
     def accept_changes(self):
+        pass
         #self.db.save(database.STORE_DB)
-        trigger.Trigger.save()
-        category.Category.save()
-        override.Override.save()
+        #trigger.Trigger.save()             #TODO  these things are already save by the button handlers
+        #category.Category.save()
+        #override.Override.save()
     
     def reject_changes(self):
         print('Burp!')      #todo change accept/reject buttons to a done button

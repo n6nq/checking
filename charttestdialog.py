@@ -126,7 +126,7 @@ class ChartTestDialog(QMainWindow, Ui_predictions):     #deprecated
         showList = []
 
         for pent in selected:
-            showList.append(pent.asCategorizedStr())
+            showList.append(pent.asCategorizedStr(''))
             
         dl = WarningListDialog("Predictions", 
             "Here are the entries or predictions near your selection point.", 

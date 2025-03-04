@@ -30,7 +30,7 @@ MainWindow
 cbCategory.activated.connect(lambda: self.new_category_filter()
 		filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category())
         filtered = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.get_category(), reverse=True)
-        filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr())
+        filtered = sorted(self.db.get_all_entries_with_cat(self.search_choice, cat), key=lambda ent: ent.asCategorizedStr(''))
         self.set_list_model(filtered)
         self.set_search_filter(common_ui.all_results[1])  #'Results'
 

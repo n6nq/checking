@@ -151,7 +151,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
     
     def deletePrediction(self):
         pent = self.futures[self.lastSelected]
-        print(pent.asCategorizedStr())
+        print(pent.asCategorizedStr(''))
         del self.futures[self.lastSelected]
         self.doBalances(self.starting_bal)
         self.refresh(False)
@@ -306,7 +306,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         min_bal = min(self.balances)
 
         self.showRects(1)
-        scenewidth = (len(self.entries) + len(self.futures)) * XINC
+        scenewidth = (len(self.entries) + len(self.futures)) * XINC  #TODO with only a few predictions, this makes a narrow graph.
         sceneYmax = round((max_bal/100), -2)
         sceneYmin = round((min_bal/100), -2)
         self.showRects(2)
@@ -323,13 +323,13 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         
         for i in range(0, len(self.entries)-1):
             self.scene.addLine( QLineF( i * XINC, self.balances[i]/100, (i+1) * XINC, self.balances[i+1]/100), pen)
-            self.listWidget.addItem(self.entries[i].asCategorizedStr())
+            self.listWidget.addItem(self.entries[i].asCategorizedStr(''))
             
         pen.setColor(Qt.red)
 
         for j in range(0, len(self.futures)-1):
             self.scene.addLine( QLineF( (i+j) * XINC, self.balances[i+j]/100, (i+j+1) * XINC, self.balances[i+j+1]/100), pen)
-            self.listWidget.addItem(self.futures[i+j].asCategorizedStr())
+            self.listWidget.addItem(self.futures[i+j].asCategorizedStr(''))
             
         pen.setColor(Qt.black)
         
@@ -416,7 +416,7 @@ class WhatIfMain(QMainWindow, Ui_MainWindow):
         self.listWidget.clear()
         
         for pent in selected:
-            self.listWidget.addItem(pent.asCategorizedStr())
+            self.listWidget.addItem(pent.asCategorizedStr(''))
           
         self.listWidget.setCurrentRow(10)
         

@@ -452,7 +452,7 @@ class DB(object):
                     ent.trig_id = 0
                     
             for ent in self.filtered_entries:
-                if ent.category == trigup[1] and trig in ent.desc:  # TODO
+                if ent.category == catstr and trig in ent.desc:  # TODO
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
                     ent.trig_id = 0
@@ -560,7 +560,7 @@ class DB(object):
         
         for entry in self.entries:
             if entry.category == catstr:
-                affected.append('<Entry>'+entry.asCategorizedStr())
+                affected.append('<Entry>'+entry.asCategorizedStr(''))
             
         return affected
     
@@ -580,17 +580,17 @@ class DB(object):
         
         for entry in self.entries:
             if entry.cat_id == cat_id and entry.trig_id == trig_id:
-                affected.append('<Entry>'+entry.asCategorizedStr())
+                affected.append('<Entry>'+entry.asCategorizedStr(''))
 
         for entry in self.ncf_entries:
             if entry.cat_id == cat_id and entry.trig_id == trig_id:
-                affected.append('<NewEntry>'+entry.asCategorizedStr())
+                affected.append('<NewEntry>'+entry.asCategorizedStr(''))
 
         #Are there already categorized entries that have this new trigger?
         if new_trig:
             for entry in self.entries:
                 if new_trig in entry.desc:
-                    affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
+                    affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr(''))
  
         return affected
     
@@ -628,17 +628,17 @@ class DB(object):
         
         for entry in self.entries:
             if entry.cat_id == cat_id and entry.over_id == over_id:
-                affected.append('<Entry>'+entry.asCategorizedStr())
+                affected.append('<Entry>'+entry.asCategorizedStr(''))
 
         for entry in self.ncf_entries:
             if entry.cat_id == cat_id and entry.over_id == over_id:
-                affected.append('<NewEntry>'+entry.asCategorizedStr())
+                affected.append('<NewEntry>'+entry.asCategorizedStr(''))
 
         #Are there already categorized entries that have this new override?
         if new_over:
             for entry in self.entries:
                 if new_over in entry.desc:
-                    affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr())
+                    affected.append('<Existing Entry> will be re-categorized: '+entry.asCategorizedStr(''))
 
         return affected
         
@@ -647,7 +647,7 @@ class DB(object):
         affected = []
         for entry in self.entries:
             if trig in entry.desc:
-                affected.append('<Entry>'+entry.asCategorizedStr())
+                affected.append('<Entry>'+entry.asCategorizedStr(''))
         return affected
 
     def find_all_with_trigger_or_override(self, trigger, override):
@@ -657,7 +657,7 @@ class DB(object):
         if override:
             for entry in self.entries:
                 if override in entry.desc:
-                    affected.append('<Entry>'+entry.asCategorizedStr())
+                    affected.append('<Entry>'+entry.asCategorizedStr(''))
         if trigger:
             affected.extend(self.find_all_with_trigger(trigger))
         
@@ -1377,7 +1377,7 @@ class DB(object):
         for ent in self.entries:
             got_one = False
             if ent.category not in self.cat_to_oid:
-                print("Entry: "+ent.asCategorizedStr() + " No category. BAD BAD.")
+                print("Entry: "+ent.asCategorizedStr('') + " No category. BAD BAD.")
                 assert(False)
                 continue
             for over, override in self.overrides.items():
@@ -1393,7 +1393,7 @@ class DB(object):
             if got_one:
                 continue
             else:
-                print("Entry: "+ent.asCategorizedStr() + " No trig or over. BAD BAD.")
+                print("Entry: "+ent.asCategorizedStr('') + " No trig or over. BAD BAD.")
                 #assert(False)
 
     def set_cat_for_all_with_over(self, cat, over):
