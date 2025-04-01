@@ -1,4 +1,5 @@
 """Check entry --- one entry for each transaction on the account"""
+from asyncio import locks
 import index
 import database
 import dbrow
@@ -15,13 +16,13 @@ class Entries(object):
         #self.n_entries = 0
         self.cache = []
         self.db = db
-        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
-        self.selectAllSQL = 'select oid, category, sdate, amount, cleared, checknum, desc from Entries'
-        self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?)'
-        self.updateCatSQL = 'update Entries set category = ? where category = ?'
+        self.createSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), sdate date, amount int, cleared boolean, checknum int, desc varchar(255), locked bool)'
+        self.selectAllSQL = 'select oid, category, sdate, amount, cleared, checknum, desc, locked from Entries' #TODO check callers
+        self.insertSQL = 'insert into Entries(category, sdate, amount, cleared, checknum, desc, locked) values(?, ?, ?, ?, ?, ?, ?)'  #TODOcheck callers
+        self.updateCatSQL = 'update Entries set category = ? where category = ?'    #TODOcheck callers
         db.create_table(self.createSQL, 'Entries')  #TODO: maybe skip if temp_entries
-        #self.load(storage)   load after it's created
 
+        
     def del_cat(self, cat):
         pass
     
@@ -44,7 +45,6 @@ class Entries(object):
     #        self.db.error("An error occurred when creating the EntryList table:\n", e.args[0])
     #        return False            
         
-
     def isDupe(self, newEtry):
         for entry in self.entrylist:
             if entry.compare(newEtry):
@@ -61,8 +61,8 @@ class Entries(object):
         
 class Entry(dbrow.DBRow):
     """Entry --- An entry in the check register"""
-    def __init__(self, db, row, how_to_cat):
-        self.db = db     # TODO
+    def __init__(self, db, row, how_to_cat):  # TODO check callers, how should they pass locked?
+        self.db = db
         self.oid = row[index.ENTRY_OID]
         self.category = row[index.ENTRY_CATEGORY]
         self.cat_id = row[index.ENTRY_CAT_ID]
@@ -73,13 +73,15 @@ class Entry(dbrow.DBRow):
         self.cleared = row[index.ENTRY_CLEARED]
         self.checknum = row[index.ENTRY_CHECKNUM]
         self.desc = row[index.ENTRY_DESC].replace('\n', '')
+        self.locked = row[index.ENTRY_LOCKED]
 
-        if how_to_cat == Entry.categorize():
+        if int(how_to_cat) == int(Entry.categorize()):
             cat_tuple = self.db.cat_from_desc(self.desc)
             self.category = cat_tuple[0]
             self.cat_id = cat_tuple[1]
             self.trig_id = cat_tuple[2]
             self.over_id = cat_tuple[3]
+            self.locked = False
             
 #oid  cat  datestr amtstr  clr*    chknum''  desc
 #    def __init__(self, db, date, amount, cleared, checknum, desc):
@@ -139,16 +141,20 @@ class Entry(dbrow.DBRow):
             cat_str = 'None'
         else:
             cat_str = self.category
-        if sep == ',':    
-            return '{}'.format(cat_str) + self.asNotCatStr(sep)
+        if self.locked:         #TODO test lock display
+            lockstr = 'L'
         else:
-            return '{:<10}'.format(cat_str) + sep + self.asNotCatStr(sep)
+            lockstr = ' '
+        if sep == ',':    
+            return '{}'.format(cat_str) + ',' + lockstr + ',' + self.asNotCatStr(sep)  
+        else:
+            return '{:<10}'.format(cat_str) + lockstr + self.asNotCatStr(sep)
     
-    def get_category(self):
+    def get_category(self):     #TODO check callers
         return self.category
     
-    def isMatch(self, line):
-        assert(False)
+    def isMatch(self, line):    #TODO check callers
+        #assert(False)
         thisStr = self.asNotCatStr('')
         if thisStr in line:
             return True

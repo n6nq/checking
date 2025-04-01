@@ -21,7 +21,7 @@ class Category(dbrow.DBRow):
            The category list in Database is used where ever entries exist"""
     
     def __init__(self, row):
-        self.id = row[index.CAT_OID]    # TODO
+        self.id = row[index.CAT_OID]    
         self.cat = row[index.CAT_NAME]
         self.super_cat = row[index.CAT_SUPER]
         
@@ -59,4 +59,4 @@ class Category(dbrow.DBRow):
     @classmethod
     def no_cat_id(cls):
         """no_cat_id -- a class method to provide the id of uncategorized entries"""
-        return 0
+        return 1

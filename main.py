@@ -443,14 +443,29 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def set_list_model(self, listOfEnts):
         self.list_model = MyListModel(listOfEnts, self.listEntries)
         self.listEntries.setModel(self.list_model)
-        
+    
+    def canChangeEntry(self):
+        if self.selectedEntry.locked == True:
+            msgBox = QMessageBox()
+            msgBox.setText("This entry is locked!")
+            msgBox.setInformativeText("Do you want to change it anyway?")
+            msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            msgBox.setDefaultButton(QMessageBox.Yes)
+            retval = msgBox.exec()
+            return retval
+        else:
+            return QMessageBox.Yes
+
     def NewCatActionFunc(self, action):
-        cat = action.text()
-        cat_id = self.db.cat_to_oid[cat]
-        self.selectedEntry.category = cat
-        self.selectedEntry.cat_id = cat_id
-        self.db.update_entry_cat_by_oid(cat, cat_id, self.selectedEntry.oid)
-        #self.ResortList()
+        if self.canChangeEntry() == QMessageBox.Yes:
+            cat = action.text()                 #TODO we might need an unlock function
+            cat_id = self.db.cat_to_oid[cat]
+            self.selectedEntry.category = cat
+            self.selectedEntry.cat_id = cat_id  #DONE set locked to true, clear trig and over???
+            self.selectedEntry.trig_id = 0
+            self.selectedEntry.over_id = 0
+            self.selectedEntry.locked = True
+            self.db.update_entry_cat_by_oid(cat, cat_id, self.selectedEntry.oid)
     
     def NewPredActionFunc(self):
         if self.PredDlg == None:
@@ -459,8 +474,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.PredDlg.newPred(self.db, self.selectedEntry)
 
     def NoneCatActionFunc(self):
-        self.selectedEntry.category = None
-        #self.ResortList()      #TODO
+        if self.canChangeEntry() == QMessageBox.Yes:
+            self.selectedEntry.category = 'None'  #DONE set cat_id, set locked = 0
+            self.selectedEntry.cat_id = 1
+            self.selectedEntry.trig_id = 0
+            self.selectedEntry.over_id = 0
+            self.selectedEntry.locked = False
         
        
 def main():

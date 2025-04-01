@@ -32,7 +32,7 @@ class CheckFile(object):
             #     oid  cat_id trig_id  cat datestr amtstr  clr*    chknum''  desc
             trans_date = datetime.datetime.strptime(prt[0], '%m/%d/%Y').date()
             row = (0, 'None', Category.no_cat_id(), Trigger.no_trig_id(), Override.no_over_id(), trans_date, Money.str_to_num(prt[1]),
-                   self.cleared(prt[2]), self.check_num(prt[3]), prt[4])
+                   self.cleared(prt[2]), self.check_num(prt[3]), prt[4], False)
             self.db.add_ncf_entry(Entry(self.db, row, Entry.categorize()))
             #self.db.temp_entries.entrylist.append(Entry(self.db, row, Entry.categorize()))
             line = f.readline()

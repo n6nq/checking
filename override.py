@@ -48,7 +48,7 @@ class Override(dbrow.DBRow):
     B that triggered on the string 'bbbbb' setting this entries Category to 'Bee', that could be
     overridden by defining and Override 'ccccc' therefore making the netries category 'See'."""
     def __init__(self, row):
-        self.oid = row[index.OVER_OID]     # TODO
+        self.oid = row[index.OVER_OID]     # TODO check for dupes
         self.over = row[index.OVER_OVER]
         self.cat = row[index.OVER_CAT]
         
@@ -56,7 +56,7 @@ class Override(dbrow.DBRow):
         pass
     
     def add_over(self, over_str, cat):
-        if over_str == '' or over_str == None:
+        if over_str == '' or over_str == None:   # TODO check for dupes
             return False
         if over_str in self.strings:
             return False

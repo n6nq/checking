@@ -189,12 +189,15 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.close()
         
     def SetCatHndlr(self):
-        """The Set Cat button has been pushed. Set the Category of the
-        entry that is the current selection in the UnCategorized list.
-        No new trigger will be defined and therefore no new entries like
-        this one will be recognized in the future. This is a manual
-        category set for entries that do not contain repeating trigger
-        strings."""
+        """The Set Cat button has been pushed. Set the Category of the entry that is the current 
+        selection in the UnCategorized list. No new trigger will be defined and therefore no new 
+        entries like this one will be recognized in the future. This is a manual category set 
+        for entries that do not contain repeating trigger strings or entries with triggeres that 
+        may need to be set to different categories. This is especially true of entries caused by 
+        Amazon purchases. To prevent manual categorized entries for being arbitrarily changed,
+       they will marked as locked"""
+       #TODO check all code that sets category and cat_id to honor locked status
+       #TODO make all setters of category also set cat_id
         #trgStr = self.selectedTriggerStr
         #if trgStr == '':
         #    raise EOFError
@@ -219,6 +222,10 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
 
         selectedEntry = self.cf.find(selectedEntryStr)
         selectedEntry.category = selectedCatStr
+        selectedEntry.cat_id = self.db.oid_for_cat(selectedCatStr)
+        selectedEntry.trig_id = 0                   #DONE cat_id trig_id and locked
+        selectedEntry.over_id = 0
+        selectedEntry.locked = True
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()
@@ -226,11 +233,12 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         # repopulate
         for check in self.db.get_ncf_entries():
             if check.category == 'None':
-                cat_tuple = self.db.cat_from_desc(check.desc)    # TODO
+                cat_tuple = self.db.cat_from_desc(check.desc)    # TODO cat_id, trig_id, locked should we clear values?
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
                 check.over_id = cat_tuple[3]
+                
                 self.listUnCategorized.addItem('\t'+check.asNotCatStr(''))
             else:
                 self.listCategorized.addItem(check.asCategorizedStr(''))
@@ -248,14 +256,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
             msgBox.setText('Please select a trigger string!')
             msgBox.exec_()            
             return
-        selectedItems = self.listCategories.selectedItems()
-        if len(selectedItems) == 0:
+        selectedCats = self.listCategories.selectedItems()
+        if len(selectedCats) == 0:
             msgBox = QMessageBox()
             msgBox.setWindowTitle("Can't do it!")
             msgBox.setText('Please select a category!')
             msgBox.exec_()            
             return            
-        selectedCatStr = selectedItems[0].text()
+        selectedCatStr = selectedCats[0].text()
         if self.db.add_trigger(trgStr, selectedCatStr) == False:
             pass
             #return   # raise EOFError  #TODO
@@ -269,7 +277,8 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
                 check.category = cat_tuple[0]
                 check.cat_id = cat_tuple[1]
                 check.trig_id = cat_tuple[2]
-                check.over_id = cat_tuple[3]
+                check.over_id = cat_tuple[3]   #DONE clear locked
+                check.locked = False
                 
             if check.category == 'None':
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr(''))
@@ -296,20 +305,24 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
 
     def UnCatHndlr(self):
         selection = self.listCategorized.currentItem().text()
-        selectedEntry = self.cf.find(selection)
-        selectedEntry.category = None
-        
+        sentry = self.cf.find(selection)
+        sentry.category = None;  #DONE set cat_id, trig_id, locked = 0
+        sentry.cat_id = 0
+        sentry.trig_id = 0
+        sentry.over_id = 0
+        sentry.locked = False
         # clear the list
         self.listCategorized.clear()
         self.listUnCategorized.clear()
         
         for check in self.db.get_ncf_entries():
             if check.category == None:
-                #cat_tuple = self.db.cat_from_desc(check.desc)   # TODO
-                #check.category = cat_tuple[0]
+                cat_tuple = self.db.cat_from_desc(check.desc)
+                check.category = cat_tuple[0]
                 check.cat_id = 0  #cat_tuple[1]
                 check.trig_id = 0  #cat_tuple[2]
-                check.over_id = 0  #cat_tuple[3]
+                check.over_id = 0  #cat_tuple[3]  #DONE set locked = 0
+                check.locked = False
                 self.listUnCategorized.addItem('/t'+check.asNotCatStr(''))
             else:
                 self.listCategorized.addItem(check.asCategorizedStr(''))
@@ -329,14 +342,14 @@ class CheckFileDialog(QDialog, Ui_ReadCheckFileDialog):
         self.NoneCatAct.triggered.connect(self.NoneCatActionFunc)
         
     def NewCatActionFunc(self):
-        """Set the current selected entries category wiyh the category that was previously
+        """Set the current selected entries category with the category that was previously
         selected in the category list."""
-        self.selectedEntry.category = self.newCatStr
+        self.selectedEntry.category = self.newCatStr #TODO set cat_id, trig_id, locked  is this a manual set?
         self.ResortList()
         
     def NoneCatActionFunc(self):
         """Set the current selected entry's category to None"""
-        self.selectedEntry.category = None
+        self.selectedEntry.category = None #TODO set cat_id locked = 0
         self.ResortList()
         
     def ResortList(self):

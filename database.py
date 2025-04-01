@@ -111,37 +111,37 @@ class DB(object):
         self.deletePredictionSQL = 'delete from Predictions where oid = ?'
         self.updatePredictionSQL = 'update Predictions set amount = ?, income = ?, cat = ?, trig = ?, over = ?, cat_id = ?, trig_id = ?, over_id = ?, cycle = ?, ddate = ?, vdate = ?, desc = ? where oid = ?'
         
-        self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
-        self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255))'
-        self.selectAllEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc from Entries'
-        self.insertEntrySQL = 'insert into Entries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        self.insertMigratedEntrySQL = 'insert into NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)' 
+        self.createEntriesSQL = 'create table if not exists Entries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255), locked bool)'
+        self.migrateEntriesTableSQL = 'create table if not exists NewEntries(oid INTEGER PRIMARY KEY ASC, category varchar(20), cat_id int, trig_id int, over_id int, sdate date, amount int, cleared boolean, checknum int, desc varchar(255), locked bool)'
+        self.selectAllEntriesSQL = 'select oid, category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc, locked from Entries' #DONE check all references
+        self.insertEntrySQL = 'insert into Entries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc, locked) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'  #DONE add locked and find all references
+        self.insertMigratedEntrySQL = 'insert into NewEntries(category, cat_id, trig_id, over_id, sdate, amount, cleared, checknum, desc) values(?, ?, ?, ?, ?, ?, ?, ?, ?)' #DONE add locked to next migrationand find all references
         self.findCatInEntriesSQL = 'select * from Entries where cat_id = ?'
         self.deleteOldEntriesSQL = "delete from Entries where sdate < date('now','-12 months')"
 
-        self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?'
-        self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'
-        self.updateEntryCatByOidSQL = 'update Entries set category = ?, cat_id = ? where oid = ?'
-        self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, over_id = ?, category = ? where cat_id = ? and over_id = ?'
-        self.updateEntryCatForOverSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'
+        self.updateEntryCatSQL = 'update Entries set cat_id = ?, category = ? where cat_id = ?' #DONE NOT called on a manual set, it must set locked and trig_id to 0
+        #self.updateEntryCatSQLOld = 'update Entries set category = ? where category = ?'  #DONE DELETE what about cat_id and if used by manual set, have to set locked
+        self.updateEntryCatByOidSQL = 'update Entries set category = ?, cat_id = ? where oid = ?'  #TODO check calls if manual set locked
+        self.updateEntryCatForOverSQL = 'update Entries set cat_id = ?, over_id = ?, category = ? where cat_id = ? and over_id = ?' #TODO if used by manual set, must set locked
+        #self.updateEntryCatForOverSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?' #TODO obsolete
         
-        self.updateEntryCatForTrigSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?'
-        self.updateEntryCatForTrigSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'
+        self.updateEntryCatForTrigSQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where cat_id = ? and trig_id = ?' #TODO what about locked
+        #self.updateEntryCatForTrigSQLOld = 'update Entries set category = ? where category = ? and desc LIKE ?'                     #TODO still used?
 
         self.findEntryCatForTrigSQL = 'select * from Entries where cat_id = ? and trig_id = ?'
-        self.findEntryCatForTrigSQLOld = 'select * from Entries where category = ? and desc LIKE ?'
+        #self.findEntryCatForTrigSQLOld = 'select * from Entries where category = ? and desc LIKE ?' #TODO check users
 
-        self.updateEntryCatByOverOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?'
-        self.updateEntryCatByOverOnlySQL = 'update Entries set category = ? where desc LIKE ?'
+        #self.updateEntryCatByOverOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?' #TODO  check users
+        self.updateEntryCatByOverOnlySQL = 'update Entries set category = ? where desc LIKE ?'                          #TODO  check users
 
         self.updateEntryCatByTrigOnlySQL = 'update Entries set cat_id = ?, trig_id = ?, category = ? where trig_id = ?'
         self.updateEntryCatByTrigOnlySQL = 'update Entries set category = ? where desc LIKE ?'
 
 #        self.get_yrmo_groups_by_monSQL = 'select yrmo(sdate) ym, category, trig_id, over_id, sum(amount) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id'
-        self.get_yrmo_groups_by_monSQL = "select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id"
+        self.get_yrmo_groups_by_monSQL = "select strftime('%Y-%m', sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id"
                                           #select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by ym, category, trig_id, over_id;
 
-        self.get_yrmo_groups_by_catSQL = "select strftime('%Y',sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by category, ym, trig_id, over_id"
+        self.get_yrmo_groups_by_catSQL = "select strftime('%Y-%m', sdate) ym, category, trig_id, over_id, sum(abs(amount*1.0))/100, count(*), (sum(abs(amount*1.0))/100)/count(*) from Entries group by ym, category, trig_id, over_id order by category, ym, trig_id, over_id"
         
         self.createCatsSQL = 'create table if not exists Categories(oid INTEGER PRIMARY KEY ASC, name varchar(20) unique, super varchar(20))'
         self.selectAllCatsSQL = 'select oid, name, super from Categories'
@@ -191,7 +191,7 @@ class DB(object):
         self.load_overrides()
         self.load_predictions()
         
-        self.sanity_check_db()  # todo remove after dev is done
+        self.sanity_check_db()  # TODO remove after dev is done
         
     def add_account(self, name):
         """This function add new account records. This function is not used yet. We'll see if I
@@ -215,26 +215,24 @@ class DB(object):
                 cur = self.conn.execute(self.insertCatSQL, (catStr, None))
                 self.commit()
                 last_id = cur.lastrowid     # use the last rowid to set entry in cat_to_oid dictionary
-                self.categories[catStr] = Category((last_id, catStr, None ))
+                self.categories[catStr] = Category((last_id, catStr, None )) 
                 self.cat_to_oid[catStr] = last_id                     
                 return True
         except sqlite3.Error as e:
             self.error('Could not save category in Category table:\n', e.args[0])
             return False
-            
-        
+             
     def add_entry(self, ent):
         """Add a new entry to the list of entries."""
         try:
-            self.conn.execute(self.insertEntrySQL, (ent.category, ent.cat_id, ent.trig_id, ent.over_id, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc))
+            self.conn.execute(self.insertEntrySQL, (ent.category, ent.cat_id, ent.trig_id, ent.over_id, ent.date, ent.amount.value, ent.checknum, ent.cleared, ent.desc, ent.locked)) #DONE add locked
             self.commit()
             self.entries.append(ent)
             return True
         except sqlite3.Error as e:
             self.error('Could not save entries in Entries table:\n', e.args[0])
             return False
-       
-            
+               
     def add_override(self, over, cat):
         """Add an override to the to the override list. Also add an entry for this override to the
         over_to_oid dictionary."""
@@ -270,9 +268,6 @@ class DB(object):
             self.error('Could not save prediction in Predictions table:\n', e.args[0])
             return False
        
-    #def add_filtered_entry(self, ent):
-    #    self.filtered_entries.append(ent)
-    
     def add_ncf_entry(self, ent):
         """Adds a new entry just read from a checkfile in the checkfile dialog. Entries are held in this
         'New Check File' list until accepted bythe user."""
@@ -293,7 +288,6 @@ class DB(object):
         except sqlite3.Error as e:
             self.error('Could not save triggers in Triggers table:\n', e.args[0])
             return False
-            
         
     def backup(self, backup_name):
         copyfile(self.dbname, backup_name)
@@ -304,54 +298,14 @@ class DB(object):
         for over, override in self.overrides.items():
             if over in desc:
                 return (override.cat, self.cat_to_oid[override.cat], 0, self.over_to_oid[override.over])
-            
+        #DONE check callers and decide how to handle locked
         for trig, trigger in self.triggers.items():
             if trig in desc:
                 print(trigger.cat, self.cat_to_oid[trigger.cat], self.trig_to_oid[trigger.trig], 0)
                 return (trigger.cat, self.cat_to_oid[trigger.cat], self.trig_to_oid[trigger.trig], 0)
         
-        return ('None', 0, 0, 0)
-    
-    #def change_cat_of_entries(self, current, new):
-        #db_affected = self.update_entries_cats(current, new)
-
-        #list_affected = 0
-        #for entry in self.entries:
-            #if entry.category == current:
-                #entry.category = new
-                #list_affected += 1
-        
-        #if db_affected != list_affected:
-            #self.error('Update error. {} rows affected in database, but {} affected entries in the list.\n'.format(db_affected, list_affected))
-
-    #def change_cat_of_temp_entries(self, current, new):
-        #for entry in self.temp_entries:
-            #if entry.category == current:
-                #entry.category = new
-                #list_affected += 1
-    #def change_cat_for_trigs(self, current_cat, new_cat):
-        #newd = {}
-        #for trig, cat in self.triggers.items():
-            #if cat == current_cat:
-                #newd[trig] = new_cat
-            #else:
-                #newd[trig] = cat
-        #self.triggers = newd
-        
-    #def change_overs_for_cat(self, current_cat, new_cat):
-        #newd = {}
-        #for over, cat in self.overrides.items():
-            #if cat == current_cat:
-                #newd[over] = new_cat
-            #else:
-                #newd[over] = cat
-                
-        #self.overrides = newd
-
-    #def clear_fltered(self):
-    #    self.filtered_entries = []
-        
-    
+        return ('None', self.cat_to_oid['None'], self.trig_to_oid['None'], 0)
+     
     def clear_ncf_entries(self):
         """Remove any entries from the ncf list. Called from the checkfile dialog just
         before reading a new file."""
@@ -369,16 +323,6 @@ class DB(object):
     def commit(self):
         """Used by are functions that perform an operation on the SQLite database."""
         self.conn.commit()
-        
-    #def convert_pickles_to_DB(self):  #deprecated
-        #self.categories.load(STORE_PCKL)
-        #self.categories.save(STORE_DB)
-        #self.triggers.load(STORE_PCKL)
-        #self.triggers.save(STORE_DB)
-        #self.overrides.load(STORE_PCKL)
-        #self.overrides.save(STORE_DB)
-        #self.entries.load(STORE_PCKL)
-        #self.entries.save(STORE_DB)
 
     def create_table(self, sql, tableName):  #deprecated
         try:
@@ -388,24 +332,10 @@ class DB(object):
             self.error("An error occurred when creating the "+tableName+" table:\n", e.args[0])
             return False            
         
-        
-    #def createTables(self):
-    #    try:
-    #        self.accts.createTable()
-    #        self.entries.createTable()
-    #        self.categories.createTable()
-    #        self.triggers.createTable()
-    #        self.overrides.createTable()
-    #        return True
-    #    except sqlite3.Error as e:
-    #        print("An error occurred:", e.args[0])
-    #        return False
-        
     def create_account(self, name):
         """Future. Not used."""
         self.accts.createAccount(name)
         
-    
     def delete_category_only(self, lose_cat):
         """Remove only the requested category. Used by other fuction that chase category relationships
         as well."""
@@ -419,16 +349,16 @@ class DB(object):
             return False
     
     def delete_category_all(self, cat):
-        """Change all entries and temp_entries with this cat to None. Change the Category
+        """Change all entries and temp_entries with this cat and which are not locked to None. Change the Category
         of all triggers and overrides with this cat to None. Finally remove this category."""
-        #update affected entries to None 
+        #update affected entries to None #TODO check callers and determine impacted of locked
         self.update_entries_cats(cat, Category.no_category())
         #update affected triggers to None
         self.update_triggers_cats(cat, Category.no_category())
         #update affected overrides to None
         self.update_overrides_cats(cat, Category.no_category())
         #remove category
-        self.delete_category_only(cat)
+        self.delete_category_only(cat)  #TODO should not be able to delete a category that has locked entries.
 
     def delete_trigger_all(self, trig, catstr):
         """This function changes the category of all entries in db that match the passed trigger and cat string
@@ -440,19 +370,19 @@ class DB(object):
             cat_id = self.cat_to_oid[catstr]
             trigger = self.triggers[trig]
             none_id = self.cat_to_oid['None']
-            trig_id = trigger.oid
+            trig_id = trigger.oid                               #TODO check callers and determine impact of locked
             cur = self.conn.execute(self.updateEntryCatForTrigSQL, (none_id, 0, Category.no_category(), cat_id, trig_id))
             self.commit()
             rowcount = cur.rowcount
             
             for ent in self.entries:
-                if ent.cat_id == cat_id and ent.trig_id == trig_id:
+                if ent.cat_id == cat_id and ent.trig_id == trig_id:  #TODO and is not locked
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
                     ent.trig_id = 0
                     
             for ent in self.filtered_entries:
-                if ent.category == catstr and trig in ent.desc:  # TODO
+                if ent.category == catstr and trig in ent.desc:  # TODO and is not locked
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
                     ent.trig_id = 0
@@ -484,22 +414,22 @@ class DB(object):
         filtered entry list. Finally, it deletes the override from the db and the override list."""
         if over not in self.overrides:
             return False
-        try:
+        try:                                    #TODO needs to take looked into account
             cat_id = self.cat_to_oid[catstr]
             override = self.overrides[over]
             none_id = self.cat_to_oid['None']
-            over_id = override.oid
-            cur = self.conn.execute(self.updateEntryCatForOverSQL, (none_id, 0, Category.no_category(), cat_id, over_id))
+            over_id = override.oid              #TODO below function needs to take locked into account
+            cur = self.conn.execute(self.updateEntryCatForOverSQL, (none_id, 0, Category.no_category(), cat_id, over_id))  
             self.commit()
             rowcount = cur.rowcount
             
-            for ent in self.entries:
+            for ent in self.entries:    #TODO check each entry for locked, maybe trig = 0
                 if ent.cat_id == cat_id and ent.over_id == over_id:
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
                     ent.over_id = 0
                     
-            for ent in self.filtered_entries:
+            for ent in self.filtered_entries:    #TODO check each entry for locked, maybe trig = 0
                 if ent.category == override.cat and over in ent.desc:
                     ent.category = Category.no_category()
                     ent.cat_id = none_id
@@ -537,13 +467,8 @@ class DB(object):
         msgBox = QMessageBox()
         msgBox.setWindowTitle('Error!')
         msgBox.setText(msg+'\n'+reason)
-        #msgBox.setDetailedText(reason)
-        #msgBox.addButton(QtGui.QPushButton('Accept'), QtGui.QMessageBox.YesRole)
-        #msgBox.addButton(QtGui.QPushButton('Reject'), QtGui.QMessageBox.NoRole)
-        #msgBox.addButton(QtGui.QPushButton('Cancel'), QtGui.QMessageBox.RejectRole)
         self.retval = msgBox.exec_()
-        
-    
+          
     def find_all_related_to_cat(self, catstr):
         """Finds all overrides, triggers that define a category and all entries that have been
         set to this category. Used by the delete and change category feature of the manage
@@ -559,14 +484,14 @@ class DB(object):
                 affected.append('<Trigger>'+trigger.trig)
         
         for entry in self.entries:
-            if entry.category == catstr:
+            if entry.category == catstr:    #TODO check each entry for locked and check callers
                 affected.append('<Entry>'+entry.asCategorizedStr(''))
             
         return affected
     
     def find_all_related_to_trig(self, current_trig, new_trig):
         """Finds all entries that have been categorized by this trigger. Used by the change and delete
-        functions of the manage categories dialog."""
+        functions of the manage categories dialog."""  #TODO find callers, check what they do with affected, determine impact of locked
         affected = []
         #Are we trying to rename an existing trigger to another trigger that exists?
         if new_trig and new_trig in self.trig_to_oid:
@@ -595,7 +520,7 @@ class DB(object):
         return affected
     
     def find_pred_similar_to(self, entry):
-        """Search for existing predictions that are similar to the pne we are about to create."""
+        """Search for existing predictions that are similar to the one we are about to create."""
         affected = []
         for pred in self.predictions:
             if pred.amount.value == entry.amount.value and pred.category == entry.category and \
@@ -615,7 +540,7 @@ class DB(object):
         whose description contains the new override string. Also check that the new override string is
         not already defined as an override. The sum of these is to total effect of creating the new
         override."""
-        affected = []
+        affected = []   #TODO check callers and determine impact of locked
         #Are we trying to rename an existing override to another override that exists?
         if new_over and new_over in self.over_to_oid:
             affected.append("<Override> '"+new_over+"' already exists. Datbase module will block this attempt.")
@@ -719,7 +644,7 @@ class DB(object):
         self.filtered_entries = requested
         return requested
     
-    def get_all_entries_with_cat(self, which, cat):
+    def get_all_entries_with_cat(self, which, cat):     #TODO check callers and determine impact of locked
         """Search results list or the all entries list, returning entries having the requested cat."""
         requested = []
         if which == 'All':
@@ -732,7 +657,6 @@ class DB(object):
                 requested.append(ent)
         self.filtered_entries = requested
         return requested
-    
     
     def get_all_entries_with_date_range(self, which, date1, date2):
         """Search all entries or current result list for entries in the requested data range."""
@@ -750,7 +674,6 @@ class DB(object):
                 requested.append(ent)
         self.filtered_entries = requested
         return requested
-    
     
     def get_all_predictions(self):
         """Return all predictions in the predictions list."""
@@ -830,14 +753,6 @@ class DB(object):
                 requested.append(pred)
         return requested
 
-    #def get_all_predictions_with_ptype(self, ptype):
-        #requested = []
-            
-        #for pred in self.predictions:
-            #if pred.get_typestr() == ptype:
-                #requested.append(pred)
-        #return requested
-                
     def get_all_predictions_with_trig(self, trig):
         """Return a list of predictions with the requested trigger."""
         requested = []
@@ -852,7 +767,7 @@ class DB(object):
         triggers = {}
         try:
             for row in self.conn.execute(self.triggers.selectAllTrigSQL):
-                triggers[row[1]] = trigger(row[0], row[1], row[2])  # TODO
+                triggers[row[1]] = triggers(row[0], row[1], row[2])  # TODO
         except sqlite3.Error as e:
             self.error('Error loading memory from the Triggers table:\n', e.args[0])
         return triggers
@@ -898,22 +813,6 @@ class DB(object):
         """Return the new check file entry list."""
         return self.ncf_entries
 
-    #def get_predictions_column_count(self):
-    #    """Return the number columns in a prediction. Deprecated."""
-    #    #oid,name,cat,trig,over,cat_id,trig_id,over_id,p_type,cycle,pdate,comment
-    #    return 8
-    
-    #def get_recent_entries(self, limit):
-    #    assert(False)   # This funcion
-    #    if self.num_entries <= limit:
-    #        return self.get_all_entries(which)
-    #    result = []
-    #    today = datetime.date.today()
-    #    trial = today - datetime.timedelta(months = 2)
-    #    for ent in self.entries:
-    #        if ent.date > previous:
-    #            howmany += 1
-        
     def get_last_three_months(self, today):
         """Returns a list of all entries with dates between today and three months ago.
         Used by the What If window."""
@@ -938,7 +837,7 @@ class DB(object):
             pred_instance = 0
             for dnext in next_dates:
                 oid = (pred.oid * 65336) + pred_instance
-                row = (oid, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount.value, '', '', pred.desc)
+                row = (oid, pred.cat, pred.cat_id, pred.trig_id, pred.over_id, dnext, pred.amount.value, '', '', pred.desc, False)
                 pent = entry.Entry(self, row, False)    # pent = predicted entry
                 futures.append(pent)
                 pred_instance += 1
@@ -966,7 +865,7 @@ class DB(object):
                 self.conn.execute(self.createCatsSQL)
                 self.conn.execute(self.insertNoneCatSQL, ('None', 'None'))
                 for row in self.conn.execute(self.selectAllCatsSQL):
-                    self.categories[row[1]] = Category(row) # TODO
+                    self.categories[row[1]] = Category(row)
                     self.cat_to_oid[row[index.CAT_NAME]] = row[index.CAT_OID]
             except sqlite3.Error as e:
                 self.error('Error loading memory from the Categries table:\n', e.args[0])
@@ -1023,7 +922,7 @@ class DB(object):
                 
     def merge_ncf_entries(self):
         """Move categorized entries from the new check file list to the entries list and update the
-        the database. Uncategorized entries are returned to the new check file."""
+        the database. Uncategorized entries are returned to the new check file list."""
         #As entries grows in size, make the search smarter, more code but faster
         not_cats = []
         entry_set = set(self.entries)
@@ -1085,10 +984,11 @@ class DB(object):
         
     def migrate_entries(self, old_version):
         """When the database is initialized, the latest version is read from the version table. If this version
-        has a match in this function, then appropriate changes are ade to the database. So far, there is a
-        migration from 0->1 and 1->2. 0->1 agjusts columns in tth entries tabe and 1->2 adjust columns in the
+        has a match in this function, then appropriate changes are made to the database. So far, there is a
+        migration from 0->1 and 1->2. 0->1 agjusts columns in tth entries table and 1->2 adjust columns in the
         predictions table."""
         try:
+            assert(False)           #TODO a new migration my need to account for locked entries
             if old_version == 0:
                 self.load_categories()
                 self.load_overrides()
@@ -1163,6 +1063,14 @@ class DB(object):
         """Returns the database's name. Used to create the file name for the database."""
         return self.dbname
     
+    def oid_for_cat(self, cat):
+        """Returns a category's oid, if it is in the dictionary, else returns -1. Used for columns
+        values in the main window and the what if window."""
+        if cat in self.cat_to_oid:
+            return self.cat_to_oid[cat]
+        else:
+            return -1
+
     def oid_for_over(self, over):
         """Returns an override's oid, if it is in the dictionary, else returns -1. Used for columns
         values in the main window and the what if window."""
@@ -1186,19 +1094,6 @@ class DB(object):
         else:
             assert(False)
             
-    #def open(self, name, deprecated):  #deprecated
-        #self.dbname = name
-        #conn = sqlite3.connect(name+'.db')
-        #self.conn = conn
-        #self.accts = accounts.AccountList(self)
-        #self.entries = entry.EntryList(self)
-        #self.categories = Category(self)
-        #self.triggers = trigger.Trigger(self)
-        #self.overrides = override.Override(self)
-        ##self.createTables()
-        #self.convertPicklesToDB()
-        #self.conn.commit()
-        
     def overs_for_cat(self, lookFor):
         """Return a list overrides that have the requested cat. Most of the time this will be an EMPTY
         list, as there are not that many overrides."""
@@ -1213,6 +1108,7 @@ class DB(object):
         """Renames an existing category in all places where categories are recorded. That includes
         overrides, triggers and entries. The new category is add to the cat table and list and the
         old name is removed."""
+        assert(False)   #TODO should these functions check for locked entries that have this category
         if self.add_cat(new_cat) == False or \
            self.update_overrides_cats(current_cat, new_cat) == False or \
            self.update_triggers_cats(current_cat, new_cat) == False or \
@@ -1224,11 +1120,11 @@ class DB(object):
             return True
         
     def rename_override_all(self, cur_over, new_over):
-        """Rename an existing ovrride to a new string in all places it is recorded. This includes """
+        """Rename an existing override to a new string in all places it is recorded. This includes """
         #We will not rename override to another existing, too complicated, delete override
         if new_over in self.overrides:
             return False
-        
+        assert(False)   #TODO should we check for locked entries that have this override
         override = self.overrides[cur_over]
         over_id = override.oid
         catstr = override.cat
@@ -1245,7 +1141,7 @@ class DB(object):
 
             for ent in self.entries:
                 if ent.cat_id == cat_id and ent.over_id == over_id and new_over not in ent.desc:
-                    ent.category = Category.no_category()
+                    ent.category = Category.no_category()  # TODO if locked, something is wrong
                     ent.cat_id = nonecat_id
             for ent in self.filtered_entries:
                 if ent.cat_id == cat_id and new_over not in ent.desc:
@@ -1267,7 +1163,7 @@ class DB(object):
         #We will not rename trig to another existing, too complicated, delete trigger
         if new_trig in self.triggers:
             return False
-        
+        assert(False)   #TODO should we check for locked entries that have this trigger
         trigger = self.triggers[cur_trig]
         trig_id = trigger.oid
         catstr = trigger.cat
@@ -1289,7 +1185,7 @@ class DB(object):
             #Now get the cached entries
             for ent in self.entries:
                 if ent.cat_id == cat_id and ent.trig_id == trig_id and new_trig not in ent.desc:
-                    ent.category = Category.no_category()
+                    ent.category = Category.no_category()   # TODO if locked, something is wrong
                     ent.cat_id = nonecat_id
             for ent in self.filtered_entries:
                 if ent.category == cat and new_trig not in ent.desc:
@@ -1303,25 +1199,6 @@ class DB(object):
             self.error('Error updating triggers in Entries table:\n', e.args[0])
             return False
     
-    #def restore(self, name):  #deprecated
-        #assert(False)
-        #self.dbname = name
-        ##todo: develop strategy for managing backup and restore naming
-        #conn = sqlite3.connect(name+'.db')
-        #self.conn = conn
-        #self.accts = accounts.AccountList(self, STORE_PCKL)
-        #self.accts.save(STORE_DB)
-        #self.entries = entry.EntryList(self, STORE_PCKL)
-        #self.entries.save(STORE_DB)
-        #self.categories = Category(self, STORE_PCKL)
-        #self.categories.save(STORE_DB)
-        #self.triggers = trigger.Trigger(self, STORE_PCKL)
-        #self.triggers.save(STORE_DB)
-        #self.overrides = override.Override(self, STORE_PCKL)
-        #self.overrides.save(STORE_DB)
-        #self.conn.commit()
-        
-    
     def save(self, storage):  #deprecated
         assert(False)
         print("Database.save is OBSOLETE")
@@ -1334,7 +1211,7 @@ class DB(object):
         """When the database is initialized, this function is called. The followig hecks are made:
         1) First check that every override refers to a category that exists.
         2) Check that all triggers refer to a category that exists.
-        3) Check that all categories have a least one trigger or overrides
+        3) Check that all categories have a least one trigger or overrides #TODO if new category created and only used for manual cat sets.
         4) Check that all entries have a category that exist and that their description contains a trigger
            or override that belongs to that category. Remember, overrides first.
         """
@@ -1355,7 +1232,7 @@ class DB(object):
                 assert(False)
             
         # check that all categories have a least one trigger or overrides
-        for cat, category in self.categories.items():
+        for cat, category in self.categories.items():   #TODO what about manual cat sets
             if cat == 'None':
                 continue
             trig_count = 0
@@ -1369,8 +1246,8 @@ class DB(object):
                     trig_count += 1
                     print("Category: "+category.cat+" has trig: "+trigger.trig+" GOOD.")
             if trig_count == 0 and over_count == 0:
-                print("Category: "+category.cat+" has no triggers or overrides.  BAD BAD. Adding Nada trigger")
-                self.add_trigger('None', cat)
+                print("Category: "+category.cat+" has no triggers or overrides.  Must be manual only. Adding Nada trigger")
+                #self.add_trigger('None', cat)
                 #assert(False)   #TODO  Have it put in a NADA trigger
         # check that all entries have a category that exist and that their description contains a trigger
         # or override that belongs to that category. Remember, overrides first.
@@ -1394,16 +1271,16 @@ class DB(object):
                 continue
             else:
                 print("Entry: "+ent.asCategorizedStr('') + " No trig or over. BAD BAD.")
-                #assert(False)
+        #TODO check that all entries have trig_id, over_id or are locked
 
     def set_cat_for_all_with_over(self, cat, over):
         try:
             self.conn.execute(self.updateEntryCatByOverOnlySQL, (cat, over))
             self.commit()
             for entry in self.entries:
-                if over in entry.desc:
-                    entry.category = cat
-
+                if over in entry.desc and entry.locked == False:    #do not touch locked entries
+                    entry.category = cat  #DONE what about cat_id
+                    entry.cat_id = self.cat_to_oid[cat]
             #for entry in self.temp_entries:
             #    if over in entry.desc:
             #        entry.category = cat
@@ -1420,7 +1297,7 @@ class DB(object):
             self.commit()
             for entry in self.entries:
                 if trig in entry.desc:
-                    entry.category = cat
+                    entry.category = cat    #TODO what about locked
 
             #for entry in self.temp_entries:
             #    if trig in entry.desc:
@@ -1447,7 +1324,7 @@ class DB(object):
         """Updates all entries with a specific category to a new
         a category. Changes database and memory copies of records.
         This function covers both the permanent entries and the filtered_entries."""
-        try:
+        try:    #TODO this should check for locked entries
             new_id = self.cat_to_oid[newCat]
             cur_id = self.cat_to_oid[curCat]
             cur = self.conn.execute(self.updateEntryCatSQL, (new_id, newCat, cur_id))
@@ -1472,8 +1349,8 @@ class DB(object):
         try:
             cur = self.conn.execute(self.updateEntryCatByOidSQL, (cat, cat_id, oid))
             self.commit()
-            for ent in self.entries:
-                if ent.oid == oid:
+            for ent in self.entries:        #Done: this should check for locked entries
+                if ent.oid == oid and ent.locked == False:
                     ent.category = cat
                     ent.cat_id = cat_id
             return True
@@ -1484,7 +1361,7 @@ class DB(object):
     def update_triggers_cats(self, curCat, newCat):
         """Changes all instances of triggers of a specific category to a new category.
         Changes database and memory records."""
-        try:
+        try:    
             self.conn.execute(self.updateTriggersCatSQL, (newCat, curCat))
             self.commit()
             for trig, trigger in self.triggers.items():

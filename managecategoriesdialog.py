@@ -86,7 +86,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         #override.Override.save()
     
     def reject_changes(self):
-        print('Burp!')      #todo change accept/reject buttons to a done button
+        print('Burp!')      #TODO change accept/reject buttons to a done button
     
     def list_overrides_select_changed(self):
         selected_list = self.listOverrides.selectedItems()
@@ -146,13 +146,13 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             i = QListWidgetItem(self.override_str)
             self.listOverrides.addItem(i)
             self.listOverrides.setCurrentItem(i)
-            self.db.set_cat_for_all_with_over(cat, self.override_str)
+            self.db.set_cat_for_all_with_over(cat, self.override_str) #this function should only set entries that are not locked
     
-    def make_new_category(self):
+    def make_new_category(self):                    #TODO check for duplicates
         self.category_str = self.edtCategory.text()
         #cat_list = self.listCategories.selectedItems()
     
-        if self.db.add_cat(self.category_str):
+        if self.db.add_cat(self.category_str):  # TODO check callers for effects of locked
             i = QListWidgetItem(self.category_str)
             self.listCategories.addItem(i)
             self.listCategories.setCurrentItem(i)
@@ -174,13 +174,13 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
             self.db.set_cat_for_all_with_trigger(cat, self.trigger_str)
     
     def rename_category(self):
-        current_cat = self.listCategories.currentItem().text()
-        new_cat = self.edtCategory.text()
+        current_cat = self.listCategories.currentItem().text()  #TODO check if entries with this cat are locked
+        new_cat = self.edtCategory.text()                       #TODO yell, we have to figure out what to do
         row = self.listCategories.currentRow()
         affected_list = self.db.find_all_related_to_cat(current_cat)
         dl = WarningListDialog("Warning!", 
             "All triggers, overrides and entries listed below are relatd to the category'"+current_cat+"'.\n" + \
-            "They will have their categories change to the new category '"+new_cat+"'.\n", 
+            "They will have their categories change to the new    category '"+new_cat+"'.\n", 
             affected_list, True)
 
         if dl.reply == True:
@@ -274,7 +274,7 @@ class ManageCategoriesDialog(QDialog, Ui_ManageCategoriesDialog):
         self.listOverrides.setCurrentRow(current)
         self.list_overrides_select_changed()
     
-    def delete_category(self):
+    def delete_category_all(self):
         current_row = self.listCategories.currentRow()
         selected_cat = self.listCategories.selectedItems()[0].text()
         affected_list = self.db.find_all_related_to_cat(selected_cat)

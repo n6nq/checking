@@ -9,7 +9,7 @@ from what_if_auto import Ui_MainWindow
 from money import Money
 
 """ NOTES:
-    TODOS: Remove type from predictions and UI
+    DONE: Remove type from predictions and UI
     You can't change predictions into entries. Duh!
     There is no holder for cycle. Remove entries from what_if.
 """

@@ -146,7 +146,7 @@ class Prediction(object):
         self.desc = desc
 
     def set_without_oid(self, lst):
-        self.amount = Money.from_number(lst[index.PRED_AMOUNT])  # TODO
+        self.amount = Money.from_number(lst[index.PRED_AMOUNT])  # TODO check cat,trig,over combo for sanity
         self.income = lst[index.PRED_INCOME]
         self.cat = lst[index.PRED_CAT]
         self.trig = lst[index.PRED_TRIG]
@@ -158,7 +158,7 @@ class Prediction(object):
         self.desc = lst[index.PRED_DESC]
         
     def set_with_list(self, lst):
-        self.oid = lst[0] # TODO
+        self.oid = lst[0] # TODO check callers
         self.set_without_oid(lst)
         
     def update_with_list(self, lst):
