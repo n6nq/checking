@@ -100,7 +100,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Setup the entry list
         self.search_choice = common_ui.all_results[0]  #'All' Start with 'All' searching
         list_data = sorted(self.db.get_all_entries(self.search_choice), key=lambda ent: ent.asCategorizedStr(''))
-        self.set_list_model(list_data)
+        
         self.listEntries.customContextMenuRequested.connect(lambda: self.entryPopUpMenuHndlr(self.listEntries))
         self.listEntries.pressed.connect(lambda index:  self.mousePressed(index))
         self.selectedEntry = None
@@ -137,6 +137,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Setup group by combo box
         self.cbGroupBy.activated.connect(lambda: self.new_group_by_filter())
         self.cbGroupBy.addItems(common_ui.groupby_labels)
+        self.set_list_model(list_data)
         self.show()
 
     def default_dates(self):

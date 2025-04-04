@@ -6,267 +6,178 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1040</width>
-    <height>630</height>
+    <width>1070</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="btnChart">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>550</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Predicted</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnReadFile">
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>550</y>
-      <width>84</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Read Check File</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbCategory">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>69</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="whatsThis">
-     <string extracomment="Select sort order or category"/>
-    </property>
-    <property name="currentText">
-     <string/>
-    </property>
-    <property name="currentIndex">
-     <number>-1</number>
-    </property>
-    <property name="modelColumn">
-     <number>0</number>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbDate">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>0</y>
-      <width>69</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbAmount">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>0</y>
-      <width>69</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbCheckNum">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>0</y>
-      <width>69</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbDescription">
-    <property name="geometry">
-     <rect>
-      <x>320</x>
-      <y>0</y>
-      <width>69</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QListView" name="listEntries">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>1011</width>
-      <height>511</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Courier New</family>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-    <property name="contextMenuPolicy">
-     <enum>Qt::CustomContextMenu</enum>
-    </property>
-    <property name="editTriggers">
-     <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
-    </property>
-    <property name="selectionMode">
-     <enum>QAbstractItemView::MultiSelection</enum>
-    </property>
-    <property name="resizeMode">
-     <enum>QListView::Adjust</enum>
-    </property>
-    <property name="layoutMode">
-     <enum>QListView::Batched</enum>
-    </property>
-    <property name="spacing">
-     <number>0</number>
-    </property>
-   </widget>
-   <widget class="QCalendarWidget" name="calendar1">
-    <property name="geometry">
-     <rect>
-      <x>110</x>
-      <y>60</y>
-      <width>312</width>
-      <height>183</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QCalendarWidget" name="calendar2">
-    <property name="geometry">
-     <rect>
-      <x>420</x>
-      <y>60</y>
-      <width>312</width>
-      <height>183</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbSearchIn">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>0</y>
-      <width>121</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelSearchIn">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>0</y>
-      <width>81</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Search In:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>620</x>
-      <y>0</y>
-      <width>71</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Group By:</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::RichText</enum>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cbGroupBy">
-    <property name="geometry">
-     <rect>
-      <x>700</x>
-      <y>0</y>
-      <width>101</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnMngPredict">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>550</y>
-      <width>111</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Manage Predictions</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnBackup">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>550</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Backup DB</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnCleanDB">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>550</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Clean DB</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnListToFile">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>550</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>List To File</string>
-    </property>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QComboBox" name="cbCategory">
+        <property name="whatsThis">
+         <string extracomment="Select sort order or category"/>
+        </property>
+        <property name="currentText">
+         <string/>
+        </property>
+        <property name="currentIndex">
+         <number>-1</number>
+        </property>
+        <property name="modelColumn">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbDate"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbAmount"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbCheckNum"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbDescription"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelSearchIn">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Search In:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbSearchIn"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Group By:</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbGroupBy"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QListView" name="listEntries">
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::MultiSelection</enum>
+      </property>
+      <property name="resizeMode">
+       <enum>QListView::Adjust</enum>
+      </property>
+      <property name="layoutMode">
+       <enum>QListView::Batched</enum>
+      </property>
+      <property name="spacing">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCalendarWidget" name="calendar2"/>
+    </item>
+    <item>
+     <widget class="QCalendarWidget" name="calendar1"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="btnReadFile">
+          <property name="text">
+           <string>Read Check File</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnChart">
+          <property name="text">
+           <string>Predicted</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnMngPredict">
+          <property name="text">
+           <string>Manage Predictions</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnBackup">
+          <property name="text">
+           <string>Backup DB</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnCleanDB">
+          <property name="text">
+           <string>Clean DB</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnListToFile">
+          <property name="text">
+           <string>List To File</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>388</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
    <zorder>listEntries</zorder>
    <zorder>btnChart</zorder>
    <zorder>btnReadFile</zorder>
@@ -285,13 +196,14 @@
    <zorder>btnBackup</zorder>
    <zorder>btnCleanDB</zorder>
    <zorder>btnListToFile</zorder>
+   <zorder>horizontalSpacer</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1040</width>
+     <width>1070</width>
      <height>21</height>
     </rect>
    </property>
